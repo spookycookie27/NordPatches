@@ -1,4 +1,5 @@
 using System;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -31,7 +32,7 @@ namespace NordSamples
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.Configure<AuthMessageSenderOptions>(Configuration);
             services.Configure<IdentityOptions>(options =>
             {

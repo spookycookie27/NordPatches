@@ -1,6 +1,4 @@
-using System;
-
-namespace WebApplication3.Models
+namespace NordSamples.Models
 {
     public class ErrorViewModel
     {
