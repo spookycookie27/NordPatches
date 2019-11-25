@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication;
 using AutoMapper;
-using NordSamples.Data;
 using NordSamples.Data.Constants;
 using NordSamples.Models;
 using System.IdentityModel.Tokens.Jwt;
