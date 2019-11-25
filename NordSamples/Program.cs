@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ContactManager.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,7 @@ namespace NordSamples
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     //context.Database.EnsureCreated();
+                    SeedUserRoles.Initialize(services).Wait();
                     DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)

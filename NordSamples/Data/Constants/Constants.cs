@@ -9,7 +9,7 @@
         public static readonly string ApproveOperationName = "Approve";
         public static readonly string RejectOperationName = "Reject";
 
-        public static readonly string AdministratorsRole = "Administrator";
-        public static readonly string BandMembersRole = "BandMember";
+        public static readonly string AdministratorRole = "Administrator";
+        public static readonly string UserRole = "User";
     }
 }

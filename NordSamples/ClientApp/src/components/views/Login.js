@@ -72,11 +72,6 @@ class Login extends Component {
       if (response.ok) {
         setToken(response.content.token);
         await this.props.setUser(response.content.user);
-        this.props.setArtist(response.content.artist);
-        this.props.setGallery(null);
-        this.props.setSonglist(null);
-        this.props.setMp3s(null);
-        this.props.setArtistList(response.content.artistList);
         this.props.history.push('/');
       } else {
         this.setState({

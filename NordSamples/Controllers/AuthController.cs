@@ -54,8 +54,8 @@ namespace NordSamples.Controllers
                 if (appUser == null) return Unauthorized();
 
                 var roles = await _userManager.GetRolesAsync(appUser);
-                var isAdmin = roles.Contains(Constants.AdministratorsRole);
-                var roleToUse = isAdmin ? Constants.AdministratorsRole : Constants.BandMembersRole;
+                var isAdmin = roles.Contains(Constants.AdministratorRole);
+                var roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
 
                 var claims = new[] {
