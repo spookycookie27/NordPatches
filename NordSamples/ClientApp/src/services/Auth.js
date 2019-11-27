@@ -1,17 +1,23 @@
-const STORAGE_KEY = 'token';
+import moment from 'moment';
+
+const TOKEN_KEY = 'token';
+const EXPIRY_KEY = 'tokenExpiry';
 
 export function getToken() {
-  return window.localStorage.getItem(STORAGE_KEY);
+  return window.localStorage.getItem(TOKEN_KEY);
 }
 
-export function setToken(token) {
-  window.localStorage.setItem(STORAGE_KEY, token);
+export function setToken(token, tokenExpiryDate) {
+  window.localStorage.setItem(TOKEN_KEY, token);
+  window.localStorage.setItem(EXPIRY_KEY, tokenExpiryDate);
 }
 
 export function signOut() {
-  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(TOKEN_KEY);
 }
 
 export function isSignedIn() {
-  return !!window.localStorage.getItem(STORAGE_KEY);
+  var expiry = window.localStorage.getItem(EXPIRY_KEY);
+  var isFuture = moment(expiry).isAfter();
+  return !!window.localStorage.getItem(TOKEN_KEY) && isFuture;
 }

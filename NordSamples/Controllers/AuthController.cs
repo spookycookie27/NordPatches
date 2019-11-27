@@ -57,11 +57,14 @@ namespace NordSamples.Controllers
                 var isAdmin = roles.Contains(Constants.AdministratorRole);
                 var roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
+                var tokenExpiry = DateTime.Now.AddMinutes(1);
 
                 var claims = new[] {
                     new Claim(ClaimTypes.Name, appUser.Email),
                     new Claim(JwtRegisteredClaimNames.Sub, appUser.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Exp, $"{new DateTimeOffset(tokenExpiry).ToUnixTimeSeconds()}"),
+                    new Claim(JwtRegisteredClaimNames.Nbf, $"{new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds()}") ,
                     new Claim(ClaimTypes.Role, roleToUse),
                 };
 
@@ -72,14 +75,14 @@ namespace NordSamples.Controllers
                     _jwtOptions.Issuer,
                     _jwtOptions.Issuer,
                     claims,
-                    expires: DateTime.Now.AddMinutes(120),
+                    expires: tokenExpiry,
                     signingCredentials: creds);
 
                 var user = _mapper.Map<UserViewModel>(appUser);
                 user.Role = roleToUse;
 
 
-                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), user });
+                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), user, tokenExpiry });
             }
 
             return Unauthorized();

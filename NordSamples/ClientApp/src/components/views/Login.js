@@ -56,21 +56,20 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function SignInSide() {
+export default function SignInSide(props) {
   const classes = useStyles();
   const [email, setEmail] = useState('sp.cooke@me.com');
   const [password, setPassword] = useState('Passw0rd1!');
   const [error, setError] = useState(false);
-  console.log(error);
   function handleLoginClick() {
     console.log('clicked');
     const url = '/api/auth/login';
     const data = { email: email, password: password };
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
-        setToken(response.content.token);
-        //await this.props.setUser(response.content.user);
-        //this.props.history.push('/');
+        setToken(response.content.token, response.content.tokenExpiry);
+        //await this.props.setUser(response.content.user); // TODO do we want to hold user in redux?
+        props.history.push('/');
       } else {
         setError(true);
       }
@@ -116,7 +115,7 @@ export default function SignInSide() {
               autoComplete='current-password'
               onChange={event => setPassword(event.target.value)}
             />
-            <Button type='submit' fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleLoginClick()}>
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleLoginClick()}>
               Sign In
             </Button>
             <Grid container>
