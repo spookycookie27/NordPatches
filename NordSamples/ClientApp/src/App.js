@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { Route, Redirect, BrowserRouter, Switch } from 'react-router-dom';
 import Login from './components/views/Login';
+import Register from './components/views/Register';
 import Songlist from './components/views/Songlist';
 import { isSignedIn } from './services/Auth';
 
@@ -17,6 +18,7 @@ export default () => (
     <BrowserRouter>
       <Switch>
         <Route path='/login' component={Login} />
+        <Route path='/register' component={Register} />
         <PrivateRoute exact path='/' component={Songlist} />
       </Switch>
     </BrowserRouter>
