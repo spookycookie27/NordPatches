@@ -19,11 +19,11 @@ namespace ContactManager.Data
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                var adminID = await EnsureUser(serviceProvider, testUserPw, "sp.cooke@me.com");
+                var adminID = await EnsureUser(serviceProvider, testUserPw, "test@me.com");
                 await EnsureRole(serviceProvider, adminID, Constants.AdministratorRole);
 
                 // allowed user can create and edit contacts that they create
-                var managerID = await EnsureUser(serviceProvider, testUserPw, "sp.cooke@icloud.com");
+                var managerID = await EnsureUser(serviceProvider, testUserPw, "test2@me.com");
                 await EnsureRole(serviceProvider, managerID, Constants.UserRole);
 
                 var uid = await CreateTestUser(serviceProvider, testUserPw);
@@ -41,6 +41,8 @@ namespace ContactManager.Data
             {
                 user = new IdentityUser { UserName = userName, Email = userName };
                 var result = await userManager.CreateAsync(user, testUserPw);
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                await userManager.ConfirmEmailAsync(user, code);
             }
 
             return user.Id;

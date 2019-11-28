@@ -5,11 +5,12 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import { Link } from 'react-router-dom';
 import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { setToken } from '../../services/Auth';
 import RestUtilities from '../../services/RestUtilities';
 
 function Copyright() {
@@ -52,18 +53,17 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function SignUp(props) {
+export default function ForgotPassword(props) {
   const classes = useStyles();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
-  function handleRegisterClick() {
-    const url = '/api/auth/register';
-    const data = { email: email, password: password };
+  function handleForgotPasswordClick() {
+    const url = '/api/auth/ForgotPassword';
+    const data = { email: email };
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
-        props.history.push('/login');
+        setError(false);
       } else {
         setError(true);
       }
@@ -80,53 +80,29 @@ export default function SignUp(props) {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component='h1' variant='h5'>
-            Sign Up
+            Reset Password
           </Typography>
           <form className={classes.form} noValidate>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  variant='outlined'
-                  required
-                  fullWidth
-                  value={email}
-                  id='email'
-                  label='Email Address'
-                  name='email'
-                  autoComplete='email'
-                  autoFocus
-                  onChange={event => {
-                    setEmail(event.target.value);
-                    setError(false);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant='outlined'
-                  required
-                  fullWidth
-                  value={password}
-                  name='password'
-                  label='Password'
-                  type='password'
-                  id='password'
-                  autoComplete='current-password'
-                  onChange={event => {
-                    setPassword(event.target.value);
-                    setError(false);
-                  }}
-                />
-              </Grid>
-            </Grid>
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleRegisterClick()}>
-              Sign Up
+            <TextField
+              variant='outlined'
+              value={email}
+              margin='normal'
+              required
+              fullWidth
+              id='email'
+              label='Email Address'
+              name='email'
+              autoComplete='email'
+              autoFocus
+              onChange={event => {
+                setEmail(event.target.value);
+              }}
+            />
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleForgotPasswordClick()}>
+              Reset Password
             </Button>
-            <Grid container justify='flex-end'>
+            <Grid container>
               <Grid item xs>
-                <Link to={'/forgotPassword'}>Forgot password?</Link>
-              </Grid>
-              <Grid item>
                 <Link to={'/login'}>Already have an account? Sign in</Link>
               </Grid>
             </Grid>

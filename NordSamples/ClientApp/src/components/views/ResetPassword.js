@@ -11,6 +11,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import RestUtilities from '../../services/RestUtilities';
+import queryString from 'query-string';
 
 function Copyright() {
   return (
@@ -52,15 +53,18 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function SignUp(props) {
+export default function ResetPassword(props) {
   const classes = useStyles();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const search = props.location.search;
+  const parsed = queryString.parse(search);
+  const [code, setCode] = useState(parsed.code);
 
-  function handleRegisterClick() {
-    const url = '/api/auth/register';
-    const data = { email: email, password: password };
+  function handleResetPasswordClick() {
+    const url = '/api/auth/ResetPassword';
+    const data = { email, password, code };
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
         props.history.push('/login');
@@ -80,7 +84,7 @@ export default function SignUp(props) {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component='h1' variant='h5'>
-            Sign Up
+            Reset Password
           </Typography>
           <form className={classes.form} noValidate>
             <Grid container spacing={2}>
@@ -119,8 +123,8 @@ export default function SignUp(props) {
                 />
               </Grid>
             </Grid>
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleRegisterClick()}>
-              Sign Up
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()}>
+              Reset Password
             </Button>
             <Grid container justify='flex-end'>
               <Grid item xs>

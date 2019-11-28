@@ -15,6 +15,7 @@ using NordSamples.Models;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace NordSamples
@@ -37,7 +38,7 @@ namespace NordSamples
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(databaseName: "NordPatches"));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -84,21 +85,16 @@ namespace NordSamples
                 // User settings.
                 options.User.AllowedUserNameCharacters =
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
+                options.User.RequireUniqueEmail = true;
             });
 
-            services.ConfigureApplicationCookie(options =>
+            services.AddAuthorization(opt =>
             {
-                // Cookie settings
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-
-                options.LoginPath = "/Login";
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-                options.SlidingExpiration = true;
+                opt.AddPolicy("HasAdminAccess", policy =>
+                    policy.Requirements.Add(new UserRoleRequirement()));
             });
 
-            services.AddControllersWithViews()
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt =>
                     opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
@@ -109,9 +105,9 @@ namespace NordSamples
                     configuration.RootPath = "ClientApp/build";
                 });
 
-            services.AddTransient<IEmailSender, EmailSender>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.Configure<AuthMessageSenderOptions>(Configuration); // sendgrid
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<AuthMessageSenderOptions>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,14 +124,14 @@ namespace NordSamples
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthentication();
-            //app.UseAuthorization();
+            //app.UseAuthorization(); we dont use this with JWT
 
             app.UseEndpoints(endpoints =>
             {
