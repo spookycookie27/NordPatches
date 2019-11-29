@@ -5,9 +5,9 @@ import 'react-table/react-table.css';
 import { actionCreators } from '../../store/ActionCreators';
 //import RestUtilities from '../../services/RestUtilities';
 
-import './Songlist.css';
+import './PatchList.css';
 
-class Songlist extends Component {
+class PatchList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,4 +32,4 @@ class Songlist extends Component {
 export default connect(
   state => ({}),
   dispatch => bindActionCreators(actionCreators, dispatch)
-)(Songlist);
+)(PatchList);

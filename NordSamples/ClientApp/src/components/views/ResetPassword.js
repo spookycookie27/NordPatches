@@ -9,58 +9,21 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
 import RestUtilities from '../../services/RestUtilities';
 import queryString from 'query-string';
-
-function Copyright() {
-  return (
-    <Typography variant='body2' color='textSecondary' align='center'>
-      {'Copyright © '}
-      Nord User Patches {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    height: '100vh'
-  },
-  image: {
-    backgroundImage: 'url(Images/clavianordstage.jpg)',
-    backgroundRepeat: 'no-repeat',
-    backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50],
-    backgroundSize: 'cover',
-    backgroundPosition: 'center'
-  },
-  paper: {
-    margin: theme.spacing(8, 4),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1)
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2)
-  }
-}));
+import isEmail from 'validator/lib/isEmail';
+import { Copyright, useStyles, regexEx } from '../common/Common';
 
 export default function ResetPassword(props) {
   const classes = useStyles();
   const [email, setEmail] = useState('');
+  const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const search = props.location.search;
   const parsed = queryString.parse(search);
   const [code, setCode] = useState(parsed.code);
+  var isPasswordInvalid = password && !regexEx.test(password);
 
   function handleResetPasswordClick() {
     const url = '/api/auth/ResetPassword';
@@ -103,6 +66,11 @@ export default function ResetPassword(props) {
                     setEmail(event.target.value);
                     setError(false);
                   }}
+                  onBlur={() => {
+                    setIsEmailInvalid(!isEmail(email));
+                  }}
+                  error={isEmailInvalid}
+                  helperText={isEmailInvalid && 'Not an email address.'}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -120,12 +88,21 @@ export default function ResetPassword(props) {
                     setPassword(event.target.value);
                     setError(false);
                   }}
+                  error={isPasswordInvalid}
+                  helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
                 />
               </Grid>
             </Grid>
             <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()}>
               Reset Password
             </Button>
+            {error && (
+              <Grid container>
+                <Grid item xs={12}>
+                  <Typography component='p'>Something went wrong.</Typography>
+                </Grid>
+              </Grid>
+            )}
             <Grid container justify='flex-end'>
               <Grid item xs>
                 <Link to={'/forgotPassword'}>Forgot password?</Link>

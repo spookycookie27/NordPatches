@@ -22,7 +22,8 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.2.0",
-    "validator": "^10.8.0"
+    "typeface-roboto": "0.0.75",
+    "validator": "^10.11.0"
   },
   "scripts": {
     "start": "react-scripts start",
