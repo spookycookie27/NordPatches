@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using NordSamples.Data.Models;
 
 namespace NordSamples.Data
@@ -18,7 +16,7 @@ namespace NordSamples.Data
                 return;   // DB has been seeded
             }
 
-            var patches = new Patch[]
+            var patches = new[]
             {
                 new Patch {Name = "Patch1"},
                 new Patch {Name = "Patch2"},

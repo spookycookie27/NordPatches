@@ -18,8 +18,10 @@ export default function SignInSide(props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   function handleLoginClick() {
+    setDisabled(true);
     const url = '/api/auth/login';
     const data = { email: email, password: password };
     RestUtilities.post(url, data).then(async response => {
@@ -63,6 +65,7 @@ export default function SignInSide(props) {
               }}
               error={error}
               helperText={error && 'This email and password combination is not recognised'}
+              disabled={disabled}
             />
             <TextField
               variant='outlined'
@@ -81,8 +84,9 @@ export default function SignInSide(props) {
               }}
               error={error}
               helperText={error && 'This email and password combination is not recognised'}
+              disabled={disabled}
             />
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleLoginClick()}>
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled}>
               Sign In
             </Button>
             <Grid container>

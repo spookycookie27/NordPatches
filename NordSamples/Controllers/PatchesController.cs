@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NordSamples.Data;
@@ -35,7 +33,7 @@ namespace NordSamples.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
-            var patch = await _context.Patches.FindAsync(id);
+            Patch patch = await _context.Patches.FindAsync(id);
 
             if (patch == null)
             {
@@ -93,7 +91,7 @@ namespace NordSamples.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Patch>> DeletePatch(int id)
         {
-            var patch = await _context.Patches.FindAsync(id);
+            Patch patch = await _context.Patches.FindAsync(id);
             if (patch == null)
             {
                 return NotFound();

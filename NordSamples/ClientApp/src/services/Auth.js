@@ -4,7 +4,7 @@ const TOKEN_KEY = 'token';
 const EXPIRY_KEY = 'tokenExpiry';
 
 export function getToken() {
-  return window.localStorage.getItem(TOKEN_KEY);
+    return isSignedIn() ? window.localStorage.getItem(TOKEN_KEY) : null;
 }
 
 export function setToken(token, tokenExpiryDate) {

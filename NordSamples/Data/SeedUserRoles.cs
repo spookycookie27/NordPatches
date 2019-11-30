@@ -1,15 +1,10 @@
-﻿
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using NordSamples.Data;
-using NordSamples.Data.Constants;
 
-
-namespace ContactManager.Data
+namespace NordSamples.Data
 {
     public static class SeedUserRoles
     {
@@ -20,11 +15,11 @@ namespace ContactManager.Data
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
                 var adminID = await EnsureUser(serviceProvider, testUserPw, "test@me.com");
-                await EnsureRole(serviceProvider, adminID, Constants.AdministratorRole);
+                await EnsureRole(serviceProvider, adminID, Constants.Constants.AdministratorRole);
 
                 // allowed user can create and edit contacts that they create
                 var managerID = await EnsureUser(serviceProvider, testUserPw, "test2@me.com");
-                await EnsureRole(serviceProvider, managerID, Constants.UserRole);
+                await EnsureRole(serviceProvider, managerID, Constants.Constants.UserRole);
 
                 var uid = await CreateTestUser(serviceProvider, testUserPw);
 

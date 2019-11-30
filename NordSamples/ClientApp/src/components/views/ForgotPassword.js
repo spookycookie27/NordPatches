@@ -18,10 +18,12 @@ export default function ForgotPassword(props) {
   const [email, setEmail] = useState('');
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [error, setError] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   function handleForgotPasswordClick() {
     const url = '/api/auth/ForgotPassword';
     const data = { email: email };
+    setDisabled(true);
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
         setError(false);
@@ -61,22 +63,32 @@ export default function ForgotPassword(props) {
               }}
               error={isEmailInvalid}
               helperText={isEmailInvalid && 'Not an email address.'}
+              disabled={disabled}
             />
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleForgotPasswordClick()}>
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleForgotPasswordClick()} disabled={disabled}>
               Reset Password
             </Button>
-            {error && (
+            {disabled && !error && (
+              <Grid container>
+                <Grid item xs={12}>
+                  <Typography component='p'>Please check your email to continue resetting your password.</Typography>
+                </Grid>
+              </Grid>
+            )}
+            {disabled && error && (
               <Grid container>
                 <Grid item xs={12}>
                   <Typography component='p'>Something went wrong.</Typography>
                 </Grid>
               </Grid>
             )}
-            <Grid container>
-              <Grid item xs>
-                <Link to={'/login'}>Already have an account? Sign in</Link>
+            {disabled || (
+              <Grid container>
+                <Grid item xs>
+                  <Link to={'/login'}>Already have an account? Sign in</Link>
+                </Grid>
               </Grid>
-            </Grid>
+            )}
             <Box mt={5}>
               <Copyright />
             </Box>

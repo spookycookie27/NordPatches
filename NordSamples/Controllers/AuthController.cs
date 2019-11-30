@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Encodings.Web;
-using System.Threading;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace NordSamples.Controllers
 {
@@ -25,19 +25,20 @@ namespace NordSamples.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly JwtOptions _jwtOptions;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly IMapper _mapper;
-        private readonly IEmailSender _emailSender;
+        private readonly UserManager<IdentityUser> userManager;
+        private readonly JwtOptions jwtOptions;
+        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly IMapper mapper;
+        private readonly IEmailSender emailSender;
+
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
         public AuthController(UserManager<IdentityUser> userManager, IOptions<JwtOptions> jwtOptions, SignInManager<IdentityUser> signInManager, IMapper mapper, IEmailSender emailSender)
         {
-            _userManager = userManager;
-            _jwtOptions = jwtOptions.Value;
-            _signInManager = signInManager;
-            _mapper = mapper;
-            _emailSender = emailSender;
+            this.userManager = userManager;
+            this.jwtOptions = jwtOptions.Value;
+            this.signInManager = signInManager;
+            this.mapper = mapper;
+            this.emailSender = emailSender;
         }
 
         // POST: api/Auth/Register
@@ -45,29 +46,31 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+            ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (!ModelState.IsValid)
             {
-                var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
+                return BadRequest();
+            }
+
+            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            IdentityResult result = await userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                //_logger.LogInformation("User created a new account with password.");
+                await userManager.AddToRoleAsync(user, Constants.UserRole);
+                string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                string callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code }, Request.Scheme);
+
+                await emailSender.SendEmailAsync(model.Email, "Confirm your email",
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                if (!userManager.Options.SignIn.RequireConfirmedAccount)
                 {
-                    //_logger.LogInformation("User created a new account with password.");
-                    await _userManager.AddToRoleAsync(user, Constants.UserRole);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-                    var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code = code }, Request.Scheme);
-
-                    await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    if (!_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                    }
-                    return Ok();
+                    await signInManager.SignInAsync(user, isPersistent: false);
                 }
+                return Ok();
             }
 
             return BadRequest();
@@ -83,14 +86,14 @@ namespace NordSamples.Controllers
                 return RedirectToPage("/Index");
             }
 
-            var user = await _userManager.FindByIdAsync(userId);
+            IdentityUser user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{userId}'.");
             }
 
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await _userManager.ConfirmEmailAsync(user, code);
+            IdentityResult result = await userManager.ConfirmEmailAsync(user, code);
             string url = result.Succeeded ? "/login" : "/error";
             return Redirect(url);
         }
@@ -107,20 +110,27 @@ namespace NordSamples.Controllers
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
+            //var phpBbCryptoServiceProvider = new PhpBBCryptoServiceProvider();
+            //var remoteHash = "getRemoteHashfromDB";
+            //bool hashResult = phpBbCryptoServiceProvider.PhpbbCheckHash(login.Password, remoteHash);
+
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, login.RememberMe, lockoutOnFailure: false);
+            SignInResult result = await signInManager.PasswordSignInAsync(login.Email, login.Password, login.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                var appUser = await _userManager.FindByEmailAsync(login.Email);
+                IdentityUser appUser = await userManager.FindByEmailAsync(login.Email);
 
-                if (appUser == null) return Unauthorized();
+                if (appUser == null)
+                {
+                    return Unauthorized();
+                }
 
-                var roles = await _userManager.GetRolesAsync(appUser);
-                var isAdmin = roles.Contains(Constants.AdministratorRole);
-                var roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
+                IList<string> roles = await userManager.GetRolesAsync(appUser);
+                bool isAdmin = roles.Contains(Constants.AdministratorRole);
+                string roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
-                var tokenExpiry = DateTime.Now.AddMinutes(1);
+                DateTime tokenExpiry = DateTime.Now.AddMinutes(1);
 
                 var claims = new[] {
                     new Claim(ClaimTypes.Name, appUser.Email),
@@ -131,17 +141,17 @@ namespace NordSamples.Controllers
                     new Claim(ClaimTypes.Role, roleToUse),
                 };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));
+                var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(
-                    _jwtOptions.Issuer,
-                    _jwtOptions.Issuer,
+                    jwtOptions.Issuer,
+                    jwtOptions.Issuer,
                     claims,
                     expires: tokenExpiry,
-                    signingCredentials: creds);
+                    signingCredentials: credentials);
 
-                var user = _mapper.Map<UserViewModel>(appUser);
+                var user = mapper.Map<UserViewModel>(appUser);
                 user.Role = roleToUse;
 
 
@@ -155,22 +165,22 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordModel login)
         {
-            var user = await _userManager.FindByEmailAsync(login.Email);
-            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            IdentityUser user = await userManager.FindByEmailAsync(login.Email);
+            if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
             {
                 // Don't reveal that the user does not exist or is not confirmed
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                return BadRequest();
             }
 
-            // For more information on how to enable account confirmation and password reset please 
+            // For more information on how to enable account confirmation and password reset please
             // visit https://go.microsoft.com/fwlink/?LinkID=532713
-            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            string code = await userManager.GeneratePasswordResetTokenAsync(user);
+            string encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-            var callbackUrl = Url.Action("ResetPassword", "Auth", new { code = encoded }, Request.Scheme);
+            string callbackUrl = Url.Action("ResetPassword", "Auth", new { code = encoded }, Request.Scheme);
 
 
-            await _emailSender.SendEmailAsync(
+            await emailSender.SendEmailAsync(
                 login.Email,
                 "Reset Password",
                 $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
@@ -196,23 +206,23 @@ namespace NordSamples.Controllers
                 return BadRequest();
             }
 
-            var decoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
+            string decoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            IdentityUser user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
                 return RedirectToPage("/ResetPasswordConfirmation");
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, decoded, model.Password);
+            IdentityResult result = await userManager.ResetPasswordAsync(user, decoded, model.Password);
 
             if (result.Succeeded)
             {
                 return Ok();
             }
 
-            foreach (var error in result.Errors)
+            foreach (IdentityError error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
@@ -227,14 +237,44 @@ namespace NordSamples.Controllers
         public async Task<IActionResult> Confirm(CheckToken data)
         {
             var jwtHandler = new JwtSecurityTokenHandler();
-            var email = jwtHandler.ReadJwtToken(data.Token).Subject;
-            var user = await _userManager.FindByEmailAsync(email);
+            string email = jwtHandler.ReadJwtToken(data.Token).Subject;
+            IdentityUser user = await userManager.FindByEmailAsync(email);
 
             if (user == null) return NotFound();
 
-            var returnUser = _mapper.Map<UserViewModel>(user);
+            var returnUser = mapper.Map<UserViewModel>(user);
 
             return Ok(returnUser);
         }
+
+        //private async Task TryPostToNuf()
+        //{
+        //    HttpClient client = httpClientFactory.CreateClient("loginClient");
+        //    var test = new
+        //    {
+        //        username = "spookycookie",
+        //        password = "Chajamrob1!",
+        //        Login = "Login",
+        //        sid = "abc",
+        //        redirect = "/ucp.php?mode=login"
+        //    };
+        //    //var json = JsonConvert.SerializeObject(test);
+        //    //HttpContent contentPost = new StringContent(json, Encoding.UTF8, "application/json");
+        //    List<KeyValuePair<string, string>> keyValues;
+        //    keyValues = new List<KeyValuePair<string, string>>
+        //    {
+        //        new KeyValuePair<string, string>("username", "spookycookie"),
+        //        new KeyValuePair<string, string>("password", "Chajamrob1!"),
+        //        new KeyValuePair<string, string>("redirect", "./ucp.php?mode=login"),
+        //        new KeyValuePair<string, string>("sid", "19b620dbd066fc26d8129450d1491fcc"),
+        //        new KeyValuePair<string, string>("redirect", "portal.php"),
+        //        new KeyValuePair<string, string>("login", "Login")
+        //    };
+
+        //    HttpContent multi = new FormUrlEncodedContent(keyValues);
+        //    multi.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+        //    client.BaseAddress = new Uri("https://www.norduserforum.com");
+        //    HttpResponseMessage response = await client.PostAsync("ucp.php?mode=login", multi);
+        //}
     }
 }

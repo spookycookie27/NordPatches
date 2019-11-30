@@ -19,15 +19,16 @@ export default function SignUp(props) {
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   var isPasswordInvalid = password && !regexEx.test(password);
 
   function handleRegisterClick() {
     const url = '/api/auth/register';
     const data = { email: email, password: password };
+    setDisabled(true);
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
-        setConfirmed(true);
+        setError(false);
       } else {
         setError(true);
       }
@@ -66,7 +67,7 @@ export default function SignUp(props) {
                   onBlur={() => {
                     setIsEmailInvalid(!isEmail(email));
                   }}
-                  disabled={confirmed}
+                  disabled={disabled}
                   error={isEmailInvalid}
                   helperText={isEmailInvalid && 'Not an email address.'}
                 />
@@ -86,38 +87,39 @@ export default function SignUp(props) {
                     setPassword(event.target.value);
                     setError(false);
                   }}
-                  disabled={confirmed}
+                  disabled={disabled}
                   error={isPasswordInvalid}
                   helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
                 />
               </Grid>
             </Grid>
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleRegisterClick()} disabled={confirmed}>
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleRegisterClick()} disabled={disabled}>
               Sign Up
             </Button>
-            {confirmed && (
+            {disabled && !error && (
               <Grid container>
                 <Grid item xs={12}>
                   <Typography component='p'>Please check your email to confirm your email address.</Typography>
                 </Grid>
               </Grid>
             )}
-            {error && (
+            {disabled && error && (
               <Grid container>
                 <Grid item xs={12}>
                   <Typography component='p'>Something went wrong.</Typography>
                 </Grid>
               </Grid>
             )}
-
-            <Grid container justify='flex-end'>
-              <Grid item xs>
-                <Link to={'/forgotPassword'}>Forgot password?</Link>
+            {disabled || (
+              <Grid container justify='flex-end'>
+                <Grid item xs>
+                  <Link to={'/forgotPassword'}>Forgot password?</Link>
+                </Grid>
+                <Grid item>
+                  <Link to={'/login'}>Already have an account? Sign in</Link>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Link to={'/login'}>Already have an account? Sign in</Link>
-              </Grid>
-            </Grid>
+            )}
             <Box mt={5}>
               <Copyright />
             </Box>

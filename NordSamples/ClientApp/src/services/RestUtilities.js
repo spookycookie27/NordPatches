@@ -1,7 +1,6 @@
 import { getToken } from '../services/Auth';
 
 export default class RestUtilities {
-
   static get(url) {
     return RestUtilities.request('GET', url);
   }
@@ -27,19 +26,20 @@ export default class RestUtilities {
     let body = data;
     let statusCode = 200;
     let statusText = '';
+    const token = getToken();
     const headers = new Headers();
     headers.set('Accept', 'application/json');
-    headers.set('Authorization',`Bearer ${getToken()}`);
+    if (token) headers.set('Authorization', `Bearer ${token}`);
 
     if (!isFormData) {
-      headers.set('Content-Type','application/json');
+      headers.set('Content-Type', 'application/json');
       body = JSON.stringify(data);
     } else {
       body = data;
     }
 
     return fetch(url, { method, headers, body })
-      .then((response) => {
+      .then(response => {
         isBadRequest = !response.ok;
         statusCode = response.status;
         statusText = response.statusText;
@@ -48,7 +48,8 @@ export default class RestUtilities {
           return response.json();
         }
         return response.text();
-      }).then((responseContent) => {
+      })
+      .then(responseContent => {
         const response = {
           ok: !isBadRequest,
           errorContent: isBadRequest ? responseContent : null,

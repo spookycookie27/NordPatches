@@ -20,12 +20,19 @@ export default function ResetPassword(props) {
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
-  const search = props.location.search;
-  const parsed = queryString.parse(search);
-  const [code, setCode] = useState(parsed.code);
+  const [code, setCode] = useState('');
+  const [disabled, setDisabled] = useState(false);
+
+  if (!code) {
+    const search = props.location.search;
+    const parsed = queryString.parse(search);
+    setCode(parsed.code);
+  }
+
   var isPasswordInvalid = password && !regexEx.test(password);
 
   function handleResetPasswordClick() {
+    setDisabled(true);
     const url = '/api/auth/ResetPassword';
     const data = { email, password, code };
     RestUtilities.post(url, data).then(async response => {
@@ -71,6 +78,7 @@ export default function ResetPassword(props) {
                   }}
                   error={isEmailInvalid}
                   helperText={isEmailInvalid && 'Not an email address.'}
+                  disabled={disabled}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -90,10 +98,11 @@ export default function ResetPassword(props) {
                   }}
                   error={isPasswordInvalid}
                   helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
+                  disabled={disabled}
                 />
               </Grid>
             </Grid>
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()}>
+            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()} disabled={disabled}>
               Reset Password
             </Button>
             {error && (
