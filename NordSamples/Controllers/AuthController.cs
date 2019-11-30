@@ -18,7 +18,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Encodings.Web;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 using NordSamples.Data;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using NordSamples.Data.Models;
 
 namespace NordSamples.Controllers
 {
@@ -113,32 +114,14 @@ namespace NordSamples.Controllers
             {
                 return BadRequest(ModelState);
             }
-            NordAppUser appUser;
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            if (loginModel.UseNufCred)
+            NordAppUser appUser = await CheckCredentials(loginModel);
+
+            if (appUser == null)
             {
-                var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
-                var remoteHash = context.NufUsers.Where(x => x.Username == loginModel.Login).FirstOrDefault().Password;
-                bool hashResult = phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, remoteHash);
-                if (hashResult)
-                {
-                    appUser = await EnsureUser(loginModel.Password, loginModel.Login, "getEmailFromNuf@test.com");
-                }
-                else
-                {
-                    return Unauthorized();
-                }
-            }
-            else
-            {
-                SignInResult result = await signInManager.PasswordSignInAsync(loginModel.Login, loginModel.Password, loginModel.RememberMe, lockoutOnFailure: false);
-                if (!result.Succeeded)
-                {
-                    return Unauthorized();
-                }
-                appUser = await userManager.FindByNameAsync(loginModel.Login);
+                return Unauthorized();
             }
 
             // This doesn't count login failures towards account lockout
@@ -174,6 +157,47 @@ namespace NordSamples.Controllers
 
 
             return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), user, tokenExpiry });
+        }
+
+        private async Task<NordAppUser> CheckCredentials(LoginModel loginModel)
+        {
+            NordAppUser appUser;
+            if (loginModel.UseNufCred)
+            {
+                appUser = await CheckNufLogin(loginModel);
+            }
+            else
+            {
+                appUser = await CheckIdentityLogin(loginModel);
+            }
+
+            return appUser;
+        }
+
+        private async Task<NordAppUser> CheckIdentityLogin(LoginModel loginModel)
+        {
+            NordAppUser appUser = null;
+            SignInResult result = await signInManager.PasswordSignInAsync(loginModel.Login, loginModel.Password, loginModel.RememberMe,
+                lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+                appUser = await userManager.FindByNameAsync(loginModel.Login);
+            }
+
+            return appUser;
+        }
+
+        private async Task<NordAppUser> CheckNufLogin(LoginModel loginModel)
+        {
+            NordAppUser appUser = null;
+            var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
+            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username == loginModel.Login);
+            if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
+            {
+                appUser = await EnsureUser(loginModel.Password, loginModel.Login, nufUser.Email);
+            }
+
+            return appUser;
         }
 
         [AllowAnonymous]
