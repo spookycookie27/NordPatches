@@ -15,5 +15,8 @@ namespace NordSamples.Data.Models
 
         [MaxLength(40)]
         public string Password { get; set; }
+
+        [MaxLength(255)]
+        public string Email { get; set; }
     }
 }
