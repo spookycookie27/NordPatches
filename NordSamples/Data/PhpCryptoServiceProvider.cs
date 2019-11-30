@@ -17,7 +17,7 @@ namespace NordSamples.Data
         /// <summary>
         /// The encryption string base.
         /// </summary>
-        private string itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        private const string EncryptionStringBase = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         /// <summary>
         /// Compares the password string given with the hash retrieved from your database.
@@ -27,7 +27,11 @@ namespace NordSamples.Data
         /// <returns>True if the password is correct, False otherwise.</returns>
         public bool PhpbbCheckHash(string password, string hash)
         {
-            if (hash.Length == 34) return (HashCryptPrivate(Encoding.ASCII.GetBytes(password), hash, itoa64) == hash);
+            if (hash.Length == 34)
+            {
+                return (HashCryptPrivate(Encoding.ASCII.GetBytes(password), hash, EncryptionStringBase) == hash);
+            }
+
             return false;
         }
 
@@ -48,11 +52,9 @@ namespace NordSamples.Data
             // byte[] random = ASCIIEncoding.ASCII.GetBytes("abc123");
             byte[] random = Encoding.ASCII.GetBytes(new Random().Next(100000, 999999).ToString());
 
-            string hash = HashCryptPrivate(Encoding.ASCII.GetBytes(password), HashGenSaltPrivate(random, itoa64), itoa64);
+            string hash = HashCryptPrivate(Encoding.ASCII.GetBytes(password), HashGenSaltPrivate(random, EncryptionStringBase), EncryptionStringBase);
 
-            if (hash.Length == 34) return hash;
-
-            return SMD5(password);
+            return hash.Length == 34 ? hash : SMD5(password);
         }
 
         /// <summary>
@@ -60,36 +62,47 @@ namespace NordSamples.Data
         /// </summary>
         /// <param name="password">String to be encrypted. Use: ASCIIEncoding.ASCII.GetBytes();</param>
         /// <param name="genSalt">Generated salt.</param>
-        /// <param name="itoa64">The itoa64 string.</param>
+        /// <param name="encryptionStringBase">The itoa64 string.</param>
         /// <returns>The encrypted hash ready to be compared.</returns>
         /// <remarks>
         /// password:  Saves conversion inside the function, lazy coding really.
         /// genSalt:   Returns from hashGensaltPrivate(random, itoa64);
         /// return:    Compare with phpbbCheckHash(password, hash)
         /// </remarks>
-        private string HashCryptPrivate(byte[] password, string genSalt, string itoa64)
+        private string HashCryptPrivate(byte[] password, string genSalt, string encryptionStringBase)
         {
-            string output = "*";
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-            if (!genSalt.StartsWith("$H$")) return output;
-            //	$count_log2 = strpos($itoa64, $setting[3]);
-            int count_log2 = itoa64.IndexOf(genSalt[3]);
-            if (count_log2 < 7 || count_log2 > 30) return output;
+            var output = "*";
+            using var md5 = new MD5CryptoServiceProvider();
+            if (!genSalt.StartsWith("$H$"))
+            {
+                return output;
+            }
 
-            int count = 1 << count_log2;
+            int countLog2 = encryptionStringBase.IndexOf(genSalt[3]);
+
+            if (countLog2 < 7 || countLog2 > 30)
+            {
+                return output;
+            }
+
+            int count = 1 << countLog2;
             byte[] salt = Encoding.ASCII.GetBytes(genSalt.Substring(4, 8));
 
-            if (salt.Length != 8) return output;
+            if (salt.Length != 8)
+            {
+                return output;
+            }
 
             byte[] hash = md5.ComputeHash(Combine(salt, password));
 
             do
             {
                 hash = md5.ComputeHash(Combine(hash, password));
-            } while (count-- > 1);
+            }
+            while (count-- > 1);
 
             output = genSalt.Substring(0, 12);
-            output += HashEncode64(hash, 16, itoa64);
+            output += HashEncode64(hash, 16, encryptionStringBase);
 
             return output;
         }
@@ -102,7 +115,7 @@ namespace NordSamples.Data
         /// <returns>Combined byte array.</returns>
         private byte[] Combine(byte[] b1, byte[] b2)
         {
-            byte[] retVal = new byte[b1.Length + b2.Length];
+            var retVal = new byte[b1.Length + b2.Length];
             Array.Copy(b1, 0, retVal, 0, b1.Length);
             Array.Copy(b2, 0, retVal, b1.Length, b2.Length);
             return retVal;
@@ -113,29 +126,41 @@ namespace NordSamples.Data
         /// </summary>
         /// <param name="input">The hash to encode.</param>
         /// <param name="count">[This parameter needs documentation].</param>
-        /// <param name="itoa64">The itoa64 string.</param>
+        /// <param name="encryptionStringBase">The itoa64 string.</param>
         /// <returns>Encoded hash.</returns>
-        private string HashEncode64(byte[] input, int count, string itoa64)
+        private string HashEncode64(byte[] input, int count, string encryptionStringBase)
         {
-            string output = "";
-            int i = 0; int value = 0;
+            var output = "";
+            var i = 0;
 
             do
             {
-                value = input[i++];
-                output += itoa64[value & 0x3f];
+                int value = input[i++];
+                output += encryptionStringBase[value & 0x3f];
 
-                if (i < count) value |= input[i] << 8;
-                output += itoa64[(value >> 6) & 0x3f];
+                if (i < count)
+                {
+                    value |= input[i] << 8;
+                }
+
+                output += encryptionStringBase[(value >> 6) & 0x3f];
                 if (i++ >= count)
+                {
                     break;
+                }
 
-                if (i < count) value |= input[i] << 16;
-                output += itoa64[(value >> 12) & 0x3f];
+                if (i < count)
+                {
+                    value |= input[i] << 16;
+                }
+
+                output += encryptionStringBase[(value >> 12) & 0x3f];
                 if (i++ >= count)
+                {
                     break;
+                }
 
-                output += itoa64[(value >> 18) & 0x3f];
+                output += encryptionStringBase[(value >> 18) & 0x3f];
 
             } while (i < count);
 
@@ -146,15 +171,15 @@ namespace NordSamples.Data
         /// Generate salt for hash generation.
         /// </summary>
         /// <param name="input">Any random information.</param>
-        /// <param name="itoa64">The itoa64 string.</param>
+        /// <param name="encryptionStringBase">The itoa64 string.</param>
         /// <returns>Generated salt string</returns>
-        private string HashGenSaltPrivate(byte[] input, string itoa64)
+        private string HashGenSaltPrivate(byte[] input, string encryptionStringBase)
         {
-            int iteration_count_log2 = 6;
+            const int iterationCountLog2 = 6;
 
-            string output = "$H$";
-            output += itoa64[Math.Min(iteration_count_log2 + 5, 30)];
-            output += HashEncode64(input, 6, itoa64);
+            var output = "$H$";
+            output += encryptionStringBase[Math.Min(iterationCountLog2 + 5, 30)];
+            output += HashEncode64(input, 6, encryptionStringBase);
 
             return output;
         }
@@ -163,23 +188,13 @@ namespace NordSamples.Data
         /// Returns a hexadecimal string representation for the encrypted MD5 parameter.
         /// </summary>
         /// <param name="password">String to be encrypted.</param>
-        /// <returns>String</returns>
-        private string SMD5(string password)
-        {
-            return SMD5(password, false);
-        }
-
-        /// <summary>
-        /// Returns a hexadecimal string representation for the encrypted MD5 parameter.
-        /// </summary>
-        /// <param name="password">String to be encrypted.</param>
         /// <param name="raw">Whether or not to produce a raw string.</param>
         /// <returns>String</returns>
-        private string SMD5(string password, bool raw)
+        private string SMD5(string password, bool raw = false)
         {
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-            if (raw) return Encoding.ASCII.GetString(md5.ComputeHash(Encoding.ASCII.GetBytes(password)));
-            else return BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))).Replace("-", "");
+            using var md5 = new MD5CryptoServiceProvider();
+            string returnValue = raw ? Encoding.ASCII.GetString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))) : BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))).Replace("-", "");
+            return returnValue;
         }
     }
 }

@@ -12,12 +12,12 @@ using NordSamples.Data.Constants;
 using NordSamples.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using System.Linq;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Encodings.Web;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+using NordSamples.Data;
 
 namespace NordSamples.Controllers
 {
@@ -31,7 +31,8 @@ namespace NordSamples.Controllers
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
 
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+        //public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
         public AuthController(UserManager<IdentityUser> userManager, IOptions<JwtOptions> jwtOptions, SignInManager<IdentityUser> signInManager, IMapper mapper, IEmailSender emailSender)
         {
             this.userManager = userManager;
@@ -46,7 +47,7 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            //ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (!ModelState.IsValid)
             {
                 return BadRequest();
@@ -110,8 +111,8 @@ namespace NordSamples.Controllers
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            //var phpBbCryptoServiceProvider = new PhpBBCryptoServiceProvider();
-            //var remoteHash = "getRemoteHashfromDB";
+            //var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
+            //var remoteHash = "getfromDB";
             //bool hashResult = phpBbCryptoServiceProvider.PhpbbCheckHash(login.Password, remoteHash);
 
             // This doesn't count login failures towards account lockout
