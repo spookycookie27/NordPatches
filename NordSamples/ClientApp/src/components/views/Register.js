@@ -16,6 +16,7 @@ import { Copyright, useStyles, regexEx } from '../common/Common';
 export default function SignUp(props) {
   const classes = useStyles();
   const [email, setEmail] = useState('');
+  const [login, setLogin] = useState('');
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
@@ -24,7 +25,7 @@ export default function SignUp(props) {
 
   function handleRegisterClick() {
     const url = '/api/auth/register';
-    const data = { email: email, password: password };
+    const data = { email, password, login };
     setDisabled(true);
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
@@ -70,6 +71,24 @@ export default function SignUp(props) {
                   disabled={disabled}
                   error={isEmailInvalid}
                   helperText={isEmailInvalid && 'Not an email address.'}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant='outlined'
+                  value={login}
+                  margin='normal'
+                  required
+                  fullWidth
+                  id='login'
+                  label='Login'
+                  name='login'
+                  autoComplete='username'
+                  onChange={event => {
+                    setLogin(event.target.value);
+                    setError(false);
+                  }}
+                  disabled={disabled}
                 />
               </Grid>
               <Grid item xs={12}>

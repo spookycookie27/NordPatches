@@ -8,6 +8,8 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import { setToken } from '../../services/Auth';
 import RestUtilities from '../../services/RestUtilities';
@@ -15,15 +17,16 @@ import { Copyright, useStyles } from '../common/Common';
 
 export default function SignInSide(props) {
   const classes = useStyles();
-  const [email, setEmail] = useState('');
+  const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [disabled, setDisabled] = useState(false);
+  const [useNufCred, setUseNufCred] = useState(false);
 
   function handleLoginClick() {
     setDisabled(true);
     const url = '/api/auth/login';
-    const data = { email: email, password: password };
+    const data = { password, login, useNufCred };
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
         setToken(response.content.token, response.content.tokenExpiry);
@@ -31,6 +34,7 @@ export default function SignInSide(props) {
         props.history.push('/');
       } else {
         setError(true);
+        setDisabled(false);
       }
     });
   }
@@ -48,23 +52,25 @@ export default function SignInSide(props) {
             Sign in
           </Typography>
           <form className={classes.form} noValidate>
+            <FormControlLabel
+              control={<Switch checked={useNufCred} onChange={() => setUseNufCred(!useNufCred)} />}
+              label='Use my Nord User Forum credentials'
+            />
             <TextField
               variant='outlined'
-              value={email}
+              value={login}
               margin='normal'
               required
               fullWidth
-              id='email'
-              label='Email Address'
-              name='email'
-              autoComplete='email'
+              id='login'
+              label='Login'
+              name='login'
+              autoComplete='username'
               autoFocus
               onChange={event => {
-                setEmail(event.target.value);
+                setLogin(event.target.value);
                 setError(false);
               }}
-              error={error}
-              helperText={error && 'This email and password combination is not recognised'}
               disabled={disabled}
             />
             <TextField

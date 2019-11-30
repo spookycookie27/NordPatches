@@ -5,6 +5,9 @@ namespace NordSamples.Models
     public class PasswordResetModel
     {
         [Required]
+        public string Username { get; set; }
+
+        [Required]
         [EmailAddress]
         public string Email { get; set; }
 

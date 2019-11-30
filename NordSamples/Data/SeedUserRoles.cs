@@ -10,35 +10,32 @@ namespace NordSamples.Data
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            string testUserPw = "Passw0rd1!";
-            using (var context = new ApplicationDbContext(
-                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
-            {
-                var adminID = await EnsureUser(serviceProvider, testUserPw, "test@me.com");
-                await EnsureRole(serviceProvider, adminID, Constants.Constants.AdministratorRole);
+            const string testUserPw = "Passw0rd1!";
+            await using var context = new ApplicationDbContext(
+                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
+            string adminId = await EnsureUser(serviceProvider, testUserPw,"testAdmin", "admin@nordsamples.com");
+            await EnsureRole(serviceProvider, adminId, Constants.Constants.AdministratorRole);
 
-                // allowed user can create and edit contacts that they create
-                var managerID = await EnsureUser(serviceProvider, testUserPw, "test2@me.com");
-                await EnsureRole(serviceProvider, managerID, Constants.Constants.UserRole);
-
-                var uid = await CreateTestUser(serviceProvider, testUserPw);
-
-            }
+            // allowed user can create and edit contacts that they create
+            string managerId = await EnsureUser(serviceProvider, testUserPw, "testUser", "user@nordsamples.com");
+            IdentityResult role = await EnsureRole(serviceProvider, managerId, Constants.Constants.UserRole);
         }
 
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
-            string testUserPw, string userName)
+            string testUserPw, string userName, string emailAddress)
         {
-            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetService<UserManager<NordAppUser>>();
 
-            var user = await userManager.FindByNameAsync(userName);
-            if (user == null)
+            NordAppUser user = await userManager.FindByNameAsync(userName);
+            if (user != null)
             {
-                user = new IdentityUser { UserName = userName, Email = userName };
-                var result = await userManager.CreateAsync(user, testUserPw);
-                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                await userManager.ConfirmEmailAsync(user, code);
+                return user.Id;
             }
+
+            user = new NordAppUser() { UserName = userName, Email = emailAddress};
+            await userManager.CreateAsync(user, testUserPw);
+            string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            await userManager.ConfirmEmailAsync(user, code);
 
             return user.Id;
         }
@@ -46,7 +43,6 @@ namespace NordSamples.Data
         private static async Task<IdentityResult> EnsureRole(IServiceProvider serviceProvider,
             string uid, string role)
         {
-            IdentityResult IR = null;
             var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
 
             if (roleManager == null)
@@ -56,35 +52,39 @@ namespace NordSamples.Data
 
             if (!await roleManager.RoleExistsAsync(role))
             {
-                IR = await roleManager.CreateAsync(new IdentityRole(role));
+                await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetService<UserManager<NordAppUser>>();
 
-            var user = await userManager.FindByIdAsync(uid);
+            NordAppUser user = await userManager.FindByIdAsync(uid.ToString());
 
-            IR = await userManager.AddToRoleAsync(user, role);
+            IdentityResult ir = await userManager.AddToRoleAsync(user, role);
 
-            return IR;
+            return ir;
         }
 
-        private static async Task<string> CreateTestUser(IServiceProvider serviceProvider, string testUserPw)
-        {
-            if (String.IsNullOrEmpty(testUserPw))
-                return "";
+        //private static async Task<string> CreateTestUser(IServiceProvider serviceProvider, string testUserPw)
+        //{
+        //    if (string.IsNullOrEmpty(testUserPw))
+        //    {
+        //        return "";
+        //    }
 
-            const string SeedUserName = "test@example.com";
+        //    const string seedUserName = "test@example.com";
 
-            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
+        //    var userManager = serviceProvider.GetService<UserManager<NordAppUser>>();
 
-            var user = await userManager.FindByNameAsync(SeedUserName);
-            if (user == null)
-            {
-                user = new IdentityUser { UserName = SeedUserName };
-                await userManager.CreateAsync(user, testUserPw);
-            }
+        //    NordAppUser user = await userManager.FindByNameAsync(seedUserName);
+        //    if (user != null)
+        //    {
+        //        return user.Id;
+        //    }
 
-            return user.Id;
-        }
+        //    user = new NordAppUser { UserName = seedUserName };
+        //    await userManager.CreateAsync(user, testUserPw);
+
+        //    return user.Id;
+        //}
     }
 }

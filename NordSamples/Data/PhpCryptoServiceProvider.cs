@@ -10,6 +10,7 @@ namespace NordSamples.Data
     /// <remarks>
     /// Ported by Ryan Irecki
     /// Website: http://www.digilitepc.net/
+    /// Help: https://www.phpbb.com/community/viewtopic.php?f=71&t=1771165
     /// E-mail: razchek@gmail.com
     /// </remarks>
     public class PhpBbCryptoServiceProvider
@@ -25,7 +26,7 @@ namespace NordSamples.Data
         /// <param name="password">Plaintext password.</param>
         /// <param name="hash">Hash from a SQL database</param>
         /// <returns>True if the password is correct, False otherwise.</returns>
-        public bool PhpbbCheckHash(string password, string hash)
+        public bool PhpBbCheckHash(string password, string hash)
         {
             if (hash.Length == 34)
             {
@@ -45,7 +46,7 @@ namespace NordSamples.Data
         /// support for older passwords, so they will not work with this class unless
         /// I or someone else updates it.
         /// </remarks>
-        public string PhpbbHash(string password)
+        public string PhpBbHash(string password)
         {
             // Generate a random string from a random number with the length of 6.
             // You could use a static string instead, doesn't matter. E.g.
@@ -54,7 +55,7 @@ namespace NordSamples.Data
 
             string hash = HashCryptPrivate(Encoding.ASCII.GetBytes(password), HashGenSaltPrivate(random, EncryptionStringBase), EncryptionStringBase);
 
-            return hash.Length == 34 ? hash : SMD5(password);
+            return hash.Length == 34 ? hash : Smd5(password);
         }
 
         /// <summary>
@@ -69,7 +70,7 @@ namespace NordSamples.Data
         /// genSalt:   Returns from hashGensaltPrivate(random, itoa64);
         /// return:    Compare with phpbbCheckHash(password, hash)
         /// </remarks>
-        private string HashCryptPrivate(byte[] password, string genSalt, string encryptionStringBase)
+        private static string HashCryptPrivate(byte[] password, string genSalt, string encryptionStringBase)
         {
             var output = "*";
             using var md5 = new MD5CryptoServiceProvider();
@@ -113,7 +114,7 @@ namespace NordSamples.Data
         /// <param name="b1">Source array.</param>
         /// <param name="b2">Array to add to the source array.</param>
         /// <returns>Combined byte array.</returns>
-        private byte[] Combine(byte[] b1, byte[] b2)
+        private static byte[] Combine(byte[] b1, byte[] b2)
         {
             var retVal = new byte[b1.Length + b2.Length];
             Array.Copy(b1, 0, retVal, 0, b1.Length);
@@ -128,7 +129,7 @@ namespace NordSamples.Data
         /// <param name="count">[This parameter needs documentation].</param>
         /// <param name="encryptionStringBase">The itoa64 string.</param>
         /// <returns>Encoded hash.</returns>
-        private string HashEncode64(byte[] input, int count, string encryptionStringBase)
+        private static string HashEncode64(byte[] input, int count, string encryptionStringBase)
         {
             var output = "";
             var i = 0;
@@ -173,7 +174,7 @@ namespace NordSamples.Data
         /// <param name="input">Any random information.</param>
         /// <param name="encryptionStringBase">The itoa64 string.</param>
         /// <returns>Generated salt string</returns>
-        private string HashGenSaltPrivate(byte[] input, string encryptionStringBase)
+        private static string HashGenSaltPrivate(byte[] input, string encryptionStringBase)
         {
             const int iterationCountLog2 = 6;
 
@@ -190,7 +191,7 @@ namespace NordSamples.Data
         /// <param name="password">String to be encrypted.</param>
         /// <param name="raw">Whether or not to produce a raw string.</param>
         /// <returns>String</returns>
-        private string SMD5(string password, bool raw = false)
+        private static string Smd5(string password, bool raw = false)
         {
             using var md5 = new MD5CryptoServiceProvider();
             string returnValue = raw ? Encoding.ASCII.GetString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))) : BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))).Replace("-", "");
