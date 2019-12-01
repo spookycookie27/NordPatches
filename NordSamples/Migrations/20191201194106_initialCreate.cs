@@ -47,35 +47,47 @@ namespace NordSamples.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Category",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 50, nullable: true),
+                    Description = table.Column<string>(maxLength: 255, nullable: true),
+                    SortIndex = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Category", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Instrument",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 50, nullable: true),
+                    Description = table.Column<string>(maxLength: 255, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Instrument", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NufUser",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(maxLength: 255, nullable: true),
-                    Password = table.Column<string>(maxLength: 40, nullable: true)
+                    Password = table.Column<string>(maxLength: 40, nullable: true),
+                    Email = table.Column<string>(maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NufUser", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Patch",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Instrument = table.Column<int>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    SongName = table.Column<string>(nullable: true),
-                    ArtistName = table.Column<string>(nullable: true),
-                    DateCreated = table.Column<DateTime>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Patch", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,13 +197,63 @@ namespace NordSamples.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Patch",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Link = table.Column<string>(nullable: true),
+                    InstrumentId = table.Column<int>(nullable: false),
+                    CategoryId = table.Column<int>(nullable: true),
+                    NufUserId = table.Column<int>(nullable: true),
+                    AppUserId = table.Column<string>(nullable: true),
+                    DateCreated = table.Column<DateTime>(nullable: false),
+                    DateUpdated = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Patch", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Patch_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Patch_Category_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Patch_Instrument_InstrumentId",
+                        column: x => x.InstrumentId,
+                        principalTable: "Instrument",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Patch_NufUser_NufUserId",
+                        column: x => x.NufUserId,
+                        principalTable: "NufUser",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "File",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    Comment = table.Column<string>(maxLength: 1000, nullable: true),
+                    Extension = table.Column<string>(maxLength: 8, nullable: true),
+                    Size = table.Column<int>(nullable: true),
                     DateCreated = table.Column<DateTime>(nullable: false),
+                    NufUserId = table.Column<int>(nullable: true),
+                    AppUserId = table.Column<string>(nullable: true),
                     PatchId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -199,6 +261,26 @@ namespace NordSamples.Migrations
                     table.PrimaryKey("PK_File", x => x.Id);
                     table.ForeignKey(
                         name: "FK_File_Patch_PatchId",
+                        column: x => x.PatchId,
+                        principalTable: "Patch",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    PatchId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tags_Patch_PatchId",
                         column: x => x.PatchId,
                         principalTable: "Patch",
                         principalColumn: "Id",
@@ -248,6 +330,31 @@ namespace NordSamples.Migrations
                 name: "IX_File_PatchId",
                 table: "File",
                 column: "PatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Patch_AppUserId",
+                table: "Patch",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Patch_CategoryId",
+                table: "Patch",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Patch_InstrumentId",
+                table: "Patch",
+                column: "InstrumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Patch_NufUserId",
+                table: "Patch",
+                column: "NufUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tags_PatchId",
+                table: "Tags",
+                column: "PatchId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -271,16 +378,25 @@ namespace NordSamples.Migrations
                 name: "File");
 
             migrationBuilder.DropTable(
-                name: "NufUser");
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Patch");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Patch");
+                name: "Category");
+
+            migrationBuilder.DropTable(
+                name: "Instrument");
+
+            migrationBuilder.DropTable(
+                name: "NufUser");
         }
     }
 }

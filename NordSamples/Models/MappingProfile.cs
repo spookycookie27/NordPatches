@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using NordSamples.Data;
+using NordSamples.Data.Models;
 
 namespace NordSamples.Models
 {
@@ -8,7 +9,7 @@ namespace NordSamples.Models
     {
         public MappingProfile()
         {
-            CreateMap<NordAppUser, UserViewModel>();
+            CreateMap<AppUser, UserViewModel>();
         }
     }
 }

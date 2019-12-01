@@ -3,16 +3,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NordSamples.Data.Models;
 
 namespace NordSamples.Data
 {
-    public static class SeedUserRoles
+    public static class UserRoleSeeder
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
             const string testUserPw = "Passw0rd1!";
             await using var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
+            context.Database.EnsureCreated();
+
             string adminId = await EnsureUser(serviceProvider, testUserPw,"testAdmin", "admin@nordsamples.com");
             await EnsureRole(serviceProvider, adminId, Constants.Constants.AdministratorRole);
 
@@ -24,15 +27,15 @@ namespace NordSamples.Data
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
             string testUserPw, string userName, string emailAddress)
         {
-            var userManager = serviceProvider.GetService<UserManager<NordAppUser>>();
+            var userManager = serviceProvider.GetService<UserManager<AppUser>>();
 
-            NordAppUser user = await userManager.FindByNameAsync(userName);
+            AppUser user = await userManager.FindByNameAsync(userName);
             if (user != null)
             {
                 return user.Id;
             }
 
-            user = new NordAppUser() { UserName = userName, Email = emailAddress};
+            user = new AppUser() { UserName = userName, Email = emailAddress};
             await userManager.CreateAsync(user, testUserPw);
             string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             await userManager.ConfirmEmailAsync(user, code);
@@ -55,9 +58,9 @@ namespace NordSamples.Data
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            var userManager = serviceProvider.GetService<UserManager<NordAppUser>>();
+            var userManager = serviceProvider.GetService<UserManager<AppUser>>();
 
-            NordAppUser user = await userManager.FindByIdAsync(uid.ToString());
+            AppUser user = await userManager.FindByIdAsync(uid.ToString());
 
             IdentityResult ir = await userManager.AddToRoleAsync(user, role);
 

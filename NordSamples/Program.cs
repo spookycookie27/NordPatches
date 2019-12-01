@@ -32,9 +32,8 @@ namespace NordSamples
 
             try
             {
+                UserRoleSeeder.Initialize(services).Wait();
                 var context = services.GetRequiredService<ApplicationDbContext>();
-                context.Database.EnsureCreated(); // wont work on in memory
-                SeedUserRoles.Initialize(services).Wait();
                 DbInitializer.Initialize(context);
             }
             catch (Exception ex)

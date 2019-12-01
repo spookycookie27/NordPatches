@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 
 namespace NordSamples.Data.Models
 {
-    public class NufUser
+    public class Tag
     {
         public int Id { get; set; }
-
         [MaxLength(255)]
-        public string Username { get; set; }
+        public string Name { get; set; }
 
-        [MaxLength(40)]
-        public string Password { get; set; }
-
-        [MaxLength(100)]
-        public string Email { get; set; }
+        public int PatchId { get; set; }
+        public Patch Patch { get; set; }
     }
 }

@@ -27,9 +27,9 @@ namespace NordSamples.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<NordAppUser> userManager;
+        private readonly UserManager<AppUser> userManager;
         private readonly JwtOptions jwtOptions;
-        private readonly SignInManager<NordAppUser> signInManager;
+        private readonly SignInManager<AppUser> signInManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
@@ -37,7 +37,7 @@ namespace NordSamples.Controllers
 
         //public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        public AuthController(UserManager<NordAppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<NordAppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context)
+        public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context)
         {
             this.userManager = userManager;
             this.jwtOptions = jwtOptions.Value;
@@ -59,11 +59,12 @@ namespace NordSamples.Controllers
                 return BadRequest();
             }
 
-            var user = new NordAppUser { UserName = model.Login, Email = model.Email };
+            var user = new AppUser { UserName = model.Login, Email = model.Email };
             IdentityResult result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
                 //_logger.LogInformation("User created a new account with password.");
+
                 await userManager.AddToRoleAsync(user, Constants.UserRole);
                 string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -75,7 +76,7 @@ namespace NordSamples.Controllers
 
                 if (!userManager.Options.SignIn.RequireConfirmedAccount)
                 {
-                    await signInManager.SignInAsync(user, isPersistent: false);
+                    await signInManager.SignInAsync(user, false);
                 }
                 return Ok();
             }
@@ -90,10 +91,10 @@ namespace NordSamples.Controllers
         {
             if (userId == null || code == null)
             {
-                return RedirectToPage("/Index");
+                return BadRequest();
             }
 
-            NordAppUser user = await userManager.FindByIdAsync(userId);
+            AppUser user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{userId}'.");
@@ -117,7 +118,7 @@ namespace NordSamples.Controllers
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            NordAppUser appUser = await CheckCredentials(loginModel);
+            AppUser appUser = await CheckCredentials(loginModel);
 
             if (appUser == null)
             {
@@ -159,9 +160,9 @@ namespace NordSamples.Controllers
             return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), user, tokenExpiry });
         }
 
-        private async Task<NordAppUser> CheckCredentials(LoginModel loginModel)
+        private async Task<AppUser> CheckCredentials(LoginModel loginModel)
         {
-            NordAppUser appUser;
+            AppUser appUser;
             if (loginModel.UseNufCred)
             {
                 appUser = await CheckNufLogin(loginModel);
@@ -174,9 +175,9 @@ namespace NordSamples.Controllers
             return appUser;
         }
 
-        private async Task<NordAppUser> CheckIdentityLogin(LoginModel loginModel)
+        private async Task<AppUser> CheckIdentityLogin(LoginModel loginModel)
         {
-            NordAppUser appUser = null;
+            AppUser appUser = null;
             SignInResult result = await signInManager.PasswordSignInAsync(loginModel.Login, loginModel.Password, loginModel.RememberMe,
                 lockoutOnFailure: false);
             if (result.Succeeded)
@@ -187,9 +188,9 @@ namespace NordSamples.Controllers
             return appUser;
         }
 
-        private async Task<NordAppUser> CheckNufLogin(LoginModel loginModel)
+        private async Task<AppUser> CheckNufLogin(LoginModel loginModel)
         {
-            NordAppUser appUser = null;
+            AppUser appUser = null;
             var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
             NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username == loginModel.Login);
             if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
@@ -204,7 +205,7 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordModel login)
         {
-            NordAppUser user = await userManager.FindByEmailAsync(login.Email);
+            AppUser user = await userManager.FindByEmailAsync(login.Email);
             if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
             {
                 // Don't reveal that the user does not exist or is not confirmed
@@ -247,11 +248,11 @@ namespace NordSamples.Controllers
 
             string decoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
 
-            NordAppUser user = await userManager.FindByEmailAsync(model.Email);
+            AppUser user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return RedirectToPage("/ResetPasswordConfirmation");
+                return NotFound($"Unable to load user with Email '{model.Email}'.");
             }
 
             IdentityResult result = await userManager.ResetPasswordAsync(user, decoded, model.Password);
@@ -277,25 +278,28 @@ namespace NordSamples.Controllers
         {
             var jwtHandler = new JwtSecurityTokenHandler();
             string email = jwtHandler.ReadJwtToken(data.Token).Subject;
-            NordAppUser user = await userManager.FindByEmailAsync(email);
+            AppUser user = await userManager.FindByEmailAsync(email);
 
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                return NotFound();
+            }
 
             var returnUser = mapper.Map<UserViewModel>(user);
 
             return Ok(returnUser);
         }
 
-        private async Task<NordAppUser> EnsureUser(string password, string userName, string emailAddress)
+        private async Task<AppUser> EnsureUser(string password, string userName, string emailAddress)
         {
 
-            NordAppUser user = await userManager.FindByNameAsync(userName);
+            AppUser user = await userManager.FindByNameAsync(userName);
             if (user != null)
             {
                 return user;
             }
 
-            user = new NordAppUser() { UserName = userName, Email = emailAddress };
+            user = new AppUser() { UserName = userName, Email = emailAddress };
             await userManager.CreateAsync(user, password);
             string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             await userManager.ConfirmEmailAsync(user, code);
@@ -303,7 +307,7 @@ namespace NordSamples.Controllers
             return user;
         }
 
-        private async Task<IdentityResult> EnsureRole(NordAppUser user, string role)
+        private async Task EnsureRole(AppUser user, string role)
         {
             if (roleManager == null)
             {
@@ -315,39 +319,7 @@ namespace NordSamples.Controllers
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            IdentityResult ir = await userManager.AddToRoleAsync(user, role);
-
-            return ir;
+            await userManager.AddToRoleAsync(user, role);
         }
-
-        //private async Task TryPostToNuf()
-        //{
-        //    HttpClient client = httpClientFactory.CreateClient("loginClient");
-        //    var test = new
-        //    {
-        //        username = "spookycookie",
-        //        password = "Chajamrob1!",
-        //        Login = "Login",
-        //        sid = "abc",
-        //        redirect = "/ucp.php?mode=login"
-        //    };
-        //    //var json = JsonConvert.SerializeObject(test);
-        //    //HttpContent contentPost = new StringContent(json, Encoding.UTF8, "application/json");
-        //    List<KeyValuePair<string, string>> keyValues;
-        //    keyValues = new List<KeyValuePair<string, string>>
-        //    {
-        //        new KeyValuePair<string, string>("username", "spookycookie"),
-        //        new KeyValuePair<string, string>("password", "Chajamrob1!"),
-        //        new KeyValuePair<string, string>("redirect", "./ucp.php?mode=login"),
-        //        new KeyValuePair<string, string>("sid", "19b620dbd066fc26d8129450d1491fcc"),
-        //        new KeyValuePair<string, string>("redirect", "portal.php"),
-        //        new KeyValuePair<string, string>("login", "Login")
-        //    };
-
-        //    HttpContent multi = new FormUrlEncodedContent(keyValues);
-        //    multi.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
-        //    client.BaseAddress = new Uri("https://www.norduserforum.com");
-        //    HttpResponseMessage response = await client.PostAsync("ucp.php?mode=login", multi);
-        //}
     }
 }

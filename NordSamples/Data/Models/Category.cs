@@ -6,17 +6,18 @@ using System.Threading.Tasks;
 
 namespace NordSamples.Data.Models
 {
-    public class NufUser
+    public class Category
     {
         public int Id { get; set; }
 
+        [MaxLength(50)]
+        public string Name { get; set; }
+
         [MaxLength(255)]
-        public string Username { get; set; }
+        public string Description { get; set; }
 
-        [MaxLength(40)]
-        public string Password { get; set; }
+        public int SortIndex { get; set; }
 
-        [MaxLength(100)]
-        public string Email { get; set; }
+        public ICollection<Patch> Patches { get; set; } = new List<Patch>();
     }
 }
