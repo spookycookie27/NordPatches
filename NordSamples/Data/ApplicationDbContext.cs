@@ -25,12 +25,14 @@ namespace NordSamples.Data
             modelBuilder.Entity<Instrument>().ToTable("Instrument");
             modelBuilder.Entity<NufUser>().ToTable("NufUser");
             modelBuilder.Entity<AppUser>().ToTable("AspNetUsers");
+            modelBuilder.Entity<Comment>().ToTable("Comment");
         }
 
         public DbSet<Patch> Patches { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<File> Files { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<Comment> Comments { get; set; }
         public DbSet<Instrument> Instruments { get; set; }
         public DbSet<NufUser> NufUsers { get; set; }
         public DbSet<AppUser> AppUsers { get; set; }

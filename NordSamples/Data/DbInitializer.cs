@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using NordSamples.Data.Models;
 
@@ -14,31 +13,35 @@ namespace NordSamples.Data
             try
             {
                 AddInitialCategories(context);
-
-                if (!context.Instruments.Any())
-                {
-                    var instruments = new[]
-                    {
-                        new Instrument {Name = "UserSample", Id = 1},
-                        new Instrument {Name = "Lead", Id = 2},
-                        new Instrument {Name = "Electro", Id = 3},
-                        new Instrument {Name = "Stage1", Id = 4},
-                        new Instrument {Name = "Stage2", Id = 5},
-                        new Instrument {Name = "Stage3", Id = 6},
-                    };
-                    foreach (Instrument i in instruments)
-                    {
-                        context.Instruments.Add(i);
-                    }
-
-                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Instrument ON");
-                    context.SaveChanges();
-                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Instrument OFF");
-                }
+                AddInitialInstruments(context);
             }
             finally
             {
                 context.Database.CloseConnection();
+            }
+        }
+
+        private static void AddInitialInstruments(ApplicationDbContext context)
+        {
+            if (!context.Instruments.Any())
+            {
+                var instruments = new[]
+                {
+                    new Instrument {Name = "UserSample", Id = 1},
+                    new Instrument {Name = "Lead", Id = 2},
+                    new Instrument {Name = "Electro", Id = 3},
+                    new Instrument {Name = "Stage1", Id = 4},
+                    new Instrument {Name = "Stage2", Id = 5},
+                    new Instrument {Name = "Stage3", Id = 6},
+                };
+                foreach (Instrument i in instruments)
+                {
+                    context.Instruments.Add(i);
+                }
+
+                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Instrument ON");
+                context.SaveChanges();
+                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Instrument OFF");
             }
         }
 

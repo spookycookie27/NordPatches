@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NordSamples.Data;
-using NordSamples.Data.Models;
+using NordSamples.Models.ViewModels;
 
 namespace NordSamples.Controllers
 {
@@ -12,100 +14,112 @@ namespace NordSamples.Controllers
     [ApiController]
     public class PatchesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
 
-        public PatchesController(ApplicationDbContext context)
+        public PatchesController(ApplicationDbContext context, IMapper mapper)
         {
-            _context = context;
+            this.context = context;
+            this.mapper = mapper;
         }
 
         // GET: api/Patches
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patch>>> GetPatches()
+        public async Task<ActionResult<List<Patch>>> GetPatches()
         {
-            return await _context.Patches
+            var patches = await context.Patches
                 .Include(x => x.Files)
+                .Include(x => x.NufUser)
+                .Include(x => x.Instrument)
+                .Include(x => x.Category)
+                .Include(x => x.Tags)
+                .Include(x => x.Comments)
                 .AsNoTracking()
                 .ToListAsync();
+
+            var model = mapper.Map<List<Patch>>(patches);
+            return model;
         }
 
         // GET: api/Patches/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
-            Patch patch = await _context.Patches.FindAsync(id);
+            var patch = await context.Patches.FindAsync(id);
 
             if (patch == null)
             {
                 return NotFound();
             }
 
-            return patch;
+            var model = mapper.Map<Patch>(patch);
+            return model;
         }
 
         // PUT: api/Patches/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPatch(int id, Patch patch)
-        {
-            if (id != patch.Id)
-            {
-                return BadRequest();
-            }
+        // [HttpPut("{id}")]
+        // public async Task<IActionResult> PutPatch(int id, Patch patch)
+        // {
+        //     if (id != patch.Id)
+        //     {
+        //         return BadRequest();
+        //     }
 
-            _context.Entry(patch).State = EntityState.Modified;
+        //     context.Entry(patch).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PatchExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //     try
+        //     {
+        //         await context.SaveChangesAsync();
+        //     }
+        //     catch (DbUpdateConcurrencyException)
+        //     {
+        //         if (!PatchExists(id))
+        //         {
+        //             return NotFound();
+        //         }
+        //         else
+        //         {
+        //             throw;
+        //         }
+        //     }
 
-            return NoContent();
-        }
+        //     return NoContent();
+        // }
 
         // POST: api/Patches
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<Patch>> PostPatch(Patch patch)
-        {
-            _context.Patches.Add(patch);
-            await _context.SaveChangesAsync();
+        // [HttpPost]
+        // public async Task<ActionResult<Patch>> PostPatch(Patch patch)
+        // {
+        //     context.Patches.Add(patch);
+        //     await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPatch", new { id = patch.Id }, patch);
-        }
+        //     return CreatedAtAction("GetPatch", new { id = patch.Id }, patch);
+        // }
 
         // DELETE: api/Patches/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Patch>> DeletePatch(int id)
-        {
-            Patch patch = await _context.Patches.FindAsync(id);
-            if (patch == null)
-            {
-                return NotFound();
-            }
+        // [HttpDelete("{id}")]
+        // public async Task<ActionResult<Patch>> DeletePatch(int id)
+        // {
+        //     Patch patch = await context.Patches.FindAsync(id);
+        //     if (patch == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            _context.Patches.Remove(patch);
-            await _context.SaveChangesAsync();
+        //     context.Patches.Remove(patch);
+        //     await context.SaveChangesAsync();
 
-            return patch;
-        }
+        //     return patch;
+        // }
 
         private bool PatchExists(int id)
         {
-            return _context.Patches.Any(e => e.Id == id);
+            return context.Patches.Any(e => e.Id == id);
         }
     }
 }

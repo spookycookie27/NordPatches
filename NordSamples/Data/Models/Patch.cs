@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using NordSamples.Data.Enum;
 
 namespace NordSamples.Data.Models
 {
@@ -26,5 +25,6 @@ namespace NordSamples.Data.Models
         public Patch Parent { get; set; }
         public ICollection<File> Files { get; set; } = new List<File>();
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }
