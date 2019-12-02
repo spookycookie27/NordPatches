@@ -5,6 +5,7 @@ namespace NordSamples.Data.Models
 {
     public class AppUser : IdentityUser
     {
-        public virtual ICollection<IdentityUserRole<string>> UserRoles { get; set; }
+        public int? NufUserId { get; set; }
+
     }
 }

@@ -17,11 +17,13 @@ namespace NordSamples.Data.Models
         public string AppUserId { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
+        public int PatchId { get; set; }
 
         public NufUser NufUser { get; set; }
         public AppUser AppUser { get; set; }
         public Instrument Instrument { get; set; }
         public Category Category { get; set; }
+        public Patch Parent { get; set; }
         public ICollection<File> Files { get; set; } = new List<File>();
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     }

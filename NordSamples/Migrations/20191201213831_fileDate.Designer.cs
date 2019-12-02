@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NordSamples.Data;
 
 namespace NordSamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191201213831_fileDate")]
+    partial class fileDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,9 +185,6 @@ namespace NordSamples.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<int?>("NufUserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -277,9 +276,6 @@ namespace NordSamples.Migrations
                     b.Property<int?>("Size")
                         .HasColumnType("int");
 
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PatchId");
@@ -366,12 +362,6 @@ namespace NordSamples.Migrations
                     b.Property<int?>("NufUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PatchId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
@@ -381,8 +371,6 @@ namespace NordSamples.Migrations
                     b.HasIndex("InstrumentId");
 
                     b.HasIndex("NufUserId");
-
-                    b.HasIndex("ParentId");
 
                     b.ToTable("Patch");
                 });
@@ -444,7 +432,7 @@ namespace NordSamples.Migrations
                         .IsRequired();
 
                     b.HasOne("NordSamples.Data.Models.AppUser", null)
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -487,10 +475,6 @@ namespace NordSamples.Migrations
                     b.HasOne("NordSamples.Data.Models.NufUser", "NufUser")
                         .WithMany()
                         .HasForeignKey("NufUserId");
-
-                    b.HasOne("NordSamples.Data.Models.Patch", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId");
                 });
 
             modelBuilder.Entity("NordSamples.Data.Models.Tag", b =>

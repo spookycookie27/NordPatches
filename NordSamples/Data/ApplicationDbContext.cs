@@ -15,18 +15,11 @@ namespace NordSamples.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<AppUser>(b =>
-            {
-
-                // Each User can have many entries in the UserRole join table
-                b.HasMany(e => e.UserRoles)
-                    .WithOne()
-                    .HasForeignKey(ur => ur.UserId)
-                    .IsRequired();
-            });
-
+            modelBuilder.Entity<AppUser>().ToTable("AspNetUsers");
             modelBuilder.Entity<Patch>().ToTable("Patch");
-            modelBuilder.Entity<File>().ToTable("File");
+            modelBuilder.Entity<File>().ToTable("File")
+                .Property(b => b.DateCreated)
+                .HasDefaultValueSql("getDate()");
             modelBuilder.Entity<Category>().ToTable("Category");
             modelBuilder.Entity<Tag>().ToTable("Tags");
             modelBuilder.Entity<Instrument>().ToTable("Instrument");
