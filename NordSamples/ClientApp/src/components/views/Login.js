@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { actionCreators } from '../../store/ActionCreators';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -15,7 +18,7 @@ import { setToken } from '../../services/Auth';
 import RestUtilities from '../../services/RestUtilities';
 import { Copyright, useStyles } from '../common/Common';
 
-export default function SignInSide(props) {
+function SignInSide(props) {
   const classes = useStyles();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +33,7 @@ export default function SignInSide(props) {
     RestUtilities.post(url, data).then(async response => {
       if (response.ok) {
         setToken(response.content.token, response.content.tokenExpiry);
-        //await this.props.setUser(response.content.user); // TODO do we want to hold user in redux?
+        props.setUser(response.content.user);
         props.history.push('/');
       } else {
         setError(true);
@@ -63,7 +66,7 @@ export default function SignInSide(props) {
               required
               fullWidth
               id='login'
-              label='Login'
+              label={useNufCred ? 'NUF Username' : 'Login'}
               name='login'
               autoComplete='username'
               autoFocus
@@ -80,7 +83,7 @@ export default function SignInSide(props) {
               required
               fullWidth
               name='password'
-              label='Password'
+              label={useNufCred ? 'NUF Password' : 'Password'}
               type='password'
               id='password'
               autoComplete='current-password'
@@ -112,3 +115,11 @@ export default function SignInSide(props) {
     </Grid>
   );
 }
+
+const mapStateToProps = function(state) {
+  return {
+    user: state.user
+  };
+};
+
+export default connect(mapStateToProps, dispatch => bindActionCreators(actionCreators, dispatch))(SignInSide);

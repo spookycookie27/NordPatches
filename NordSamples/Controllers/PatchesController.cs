@@ -24,7 +24,6 @@ namespace NordSamples.Controllers
         }
 
         // GET: api/Patches
-        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<List<Patch>>> GetPatches()
         {

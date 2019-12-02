@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import 'react-table/react-table.css';
 import { actionCreators } from '../../store/ActionCreators';
-//import RestUtilities from '../../services/RestUtilities';
+import RestUtilities from '../../services/RestUtilities';
 
 import './PatchList.css';
 
@@ -11,19 +10,37 @@ class PatchList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      show: false,
-      isLoading: false
+      data: null,
+      error: false
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.getData();
+  }
 
   componentDidUpdate(prevProps) {}
+
+  getData() {
+    console.log('getting data');
+    this.props.setLoading(true);
+    const url = '/api/patches';
+    RestUtilities.get(url).then(async response => {
+      if (response.ok) {
+        this.setState({ data: response.content });
+        console.log('got data');
+      } else {
+        this.setState({ error: true });
+      }
+      this.props.setLoading(false);
+    });
+  }
 
   render() {
     return (
       <div className='Patchlist'>
         <h2>Patch List</h2>
+        {this.state.error && <p>There was an error getting data</p>}
       </div>
     );
   }

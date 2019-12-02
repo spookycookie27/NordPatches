@@ -132,7 +132,7 @@ namespace NordSamples.Controllers
             bool isAdmin = roles.Contains(Constants.AdministratorRole);
             string roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
-            DateTime tokenExpiry = DateTime.Now.AddMinutes(1);
+            DateTime tokenExpiry = DateTime.Now.AddMinutes(10);
 
             var claims = new[] {
                     new Claim(ClaimTypes.Name, appUser.Email),
@@ -153,8 +153,8 @@ namespace NordSamples.Controllers
                 expires: tokenExpiry,
                 signingCredentials: credentials);
 
-            var user = mapper.Map<UserViewModel>(appUser);
-            user.Role = roleToUse;
+            var user = mapper.Map<NordSamples.Models.ViewModels.User>(appUser);
+            user.Role = roleToUse.ToLowerInvariant();
 
 
             return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), user, tokenExpiry });
@@ -195,7 +195,7 @@ namespace NordSamples.Controllers
             NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username == loginModel.Login);
             if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
             {
-                appUser = await EnsureUser(loginModel.Password, loginModel.Login, nufUser.Email);
+                appUser = await EnsureUser(loginModel.Password, nufUser);
             }
 
             return appUser;
@@ -290,16 +290,16 @@ namespace NordSamples.Controllers
             return Ok(returnUser);
         }
 
-        private async Task<AppUser> EnsureUser(string password, string userName, string emailAddress)
+        private async Task<AppUser> EnsureUser(string password, NufUser nufUser)
         {
 
-            AppUser user = await userManager.FindByNameAsync(userName);
+            AppUser user = await userManager.FindByNameAsync(nufUser.Username);
             if (user != null)
             {
                 return user;
             }
 
-            user = new AppUser() { UserName = userName, Email = emailAddress };
+            user = new AppUser() { UserName = nufUser.Username, Email = nufUser.Email, NufUserId = nufUser.Id };
             await userManager.CreateAsync(user, password);
             string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             await userManager.ConfirmEmailAsync(user, code);

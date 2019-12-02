@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { Route, Redirect, BrowserRouter, Switch } from 'react-router-dom';
+import Layout from './components/common/Layout';
 import Login from './components/views/Login';
 import Register from './components/views/Register';
 import ForgotPassword from './components/views/ForgotPassword';
@@ -24,7 +25,9 @@ export default () => (
         <Route path='/register' component={Register} />
         <Route path='/forgotPassword' component={ForgotPassword} />
         <Route path='/resetPassword' component={ResetPassword} />
-        <PrivateRoute exact path='/' component={PatchList} />
+        <Layout>
+          <PrivateRoute exact path='/' component={PatchList} />
+        </Layout>
       </Switch>
     </BrowserRouter>
   </div>
