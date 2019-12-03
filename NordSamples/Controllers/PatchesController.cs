@@ -20,6 +20,7 @@ namespace NordSamples.Controllers
         private readonly IMapper mapper;
         private readonly ILogger<PatchesController> logger;
 
+
         public PatchesController(ApplicationDbContext context, IMapper mapper, ILogger<PatchesController> logger)
         {
             this.context = context;
@@ -29,6 +30,7 @@ namespace NordSamples.Controllers
 
         // GET: api/Patches
         [HttpGet]
+        [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<List<Patch>>> GetPatches()
         {
             List<Patch> model;
@@ -46,8 +48,8 @@ namespace NordSamples.Controllers
                     .AsNoTracking()
                     .ToListAsync();
 
-                var filtered = patches.Where(x => x.Children.Any() || x.Parent != null);
-                model = mapper.Map<List<Patch>>(filtered);
+                // var filtered = patches.Where(x => x.Children.Any() || x.Parent != null);
+                model = mapper.Map<List<Patch>>(patches);
 
             }
             catch (Exception e)

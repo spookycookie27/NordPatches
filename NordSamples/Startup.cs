@@ -132,8 +132,7 @@ namespace NordSamples
             app.UseRouting();
 
             app.UseAuthentication();
-            //app.UseAuthorization(); we dont use this with JWT
-
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
