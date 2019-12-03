@@ -10,8 +10,8 @@ using NordSamples.Data;
 namespace NordSamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20191202075339_CommentUserNotNull")]
-    partial class CommentUserNotNull
+    [Migration("20191203073635_initialCreate")]
+    partial class initialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -295,6 +295,9 @@ namespace NordSamples.Migrations
                         .HasColumnType("nvarchar(8)")
                         .HasMaxLength(8);
 
+                    b.Property<bool>("IsBlob")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
@@ -397,10 +400,7 @@ namespace NordSamples.Migrations
                     b.Property<int?>("NufUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PatchId")
+                    b.Property<int?>("ParentPatchId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -413,7 +413,7 @@ namespace NordSamples.Migrations
 
                     b.HasIndex("NufUserId");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("ParentPatchId");
 
                     b.ToTable("Patch");
                 });
@@ -535,8 +535,8 @@ namespace NordSamples.Migrations
                         .HasForeignKey("NufUserId");
 
                     b.HasOne("NordSamples.Data.Models.Patch", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId");
+                        .WithMany("Children")
+                        .HasForeignKey("ParentPatchId");
                 });
 
             modelBuilder.Entity("NordSamples.Data.Models.Tag", b =>

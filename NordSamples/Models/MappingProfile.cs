@@ -9,9 +9,7 @@ namespace NordSamples.Models
         {
             CreateMap<AppUser, UserViewModel>();
             CreateMap<NordSamples.Data.Models.Patch, NordSamples.Models.ViewModels.Patch>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.NufUser))
-                .ForMember(dest => dest.ParentId, opt => opt.MapFrom(src => src.PatchId))
-                .ForMember(dest => dest.Parent, opt => opt.MapFrom(src => src.Parent));
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.NufUser));
             CreateMap<NordSamples.Data.Models.NufUser, NordSamples.Models.ViewModels.User>();
             CreateMap<NordSamples.Data.Models.AppUser, NordSamples.Models.ViewModels.User>();
             CreateMap<NordSamples.Data.Models.File, NordSamples.Models.ViewModels.File>();

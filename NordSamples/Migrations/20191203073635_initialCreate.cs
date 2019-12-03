@@ -39,7 +39,8 @@ namespace NordSamples.Migrations
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false)
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    NufUserId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -210,7 +211,8 @@ namespace NordSamples.Migrations
                     NufUserId = table.Column<int>(nullable: true),
                     AppUserId = table.Column<string>(nullable: true),
                     DateCreated = table.Column<DateTime>(nullable: false),
-                    DateUpdated = table.Column<DateTime>(nullable: true)
+                    DateUpdated = table.Column<DateTime>(nullable: true),
+                    ParentPatchId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -239,6 +241,40 @@ namespace NordSamples.Migrations
                         principalTable: "NufUser",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Patch_Patch_ParentPatchId",
+                        column: x => x.ParentPatchId,
+                        principalTable: "Patch",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Text = table.Column<string>(nullable: true),
+                    DateCreated = table.Column<DateTime>(nullable: false),
+                    AppUserId = table.Column<string>(nullable: false),
+                    PatchId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comment_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comment_Patch_PatchId",
+                        column: x => x.PatchId,
+                        principalTable: "Patch",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -250,8 +286,10 @@ namespace NordSamples.Migrations
                     Name = table.Column<string>(maxLength: 255, nullable: true),
                     Comment = table.Column<string>(maxLength: 1000, nullable: true),
                     Extension = table.Column<string>(maxLength: 8, nullable: true),
+                    IsBlob = table.Column<bool>(nullable: false),
+                    Version = table.Column<int>(nullable: false),
                     Size = table.Column<int>(nullable: true),
-                    DateCreated = table.Column<DateTime>(nullable: false),
+                    DateCreated = table.Column<DateTime>(nullable: false, defaultValueSql: "getDate()"),
                     NufUserId = table.Column<int>(nullable: true),
                     AppUserId = table.Column<string>(nullable: true),
                     PatchId = table.Column<int>(nullable: false)
@@ -327,6 +365,16 @@ namespace NordSamples.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Comment_AppUserId",
+                table: "Comment",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comment_PatchId",
+                table: "Comment",
+                column: "PatchId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_File_PatchId",
                 table: "File",
                 column: "PatchId");
@@ -352,6 +400,11 @@ namespace NordSamples.Migrations
                 column: "NufUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Patch_ParentPatchId",
+                table: "Patch",
+                column: "ParentPatchId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tags_PatchId",
                 table: "Tags",
                 column: "PatchId");
@@ -373,6 +426,9 @@ namespace NordSamples.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Comment");
 
             migrationBuilder.DropTable(
                 name: "File");

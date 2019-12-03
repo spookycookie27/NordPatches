@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NordSamples.Data.Models
 {
@@ -16,15 +17,18 @@ namespace NordSamples.Data.Models
         public string AppUserId { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
-        public int PatchId { get; set; }
+
+        [ForeignKey("Parent")]
+        public int? ParentPatchId { get; set; }
 
         public NufUser NufUser { get; set; }
         public AppUser AppUser { get; set; }
         public Instrument Instrument { get; set; }
         public Category Category { get; set; }
         public Patch Parent { get; set; }
-        public ICollection<File> Files { get; set; } = new List<File>();
-        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
-        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<File> Files { get; set; }
+        public ICollection<Tag> Tags { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public virtual ICollection<Patch> Children { get; set; }
     }
 }

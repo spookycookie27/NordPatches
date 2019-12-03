@@ -398,10 +398,7 @@ namespace NordSamples.Migrations
                     b.Property<int?>("NufUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PatchId")
+                    b.Property<int?>("ParentPatchId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -414,7 +411,7 @@ namespace NordSamples.Migrations
 
                     b.HasIndex("NufUserId");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("ParentPatchId");
 
                     b.ToTable("Patch");
                 });
@@ -536,8 +533,8 @@ namespace NordSamples.Migrations
                         .HasForeignKey("NufUserId");
 
                     b.HasOne("NordSamples.Data.Models.Patch", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId");
+                        .WithMany("Children")
+                        .HasForeignKey("ParentPatchId");
                 });
 
             modelBuilder.Entity("NordSamples.Data.Models.Tag", b =>
