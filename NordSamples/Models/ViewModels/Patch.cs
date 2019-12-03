@@ -13,16 +13,14 @@ namespace NordSamples.Models.ViewModels
         public int? CategoryId { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
-        //public int ParentId { get; set; }
-
-        public User User { get; set; }
-        public ICollection<File> Files { get; set; }
-
         public Instrument Instrument { get; set; }
         public Category Category { get; set; }
-        //public Patch Parent { get; set; }
+        public User User { get; set; }
 
+        public Patch Parent { get; set; }
+        public ICollection<File> Files { get; set; }
         public ICollection<Tag> Tags { get; set; }
         public ICollection<Comment> Comments { get; set; }
+        public ICollection<Patch> Children { get; set; }
     }
 }

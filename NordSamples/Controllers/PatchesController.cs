@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NordSamples.Data;
 using NordSamples.Models.ViewModels;
 
@@ -16,28 +18,43 @@ namespace NordSamples.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly ILogger<PatchesController> logger;
 
-        public PatchesController(ApplicationDbContext context, IMapper mapper)
+        public PatchesController(ApplicationDbContext context, IMapper mapper, ILogger<PatchesController> logger)
         {
             this.context = context;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         // GET: api/Patches
         [HttpGet]
         public async Task<ActionResult<List<Patch>>> GetPatches()
         {
-            var patches = await context.Patches
-                .Include(x => x.Files)
-                .Include(x => x.NufUser)
-                .Include(x => x.Instrument)
-                .Include(x => x.Category)
-                .Include(x => x.Tags)
-                .Include(x => x.Comments)
-                .AsNoTracking()
-                .ToListAsync();
+            List<Patch> model;
+            try
+            {
+                var patches = await context.Patches
+                    .Include(x => x.Files)
+                    .Include(x => x.NufUser)
+                    .Include(x => x.Instrument)
+                    .Include(x => x.Category)
+                    .Include(x => x.Tags)
+                    .Include(x => x.Comments)
+                    .Include(x => x.Children)
+                    .Include(x => x.Parent)
+                    .AsNoTracking()
+                    .ToListAsync();
 
-            var model = mapper.Map<List<Patch>>(patches);
+                var filtered = patches.Where(x => x.Children.Any() || x.Parent != null);
+                model = mapper.Map<List<Patch>>(filtered);
+
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An error occurred creating the DB.");
+                model = null;
+            }
             return model;
         }
 

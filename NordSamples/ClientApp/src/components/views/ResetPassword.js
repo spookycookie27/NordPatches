@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { Link } from 'react-router-dom';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import RestUtilities from '../../services/RestUtilities';
 import queryString from 'query-string';
 import isEmail from 'validator/lib/isEmail';
-import { Copyright, useStyles, regexEx } from '../common/Common';
+import LoginLayout from '../common/LoginLayout';
+import { useStyles, regexEx } from '../common/Common';
 
 export default function ResetPassword(props) {
   const classes = useStyles();
@@ -44,86 +41,72 @@ export default function ResetPassword(props) {
   }
 
   return (
-    <Grid container component='main' className={classes.root}>
-      <Grid item xs={false} sm={4} md={7} className={classes.image} />
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component='h1' variant='h5'>
-            Reset Password
-          </Typography>
-          <form className={classes.form} noValidate>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  variant='outlined'
-                  required
-                  fullWidth
-                  value={email}
-                  id='email'
-                  label='Email Address'
-                  name='email'
-                  autoComplete='email'
-                  autoFocus
-                  onChange={event => {
-                    setEmail(event.target.value);
-                    setError(false);
-                  }}
-                  onBlur={() => {
-                    setIsEmailInvalid(!isEmail(email));
-                  }}
-                  error={isEmailInvalid}
-                  helperText={isEmailInvalid && 'Not an email address.'}
-                  disabled={disabled}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant='outlined'
-                  required
-                  fullWidth
-                  value={password}
-                  name='password'
-                  label='Password'
-                  type='password'
-                  id='password'
-                  autoComplete='current-password'
-                  onChange={event => {
-                    setPassword(event.target.value);
-                    setError(false);
-                  }}
-                  error={isPasswordInvalid}
-                  helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
-                  disabled={disabled}
-                />
-              </Grid>
+    <LoginLayout>
+      <form className={classes.form} noValidate>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              variant='outlined'
+              required
+              fullWidth
+              value={email}
+              id='email'
+              label='Email Address'
+              name='email'
+              autoComplete='email'
+              autoFocus
+              onChange={event => {
+                setEmail(event.target.value);
+                setError(false);
+              }}
+              onBlur={() => {
+                setIsEmailInvalid(!isEmail(email));
+              }}
+              error={isEmailInvalid}
+              helperText={isEmailInvalid && 'Not an email address.'}
+              disabled={disabled}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              variant='outlined'
+              required
+              fullWidth
+              value={password}
+              name='password'
+              label='Password'
+              type='password'
+              id='password'
+              autoComplete='current-password'
+              onChange={event => {
+                setPassword(event.target.value);
+                setError(false);
+              }}
+              error={isPasswordInvalid}
+              helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
+              disabled={disabled}
+            />
+          </Grid>
+        </Grid>
+        <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()} disabled={disabled}>
+          Reset Password
+        </Button>
+        {error && (
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography component='p'>Something went wrong.</Typography>
             </Grid>
-            <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()} disabled={disabled}>
-              Reset Password
-            </Button>
-            {error && (
-              <Grid container>
-                <Grid item xs={12}>
-                  <Typography component='p'>Something went wrong.</Typography>
-                </Grid>
-              </Grid>
-            )}
-            <Grid container justify='flex-end'>
-              <Grid item xs>
-                <Link to={'/forgotPassword'}>Forgot password?</Link>
-              </Grid>
-              <Grid item>
-                <Link to={'/login'}>Already have an account? Sign in</Link>
-              </Grid>
-            </Grid>
-            <Box mt={5}>
-              <Copyright />
-            </Box>
-          </form>
-        </div>
-      </Grid>
-    </Grid>
+          </Grid>
+        )}
+        <Grid container justify='flex-end'>
+          <Grid item xs>
+            <Link to={'/forgotPassword'}>Forgot password?</Link>
+          </Grid>
+          <Grid item>
+            <Link to={'/login'}>Already have an account? Sign in</Link>
+          </Grid>
+        </Grid>
+      </form>
+    </LoginLayout>
   );
 }
