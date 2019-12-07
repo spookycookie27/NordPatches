@@ -63,6 +63,28 @@ namespace NordSamples.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "File",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    Comment = table.Column<string>(maxLength: 1000, nullable: true),
+                    Extension = table.Column<string>(maxLength: 8, nullable: true),
+                    IsBlob = table.Column<bool>(nullable: false),
+                    Version = table.Column<int>(nullable: false),
+                    Size = table.Column<int>(nullable: true),
+                    DateCreated = table.Column<DateTime>(nullable: false, defaultValueSql: "getDate()"),
+                    NufUserId = table.Column<int>(nullable: true),
+                    AppUserId = table.Column<string>(nullable: true),
+                    AttachId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_File", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Instrument",
                 columns: table => new
                 {
@@ -278,34 +300,6 @@ namespace NordSamples.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "File",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(maxLength: 255, nullable: true),
-                    Comment = table.Column<string>(maxLength: 1000, nullable: true),
-                    Extension = table.Column<string>(maxLength: 8, nullable: true),
-                    IsBlob = table.Column<bool>(nullable: false),
-                    Version = table.Column<int>(nullable: false),
-                    Size = table.Column<int>(nullable: true),
-                    DateCreated = table.Column<DateTime>(nullable: false, defaultValueSql: "getDate()"),
-                    NufUserId = table.Column<int>(nullable: true),
-                    AppUserId = table.Column<string>(nullable: true),
-                    PatchId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_File", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_File_Patch_PatchId",
-                        column: x => x.PatchId,
-                        principalTable: "Patch",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Tags",
                 columns: table => new
                 {
@@ -372,11 +366,6 @@ namespace NordSamples.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Comment_PatchId",
                 table: "Comment",
-                column: "PatchId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_File_PatchId",
-                table: "File",
                 column: "PatchId");
 
             migrationBuilder.CreateIndex(

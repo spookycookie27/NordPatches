@@ -10,7 +10,7 @@ using NordSamples.Data;
 namespace NordSamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20191203073635_initialCreate")]
+    [Migration("20191207105142_initialCreate")]
     partial class initialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -282,6 +282,9 @@ namespace NordSamples.Migrations
                     b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("AttachId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(1000)")
                         .HasMaxLength(1000);
@@ -305,9 +308,6 @@ namespace NordSamples.Migrations
                     b.Property<int?>("NufUserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PatchId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("Size")
                         .HasColumnType("int");
 
@@ -315,8 +315,6 @@ namespace NordSamples.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PatchId");
 
                     b.ToTable("File");
                 });
@@ -500,15 +498,6 @@ namespace NordSamples.Migrations
 
                     b.HasOne("NordSamples.Data.Models.Patch", "Patch")
                         .WithMany("Comments")
-                        .HasForeignKey("PatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NordSamples.Data.Models.File", b =>
-                {
-                    b.HasOne("NordSamples.Data.Models.Patch", "Patch")
-                        .WithMany("Files")
                         .HasForeignKey("PatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

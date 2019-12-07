@@ -30,7 +30,7 @@ export default function ForgotPassword(props) {
   }
 
   return (
-    <LoginLayout>
+    <LoginLayout title='Forgot Password'>
       <form className={classes.form} noValidate>
         <TextField
           variant='outlined'

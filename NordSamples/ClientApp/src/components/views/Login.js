@@ -19,7 +19,7 @@ function SignInSide(props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [useNufCred, setUseNufCred] = useState(false);
+  const [useNufCred, setUseNufCred] = useState(true);
 
   function handleLoginClick() {
     setDisabled(true);
@@ -38,7 +38,7 @@ function SignInSide(props) {
   }
 
   return (
-    <LoginLayout>
+    <LoginLayout title='Login'>
       <form className={classes.form} noValidate>
         <FormControlLabel control={<Switch checked={useNufCred} onChange={() => setUseNufCred(!useNufCred)} />} label='Use my Nord User Forum credentials' />
         <TextField

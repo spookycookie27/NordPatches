@@ -53,7 +53,7 @@ class PatchList extends Component {
               title: 'Link',
               field: 'link',
               render: rowData => (
-                <a href={rowData.link} target='_blank'>
+                <a href={rowData.link} target='_blank' rel='noopener noreferrer'>
                   Click
                 </a>
               )

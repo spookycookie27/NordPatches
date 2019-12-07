@@ -14,6 +14,5 @@ namespace NordSamples.Models.ViewModels
         public DateTime DateCreated { get; set; }
         public int? NufUserId { get; set; }
         public string AppUserId { get; set; }
-        public int PatchId { get; set; }
     }
 }

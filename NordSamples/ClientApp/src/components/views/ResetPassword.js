@@ -41,7 +41,7 @@ export default function ResetPassword(props) {
   }
 
   return (
-    <LoginLayout>
+    <LoginLayout title='Reset Password'>
       <form className={classes.form} noValidate>
         <Grid container spacing={2}>
           <Grid item xs={12}>

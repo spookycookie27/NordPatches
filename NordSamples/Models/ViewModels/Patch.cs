@@ -18,7 +18,7 @@ namespace NordSamples.Models.ViewModels
         public User User { get; set; }
 
         public Patch Parent { get; set; }
-        public ICollection<File> Files { get; set; }
+        public ICollection<PatchFile> PatchFiles { get; set; }
         public ICollection<Tag> Tags { get; set; }
         public ICollection<Comment> Comments { get; set; }
         public ICollection<Patch> Children { get; set; }

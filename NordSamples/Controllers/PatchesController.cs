@@ -37,7 +37,6 @@ namespace NordSamples.Controllers
             try
             {
                 var patches = await context.Patches
-                    .Include(x => x.Files)
                     .Include(x => x.NufUser)
                     .Include(x => x.Instrument)
                     .Include(x => x.Category)
@@ -45,6 +44,8 @@ namespace NordSamples.Controllers
                     .Include(x => x.Comments)
                     .Include(x => x.Children)
                     .Include(x => x.Parent)
+                    .Include(x => x.PatchFiles)
+                    .ThenInclude(x => x.File)
                     .AsNoTracking()
                     .ToListAsync();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NordSamples.Data.Models
@@ -16,8 +17,8 @@ namespace NordSamples.Data.Models
         public DateTime DateCreated { get; set; }
         public int? NufUserId { get; set; }
         public string AppUserId { get; set; }
+        public int AttachId { get; set; }
 
-        public int PatchId { get; set; }
-        public Patch Patch { get; set; }
+        public List<PatchFile> PatchFiles { get; set; }
     }
 }
