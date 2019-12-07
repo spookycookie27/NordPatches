@@ -5,7 +5,7 @@ import Login from './components/views/Login';
 import Register from './components/views/Register';
 import ForgotPassword from './components/views/ForgotPassword';
 import ResetPassword from './components/views/ResetPassword';
-import PatchList from './components/views/PatchList';
+import PatchBrowser from './components/views/PatchBrowser';
 import { isSignedIn } from './services/Auth';
 import 'typeface-roboto';
 
@@ -26,7 +26,7 @@ export default () => (
         <Route path='/forgotPassword' component={ForgotPassword} />
         <Route path='/resetPassword' component={ResetPassword} />
         <Layout>
-          <PrivateRoute exact path='/' component={PatchList} />
+          <PrivateRoute exact path='/' component={PatchBrowser} />
         </Layout>
       </Switch>
     </BrowserRouter>

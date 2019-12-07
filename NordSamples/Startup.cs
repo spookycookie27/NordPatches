@@ -103,7 +103,7 @@ namespace NordSamples
                 {
                     configuration.RootPath = "ClientApp/build";
                 });
-
+            services.AddLazyCache();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddTransient<IEmailSender, EmailSender>();
             services.Configure<AuthMessageSenderOptions>(Configuration);

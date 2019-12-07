@@ -39,7 +39,7 @@ function Layout(props) {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      <Container component='main' className={classes.main} maxWidth='md'>
+      <Container component='main' className={classes.main} maxWidth='xl'>
         {props.children}
       </Container>
 

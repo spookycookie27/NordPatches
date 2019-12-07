@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using LazyCache;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,13 +21,14 @@ namespace NordSamples.Controllers
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
         private readonly ILogger<PatchesController> logger;
+        private readonly IAppCache cache;
 
-
-        public PatchesController(ApplicationDbContext context, IMapper mapper, ILogger<PatchesController> logger)
+        public PatchesController(ApplicationDbContext context, IMapper mapper, ILogger<PatchesController> logger, IAppCache cache)
         {
             this.context = context;
             this.mapper = mapper;
             this.logger = logger;
+            this.cache = cache;
         }
 
         // GET: api/Patches
@@ -36,21 +39,23 @@ namespace NordSamples.Controllers
             List<Patch> model;
             try
             {
-                var patches = await context.Patches
-                    .Include(x => x.NufUser)
-                    .Include(x => x.Instrument)
-                    .Include(x => x.Category)
-                    .Include(x => x.Tags)
-                    .Include(x => x.Comments)
-                    .Include(x => x.Children)
-                    .Include(x => x.Parent)
-                    .Include(x => x.PatchFiles)
-                    .ThenInclude(x => x.File)
-                    .AsNoTracking()
-                    .ToListAsync();
+                async Task<List<Data.Models.Patch>> PatchGetter() =>
+                    await context.Patches.Include(x => x.NufUser)
+                        .Include(x => x.Instrument)
+                        .Include(x => x.Category)
+                        .Include(x => x.Tags)
+                        .Include(x => x.Comments)
+                        .Include(x => x.Children)
+                        .Include(x => x.Parent)
+                        .Include(x => x.PatchFiles)
+                        .ThenInclude(x => x.File)
+                        .AsNoTracking()
+                        .ToListAsync();
+
+                List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
 
                 // var filtered = patches.Where(x => x.Children.Any() || x.Parent != null);
-                model = mapper.Map<List<Patch>>(patches);
+                model = mapper.Map<List<Patch>>(cachedPatches);
 
             }
             catch (Exception e)
@@ -136,9 +141,9 @@ namespace NordSamples.Controllers
         //     return patch;
         // }
 
-        private bool PatchExists(int id)
-        {
-            return context.Patches.Any(e => e.Id == id);
-        }
+        //private bool PatchExists(int id)
+        //{
+        //    return context.Patches.Any(e => e.Id == id);
+        //}
     }
 }

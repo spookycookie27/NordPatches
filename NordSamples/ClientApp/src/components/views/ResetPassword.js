@@ -25,19 +25,15 @@ export default function ResetPassword(props) {
     setCode(parsed.code);
   }
 
-  var isPasswordInvalid = password && !regexEx.test(password);
+  var isPasswordInvalid = !!(password && !regexEx.test(password));
 
-  function handleResetPasswordClick() {
+  async function handleResetPasswordClick() {
     setDisabled(true);
     const url = '/api/auth/ResetPassword';
     const data = { email, password, code };
-    RestUtilities.post(url, data).then(async response => {
-      if (response.ok) {
-        props.history.push('/login');
-      } else {
-        setError(true);
-      }
-    });
+    await RestUtilities.post(url, data)
+      .then(() => props.history.push('/login'))
+      .catch(() => setError(true));
   }
 
   return (

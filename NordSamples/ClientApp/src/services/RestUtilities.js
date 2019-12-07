@@ -22,10 +22,7 @@ export default class RestUtilities {
   }
 
   static request(method, url, data, isFormData = false) {
-    let isBadRequest = false;
     let body = data;
-    let statusCode = 200;
-    let statusText = '';
     const token = getToken();
     const headers = new Headers();
     headers.set('Accept', 'application/json');
@@ -38,26 +35,6 @@ export default class RestUtilities {
       body = data;
     }
 
-    return fetch(url, { method, headers, body })
-      .then(response => {
-        isBadRequest = !response.ok;
-        statusCode = response.status;
-        statusText = response.statusText;
-        const responseContentType = response.headers.get('content-type');
-        if (responseContentType && responseContentType.indexOf('application/json') !== -1) {
-          return response.json();
-        }
-        return response.text();
-      })
-      .then(responseContent => {
-        const response = {
-          ok: !isBadRequest,
-          errorContent: isBadRequest ? responseContent : null,
-          content: isBadRequest ? null : responseContent,
-          status: statusCode,
-          statusText: statusText
-        };
-        return response;
-      });
+    return fetch(url, { method, headers, body });
   }
 }

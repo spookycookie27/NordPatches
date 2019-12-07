@@ -17,19 +17,15 @@ export default function SignUp(props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  var isPasswordInvalid = password && !regexEx.test(password);
+  var isPasswordInvalid = !!(password && !regexEx.test(password));
 
-  function handleRegisterClick() {
+  async function handleRegisterClick() {
     const url = '/api/auth/register';
     const data = { email, password, login };
     setDisabled(true);
-    RestUtilities.post(url, data).then(async response => {
-      if (response.ok) {
-        setError(false);
-      } else {
-        setError(true);
-      }
-    });
+    await RestUtilities.post(url, data)
+      .then(() => setError(false))
+      .catch(() => setError(true));
   }
 
   return (

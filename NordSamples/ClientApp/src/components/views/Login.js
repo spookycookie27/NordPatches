@@ -19,22 +19,24 @@ function SignInSide(props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [useNufCred, setUseNufCred] = useState(true);
+  const [useNufCred, setUseNufCred] = useState(false);
 
-  function handleLoginClick() {
+  async function handleLoginClick() {
     setDisabled(true);
     const url = '/api/auth/login';
     const data = { password, login, useNufCred };
-    RestUtilities.post(url, data).then(async response => {
-      if (response.ok) {
-        setToken(response.content.token, response.content.tokenExpiry);
-        props.setUser(response.content.user);
+    var response = await RestUtilities.post(url, data);
+    response
+      .json()
+      .then(res => {
+        setToken(res.token, res.tokenExpiry);
+        props.setUser(res.user);
         props.history.push('/');
-      } else {
+      })
+      .catch(res => {
         setError(true);
         setDisabled(false);
-      }
-    });
+      });
   }
 
   return (

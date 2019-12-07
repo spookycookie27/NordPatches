@@ -16,17 +16,13 @@ export default function ForgotPassword(props) {
   const [error, setError] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
-  function handleForgotPasswordClick() {
+  async function handleForgotPasswordClick() {
     const url = '/api/auth/ForgotPassword';
     const data = { email: email };
     setDisabled(true);
-    RestUtilities.post(url, data).then(async response => {
-      if (response.ok) {
-        setError(false);
-      } else {
-        setError(true);
-      }
-    });
+    await RestUtilities.post(url, data)
+      .then(() => setError(false))
+      .catch(() => setError(true));
   }
 
   return (
