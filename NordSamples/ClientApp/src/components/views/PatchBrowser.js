@@ -74,14 +74,12 @@ const PatchBrowser = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
   async function getData() {
-    console.log('getting data');
     const url = '/api/patches';
     const res = await RestUtilities.get(url);
     res
       .json()
       .then(res => {
         setData(res);
-        console.log(res[0]);
       })
       .catch(err => {
         setError(true);
