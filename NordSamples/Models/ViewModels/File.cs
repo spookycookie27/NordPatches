@@ -13,6 +13,7 @@ namespace NordSamples.Models.ViewModels
         public int? Size { get; set; }
         public DateTime DateCreated { get; set; }
         public int? NufUserId { get; set; }
+        public int AttachId { get; set; }
         public string AppUserId { get; set; }
     }
 }

@@ -3,8 +3,10 @@ import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import { nufFileLink } from '../common/Common';
 
 function getPatchData(patch) {
+  var mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   return (
     <>
       <Box>Patch ID: {patch.id}</Box>
@@ -14,6 +16,15 @@ function getPatchData(patch) {
       <Box>Instrument Type: {patch.instrument.name || 'none'}</Box>
       <Box>User: {patch.user.username || 'none'}</Box>
       <Box>User ID: {patch.user.nufUserId || 'none'}</Box>
+      {mp3s && (
+        <Box>
+          {mp3s.map(mp3 => (
+            <audio key={mp3.id} controls>
+              <source src={`${nufFileLink}${mp3.attachId}`} type='audio/mpeg' />
+            </audio>
+          ))}
+        </Box>
+      )}
     </>
   );
 }
@@ -26,7 +37,9 @@ function getFileData(file) {
       <Box>File size: {file.size}</Box>
       <Box>Extension: {file.extension}</Box>
       <Box>Version: {file.version}</Box>
-      <Box>Download (TBC) : {file.name}</Box>
+      <Box>
+        <a href={`${nufFileLink}${file.attachId}`}>Download: {file.name}</a>
+      </Box>
     </Box>
   );
 }
