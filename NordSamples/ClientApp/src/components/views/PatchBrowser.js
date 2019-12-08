@@ -4,18 +4,34 @@ import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { nufFileLink } from '../common/Common';
+import moment from 'moment';
 
 function getPatchData(patch) {
   var mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
+  var displayDate = patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown';
   return (
     <>
-      <Box>Patch ID: {patch.id}</Box>
-      <Box>Date Created: {patch.dateCreated || 'none'}</Box>
-      <Box>Category: {patch.category || 'none'}</Box>
-      <Box>Description: {patch.description || 'none'}</Box>
-      <Box>Instrument Type: {patch.instrument.name || 'none'}</Box>
-      <Box>User: {patch.user.username || 'none'}</Box>
-      <Box>User ID: {patch.user.nufUserId || 'none'}</Box>
+      <Box>
+        <strong>Patch ID:</strong> {patch.id}
+      </Box>
+      <Box>
+        <strong>Date Created:</strong> {displayDate}
+      </Box>
+      <Box>
+        <strong>Category:</strong> {patch.category || 'none'}
+      </Box>
+      <Box>
+        <strong>Description:</strong> {patch.description || 'none'}
+      </Box>
+      <Box>
+        <strong>Instrument Type:</strong> {patch.instrument.name || 'none'}
+      </Box>
+      <Box>
+        <strong>User:</strong> {patch.user.username || 'none'}
+      </Box>
+      <Box>
+        <strong>User ID:</strong> {patch.user.nufUserId || 'none'}
+      </Box>
       {mp3s && (
         <Box>
           {mp3s.map(mp3 => (
@@ -32,11 +48,21 @@ function getPatchData(patch) {
 function getFileData(file) {
   return (
     <Box key={file.id}>
-      <Box>File ID: {file.id}</Box>
-      <Box>Filename: {file.name}</Box>
-      <Box>File size: {file.size}</Box>
-      <Box>Extension: {file.extension}</Box>
-      <Box>Version: {file.version}</Box>
+      <Box>
+        <strong>File ID:</strong> {file.id}
+      </Box>
+      <Box>
+        <strong>Name:</strong> {file.name}
+      </Box>
+      <Box>
+        <strong>Size (bytes):</strong> {file.size}
+      </Box>
+      <Box>
+        <strong>Extension:</strong> {file.extension}
+      </Box>
+      <Box>
+        <strong>Version:</strong> {file.version}
+      </Box>
       <Box>
         <a href={`${nufFileLink}${file.attachId}`}>Download: {file.name}</a>
       </Box>
