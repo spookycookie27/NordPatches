@@ -3,10 +3,11 @@ import Typography from '@material-ui/core/Typography';
 import { siteName } from '../../Constants';
 import { makeStyles } from '@material-ui/core/styles';
 
-export const regexEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,}$/;
+//export const regexEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,}$/;
+export const regexEx = /^.{6,}$/;
 export const nufFileLink = 'https://www.norduserforum.com/download/file.php?id=';
 
-export const useStyles = makeStyles(theme => ({
+export const loginStyles = makeStyles(theme => ({
   root: {
     height: '100vh'
   },

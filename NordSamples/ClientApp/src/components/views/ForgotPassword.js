@@ -3,14 +3,15 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import RestUtilities from '../../services/RestUtilities';
 import isEmail from 'validator/lib/isEmail';
 import LoginLayout from '../common/LoginLayout';
-import { useStyles } from '../common/Common';
+import { loginStyles } from '../common/Common';
 
 export default function ForgotPassword(props) {
-  const classes = useStyles();
+  const classes = loginStyles();
   const [email, setEmail] = useState('');
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [error, setError] = useState(false);
@@ -47,7 +48,7 @@ export default function ForgotPassword(props) {
           helperText={isEmailInvalid && 'Not an email address.'}
           disabled={disabled}
         />
-        <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleForgotPasswordClick()} disabled={disabled}>
+        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleForgotPasswordClick()} disabled={disabled}>
           Reset Password
         </Button>
         {disabled && !error && (
@@ -64,13 +65,13 @@ export default function ForgotPassword(props) {
             </Grid>
           </Grid>
         )}
-        {disabled || (
+        <Box mt={5}>
           <Grid container>
             <Grid item xs>
               <Link to={'/login'}>Already have an account? Sign in</Link>
             </Grid>
           </Grid>
-        )}
+        </Box>
       </form>
     </LoginLayout>
   );

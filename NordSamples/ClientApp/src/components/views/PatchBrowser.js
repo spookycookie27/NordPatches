@@ -18,10 +18,10 @@ function getPatchData(patch) {
         <strong>Date Created:</strong> {displayDate}
       </Box>
       <Box>
-        <strong>Category:</strong> {patch.category || 'none'}
+        <strong>Category:</strong> {patch.category || 'TBC'}
       </Box>
       <Box>
-        <strong>Description:</strong> {patch.description || 'none'}
+        <strong>Description:</strong> {patch.description || 'TBC'}
       </Box>
       <Box>
         <strong>Instrument Type:</strong> {patch.instrument.name || 'none'}
@@ -61,7 +61,7 @@ function getFileData(file) {
         <strong>Extension:</strong> {file.extension}
       </Box>
       <Box>
-        <strong>Version:</strong> {file.version}
+        <strong>Version:</strong> {file.version + 1}
       </Box>
       <Box>
         <a href={`${nufFileLink}${file.attachId}`}>Download: {file.name}</a>
@@ -114,7 +114,7 @@ const PatchBrowser = () => {
           }
         ]}
         data={data}
-        title='Programs and Samples list'
+        title='Patches List'
         detailPanel={patch => {
           return (
             <Box m={2}>

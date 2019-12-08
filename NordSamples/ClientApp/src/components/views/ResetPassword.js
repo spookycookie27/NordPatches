@@ -3,15 +3,16 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import RestUtilities from '../../services/RestUtilities';
 import queryString from 'query-string';
 import isEmail from 'validator/lib/isEmail';
 import LoginLayout from '../common/LoginLayout';
-import { useStyles, regexEx } from '../common/Common';
+import { loginStyles, regexEx } from '../common/Common';
 
 export default function ResetPassword(props) {
-  const classes = useStyles();
+  const classes = loginStyles();
   const [email, setEmail] = useState('');
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
@@ -32,7 +33,7 @@ export default function ResetPassword(props) {
     const url = '/api/auth/ResetPassword';
     const data = { email, password, code };
     await RestUtilities.post(url, data)
-      .then(() => props.history.push('/login'))
+      .then(() => props.history.push('/login?nufDisabled=true'))
       .catch(() => setError(true));
   }
 
@@ -65,6 +66,8 @@ export default function ResetPassword(props) {
           </Grid>
           <Grid item xs={12}>
             <TextField
+              minLength={5}
+              maxLength={30}
               variant='outlined'
               required
               fullWidth
@@ -84,24 +87,26 @@ export default function ResetPassword(props) {
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleResetPasswordClick()} disabled={disabled}>
+        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleResetPasswordClick()} disabled={disabled}>
           Reset Password
         </Button>
         {error && (
           <Grid container>
             <Grid item xs={12}>
-              <Typography component='p'>Something went wrong.</Typography>
+              <Typography component='p'>Oops. Something went wrong</Typography>
             </Grid>
           </Grid>
         )}
-        <Grid container justify='flex-end'>
-          <Grid item xs>
-            <Link to={'/forgotPassword'}>Forgot password?</Link>
+        <Box mt={5}>
+          <Grid container justify='flex-end'>
+            <Grid item xs>
+              <Link to={'/forgotPassword'}>Forgot password?</Link>
+            </Grid>
+            <Grid item>
+              <Link to={'/login'}>Already have an account? Sign in</Link>
+            </Grid>
           </Grid>
-          <Grid item>
-            <Link to={'/login'}>Already have an account? Sign in</Link>
-          </Grid>
-        </Grid>
+        </Box>
       </form>
     </LoginLayout>
   );

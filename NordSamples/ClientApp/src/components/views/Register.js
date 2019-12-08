@@ -3,29 +3,44 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import RestUtilities from '../../services/RestUtilities';
 import isEmail from 'validator/lib/isEmail';
 import LoginLayout from '../common/LoginLayout';
-import { useStyles, regexEx } from '../common/Common';
+import { loginStyles } from '../common/Common';
 
 export default function SignUp(props) {
-  const classes = useStyles();
+  const classes = loginStyles();
   const [email, setEmail] = useState('');
   const [login, setLogin] = useState('');
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [feedback, setFeedback] = useState('');
   const [disabled, setDisabled] = useState(false);
-  var isPasswordInvalid = !!(password && !regexEx.test(password));
+  var isPasswordInvalid = !!(password && (password.length < 5 || password.length > 30));
+  var isLoginInvalid = !!((login && login.length < 5) || login.length > 16);
 
   async function handleRegisterClick() {
     const url = '/api/auth/register';
     const data = { email, password, login };
     setDisabled(true);
-    await RestUtilities.post(url, data)
-      .then(() => setError(false))
-      .catch(() => setError(true));
+    setFeedback('');
+    var response = await RestUtilities.post(url, data);
+    if (response.ok) {
+      setFeedback('Please check your email to confirm.');
+    } else {
+      response
+        .json()
+        .then(response => {
+          setFeedback(response);
+          setDisabled(false);
+        })
+        .catch(() => {
+          setFeedback('Oops. Something went wrong');
+          setDisabled(false);
+        });
+    }
   }
 
   return (
@@ -45,7 +60,6 @@ export default function SignUp(props) {
               autoFocus
               onChange={event => {
                 setEmail(event.target.value);
-                setError(false);
               }}
               onBlur={() => {
                 setIsEmailInvalid(!isEmail(email));
@@ -57,6 +71,8 @@ export default function SignUp(props) {
           </Grid>
           <Grid item xs={12}>
             <TextField
+              minLength={5}
+              maxLength={16}
               variant='outlined'
               value={login}
               margin='normal'
@@ -68,13 +84,16 @@ export default function SignUp(props) {
               autoComplete='username'
               onChange={event => {
                 setLogin(event.target.value);
-                setError(false);
               }}
               disabled={disabled}
+              error={isLoginInvalid}
+              helperText={isLoginInvalid && 'Must be minimum 5 characters and maximum of 16'}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
+              minLength={5}
+              maxLength={30}
               variant='outlined'
               required
               fullWidth
@@ -86,32 +105,25 @@ export default function SignUp(props) {
               autoComplete='current-password'
               onChange={event => {
                 setPassword(event.target.value);
-                setError(false);
               }}
               disabled={disabled}
               error={isPasswordInvalid}
-              helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
+              helperText={isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={() => handleRegisterClick()} disabled={disabled}>
+        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleRegisterClick()} disabled={disabled}>
           Sign Up
         </Button>
-        {disabled && !error && (
+        {feedback && (
           <Grid container>
             <Grid item xs={12}>
-              <Typography component='p'>Please check your email to confirm your email address.</Typography>
+              <Typography component='p'>{feedback}</Typography>
             </Grid>
           </Grid>
         )}
-        {disabled && error && (
-          <Grid container>
-            <Grid item xs={12}>
-              <Typography component='p'>Something went wrong.</Typography>
-            </Grid>
-          </Grid>
-        )}
-        {disabled || (
+
+        <Box mt={5}>
           <Grid container justify='flex-end'>
             <Grid item xs>
               <Link to={'/forgotPassword'}>Forgot password?</Link>
@@ -120,7 +132,7 @@ export default function SignUp(props) {
               <Link to={'/login'}>Already have an account? Sign in</Link>
             </Grid>
           </Grid>
-        )}
+        </Box>
       </form>
     </LoginLayout>
   );

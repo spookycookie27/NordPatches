@@ -20,6 +20,7 @@ using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 using NordSamples.Data;
 using Microsoft.EntityFrameworkCore;
 using NordSamples.Data.Models;
+using Microsoft.Extensions.Logging;
 
 namespace NordSamples.Controllers
 {
@@ -34,10 +35,10 @@ namespace NordSamples.Controllers
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
         private readonly ApplicationDbContext context;
-
+        private readonly ILogger<PatchesController> logger;
         //public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context)
+        public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context, ILogger<PatchesController> logger)
         {
             this.userManager = userManager;
             this.jwtOptions = jwtOptions.Value;
@@ -46,6 +47,7 @@ namespace NordSamples.Controllers
             this.emailSender = emailSender;
             this.context = context;
             this.roleManager = roleManager;
+            this.logger = logger;
         }
 
         // POST: api/Auth/Register
@@ -56,14 +58,37 @@ namespace NordSamples.Controllers
             //ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest("Something is wrong with the form. Check for errors");
             }
 
-            var user = new AppUser { UserName = model.Login, Email = model.Email };
+            int? nufUserId = null;
+
+            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == model.Login.ToUpperInvariant());
+            if (nufUser != null)
+            {
+                if (nufUser.Email.ToUpper() != model.Email.ToUpperInvariant())
+                    return BadRequest("This Username already exists with a different email address. Please choose another.");
+                nufUserId = nufUser.Id;
+            }
+
+            AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Login.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
+            if (existingUser != null)
+            {
+                if (existingUser.NormalizedEmail == model.Email.ToUpperInvariant())
+                {
+                    return BadRequest("You already have an account using this email address.");
+                }
+                if (existingUser.NormalizedEmail != model.Email.ToUpperInvariant() || existingUser.NormalizedUserName != model.Login.ToUpperInvariant())
+                {
+                    return BadRequest("This UserName is already in use. Please choose another.");
+                }
+            }
+
+            var user = new AppUser { UserName = model.Login, Email = model.Email, NufUserId = nufUserId };
             IdentityResult result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                //_logger.LogInformation("User created a new account with password.");
+                logger.LogInformation("User created a new account with password.");
 
                 await userManager.AddToRoleAsync(user, Constants.UserRole);
                 string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -78,10 +103,10 @@ namespace NordSamples.Controllers
                 {
                     await signInManager.SignInAsync(user, false);
                 }
-                return Ok();
+                return Ok("success");
             }
 
-            return BadRequest();
+            return BadRequest("Something went wrong.");
         }
 
         // GET: api/Auth/ConfirmEmail
@@ -102,7 +127,7 @@ namespace NordSamples.Controllers
 
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             IdentityResult result = await userManager.ConfirmEmailAsync(user, code);
-            string url = result.Succeeded ? "/login" : "/error";
+            string url = result.Succeeded ? "/login?nufDisabled=true" : "/error";
             return Redirect(url);
         }
 
@@ -113,7 +138,7 @@ namespace NordSamples.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest("Something wrong with the form");
             }
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -122,7 +147,7 @@ namespace NordSamples.Controllers
 
             if (appUser == null)
             {
-                return Unauthorized();
+                return Unauthorized("Your username and password combination was not recognised.");
             }
 
             // This doesn't count login failures towards account lockout
@@ -163,14 +188,13 @@ namespace NordSamples.Controllers
         private async Task<AppUser> CheckCredentials(LoginModel loginModel)
         {
             AppUser appUser;
-            if (loginModel.UseNufCred)
+            appUser = await CheckNufLogin(loginModel);
+            if (appUser != null)
             {
-                appUser = await CheckNufLogin(loginModel);
+                return appUser;
             }
-            else
-            {
-                appUser = await CheckIdentityLogin(loginModel);
-            }
+            appUser = await CheckIdentityLogin(loginModel);
+
 
             return appUser;
         }
@@ -192,7 +216,7 @@ namespace NordSamples.Controllers
         {
             AppUser appUser = null;
             var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
-            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username == loginModel.Login);
+            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == loginModel.Login.ToUpperInvariant());
             if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
             {
                 appUser = await EnsureUser(loginModel.Password, nufUser);
@@ -309,17 +333,24 @@ namespace NordSamples.Controllers
 
         private async Task EnsureRole(AppUser user, string role)
         {
-            if (roleManager == null)
+            try
             {
-                throw new Exception("roleManager null");
-            }
+                if (roleManager == null)
+                {
+                    throw new Exception("roleManager null");
+                }
 
-            if (!await roleManager.RoleExistsAsync(role))
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+
+                await userManager.AddToRoleAsync(user, role);
+            }
+            catch (Exception e)
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                logger.LogError(e, "Ensure Role Failed");
             }
-
-            await userManager.AddToRoleAsync(user, role);
         }
     }
 }

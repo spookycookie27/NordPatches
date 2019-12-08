@@ -5,10 +5,10 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { Copyright, useStyles } from '../common/Common';
+import { Copyright, loginStyles } from '../common/Common';
 
 function LoginLayout(props) {
-  const classes = useStyles();
+  const classes = loginStyles();
   return (
     <Grid container component='main' className={classes.root}>
       <Grid item xs={false} sm={4} md={7} className={classes.image} />

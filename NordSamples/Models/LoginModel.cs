@@ -11,8 +11,6 @@ namespace NordSamples.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public bool UseNufCred { get; set; }
-
         public bool RememberMe => false;
     }
 }
