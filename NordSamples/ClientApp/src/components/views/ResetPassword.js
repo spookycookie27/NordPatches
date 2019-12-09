@@ -33,7 +33,7 @@ export default function ResetPassword(props) {
     const url = '/api/auth/ResetPassword';
     const data = { email, password, code };
     await RestUtilities.post(url, data)
-      .then(() => props.history.push('/login?nufDisabled=true'))
+      .then(() => props.history.push('/login'))
       .catch(() => setError(true));
   }
 

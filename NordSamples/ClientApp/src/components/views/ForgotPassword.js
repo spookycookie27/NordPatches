@@ -29,42 +29,46 @@ export default function ForgotPassword(props) {
   return (
     <LoginLayout title='Forgot Password'>
       <form className={classes.form} noValidate>
-        <TextField
-          variant='outlined'
-          value={email}
-          margin='normal'
-          required
-          fullWidth
-          id='email'
-          label='Email Address'
-          name='email'
-          autoComplete='email'
-          autoFocus
-          onChange={event => {
-            setIsEmailInvalid(!isEmail(event.target.value));
-            setEmail(event.target.value);
-          }}
-          error={isEmailInvalid}
-          helperText={isEmailInvalid && 'Not an email address.'}
-          disabled={disabled}
-        />
-        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleForgotPasswordClick()} disabled={disabled}>
-          Reset Password
-        </Button>
-        {disabled && !error && (
-          <Grid container>
-            <Grid item xs={12}>
-              <Typography component='p'>Please check your email to continue resetting your password.</Typography>
-            </Grid>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              variant='outlined'
+              value={email}
+              margin='normal'
+              required
+              fullWidth
+              id='email'
+              label='Email Address'
+              name='email'
+              autoComplete='email'
+              autoFocus
+              onChange={event => {
+                setIsEmailInvalid(!isEmail(event.target.value));
+                setEmail(event.target.value);
+              }}
+              error={isEmailInvalid}
+              helperText={isEmailInvalid && 'Not an email address.'}
+              disabled={disabled}
+            />
           </Grid>
-        )}
-        {disabled && error && (
-          <Grid container>
-            <Grid item xs={12}>
-              <Typography component='p'>Something went wrong.</Typography>
+          <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleForgotPasswordClick()} disabled={disabled}>
+            Reset Password
+          </Button>
+          {disabled && !error && (
+            <Grid container>
+              <Grid item xs={12}>
+                <Typography component='p'>Please check your email to continue resetting your password.</Typography>
+              </Grid>
             </Grid>
-          </Grid>
-        )}
+          )}
+          {disabled && error && (
+            <Grid container>
+              <Grid item xs={12}>
+                <Typography component='p'>Something went wrong.</Typography>
+              </Grid>
+            </Grid>
+          )}
+        </Grid>
         <Box mt={5}>
           <Grid container>
             <Grid item xs>

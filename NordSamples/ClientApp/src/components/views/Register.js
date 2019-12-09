@@ -13,17 +13,22 @@ import { loginStyles } from '../common/Common';
 export default function SignUp(props) {
   const classes = loginStyles();
   const [email, setEmail] = useState('');
-  const [login, setLogin] = useState('');
-  const [isEmailInvalid, setIsEmailInvalid] = useState(false);
+  const [username, setUsername] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [activationCode, setActivationCode] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState('');
   const [disabled, setDisabled] = useState(false);
-  var isPasswordInvalid = !!(password && (password.length < 5 || password.length > 30));
-  var isLoginInvalid = !!((login && login.length < 5) || login.length > 16);
+  const isPasswordInvalid = password.length < 5 || password.length > 30;
+  const isUsernameInvalid = username.length < 5 || username.length > 16;
+  const isConfirmPasswordInvalid = confirmPassword.length < 5 || confirmPassword !== password;
+  const isEmailInvalid = !isEmail(email);
+  const isActivationCodeInvalid = activationCode && activationCode.length !== 6;
+  const hasErrors = isPasswordInvalid || isUsernameInvalid || isConfirmPasswordInvalid || isEmailInvalid || isActivationCodeInvalid;
 
   async function handleRegisterClick() {
     const url = '/api/auth/register';
-    const data = { email, password, login };
+    const data = { email, password, username };
     setDisabled(true);
     setFeedback('');
     var response = await RestUtilities.post(url, data);
@@ -44,7 +49,7 @@ export default function SignUp(props) {
   }
 
   return (
-    <LoginLayout title='Register'>
+    <LoginLayout title='Register Your Account'>
       <form className={classes.form} noValidate>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -61,12 +66,9 @@ export default function SignUp(props) {
               onChange={event => {
                 setEmail(event.target.value);
               }}
-              onBlur={() => {
-                setIsEmailInvalid(!isEmail(email));
-              }}
-              disabled={disabled}
-              error={isEmailInvalid}
-              helperText={isEmailInvalid && 'Not an email address.'}
+              disabled={email && disabled}
+              error={email && isEmailInvalid}
+              helperText={email && isEmailInvalid && 'Not an email address.'}
             />
           </Grid>
           <Grid item xs={12}>
@@ -74,20 +76,20 @@ export default function SignUp(props) {
               minLength={5}
               maxLength={16}
               variant='outlined'
-              value={login}
+              value={username}
               margin='normal'
               required
               fullWidth
-              id='login'
-              label='Login'
-              name='login'
+              id='username'
+              label='Username'
+              name='username'
               autoComplete='username'
               onChange={event => {
-                setLogin(event.target.value);
+                setUsername(event.target.value);
               }}
-              disabled={disabled}
-              error={isLoginInvalid}
-              helperText={isLoginInvalid && 'Must be minimum 5 characters and maximum of 16'}
+              disabled={username && disabled}
+              error={username && isUsernameInvalid}
+              helperText={username && isUsernameInvalid && 'Must be minimum 5 characters and maximum of 16'}
             />
           </Grid>
           <Grid item xs={12}>
@@ -106,13 +108,66 @@ export default function SignUp(props) {
               onChange={event => {
                 setPassword(event.target.value);
               }}
+              disabled={password && disabled}
+              error={password && isPasswordInvalid}
+              helperText={password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              minLength={5}
+              maxLength={30}
+              variant='outlined'
+              value={confirmPassword}
+              margin='normal'
+              required
+              fullWidth
+              name='confirmPassword'
+              label={'Confirm Password'}
+              type='password'
+              id='confirmPassword'
+              onChange={event => {
+                setConfirmPassword(event.target.value);
+              }}
+              error={confirmPassword && isConfirmPasswordInvalid}
+              helperText={confirmPassword && isConfirmPasswordInvalid && 'Passwords must match.'}
               disabled={disabled}
-              error={isPasswordInvalid}
-              helperText={isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Typography component='body1'>
+              If you have a Nord User Forum account, please enter the activation code found in your user control panel. This will allow us to verify that you
+              are the owner of the files you previously uploaded. Verified users will have the ability to edit their previous files.
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              minLength={5}
+              maxLength={30}
+              variant='outlined'
+              value={activationCode}
+              margin='normal'
+              fullWidth
+              name='activationCode'
+              label={'NUF Activation Code (optional)'}
+              id='activationCode'
+              onChange={event => {
+                setActivationCode(event.target.value);
+              }}
+              error={activationCode && isActivationCodeInvalid}
+              helperText={activationCode && isActivationCodeInvalid && 'Should be 6 characters'}
+              disabled={disabled}
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleRegisterClick()} disabled={disabled}>
+        <Button
+          fullWidth
+          variant='contained'
+          color='secondary'
+          className={classes.submit}
+          onClick={() => handleRegisterClick()}
+          disabled={disabled || hasErrors}
+        >
           Sign Up
         </Button>
         {feedback && (

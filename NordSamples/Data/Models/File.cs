@@ -20,6 +20,6 @@ namespace NordSamples.Data.Models
         public int AttachId { get; set; }
 
         public List<PatchFile> PatchFiles { get; set; }
-        public List<NufUser> NufUsers { get; set; }
+        public NufUser NufUser { get; set; }
     }
 }

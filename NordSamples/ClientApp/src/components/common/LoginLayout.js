@@ -17,7 +17,7 @@ function LoginLayout(props) {
           <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component='h1' variant='h5'>
+          <Typography component='h1' variant='h5' gutterBottom>
             {props.title}
           </Typography>
           {props.children}

@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import Link from '@material-ui/core/Link';
+// import Link from '@material-ui/core/Link';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -44,8 +44,11 @@ const Home = () => {
           Login
         </Typography>
         <Typography variant='body1' gutterBottom>
-          For GDPR reasons, We have abandoned the concept of re-using credentials from Nord User Forum and NordSamples.com. Unfortunately you will need to sign
-          up on this new site. You will need to provide Email, Login and Password.
+          For GDPR reasons, We have abandoned the concept of re-using any credentials from Nord User Forum and NordSamples.com. It was unlikely we would get the
+          buy in from every user! Unfortunately you will need to sign up on this new site. You will need to provide Email, Username, Password and an optional
+          Activation Code which you can find in the NUF user form user control panel. This code is unique to your user account and cannot be guessed easily.
+          Using this code will mean you have the ability to to edit your old patches previously uploaded to the NUF forum. This is because using the code will
+          prove that you are the same user. We strongly encourage you to take the time to retrieve the code before registering on NordSamples.com.
         </Typography>
         {/* <Typography variant='body1' gutterBottom>
           We have tried to make things easy for existing users to log in. There are 2 login mechanisms, The first uses your Nord User Forum credentials. The
