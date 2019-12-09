@@ -9,6 +9,7 @@ import { setToken } from '../../services/Auth';
 import RestUtilities from '../../services/RestUtilities';
 import LoginLayout from '../common/LoginLayout';
 import { loginStyles } from '../common/Common';
+import { dispatch } from '../../State';
 
 function SignInSide(props) {
   const classes = loginStyles();
@@ -16,8 +17,10 @@ function SignInSide(props) {
   const [password, setPassword] = useState('');
   const [disabled, setDisabled] = useState(false);
   const [feedback, setFeedback] = useState('');
+
   var isPasswordInvalid = !!(password && (password.length < 5 || password.length > 30));
   var isLoginInvalid = !!((login && login.length < 5) || login.length > 16);
+
   async function handleLoginClick() {
     setDisabled(true);
     const url = '/api/auth/login';
@@ -28,6 +31,10 @@ function SignInSide(props) {
       .then(res => {
         if (response.ok) {
           setToken(res.token, res.tokenExpiry);
+          dispatch({
+            type: 'setUser',
+            user: res.user
+          });
           props.history.push('/');
         } else {
           setFeedback(res);

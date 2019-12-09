@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Container from '@material-ui/core/Container';
 import Toolbar from '@material-ui/core/Toolbar';
-// import Button from '@material-ui/core/Button';
+import Button from '@material-ui/core/Button';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
 import Zoom from '@material-ui/core/Zoom';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -13,7 +13,8 @@ import Fab from '@material-ui/core/Fab';
 import Slide from '@material-ui/core/Slide';
 import { Link as RouterLink } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
-
+import PersonIcon from '@material-ui/icons/Person';
+import { useGlobalState } from '../../State';
 import { siteName } from '../../Constants';
 
 const useStyles = makeStyles(theme => ({
@@ -107,6 +108,7 @@ function ScrollTop(props) {
 const Link1 = React.forwardRef((props, ref) => <RouterLink innerRef={ref} {...props} />);
 
 function Layout(props) {
+  const [user] = useGlobalState('user');
   const classes = useStyles();
   return (
     <div className={classes.root}>
@@ -121,15 +123,25 @@ function Layout(props) {
                 Home
               </Link>
               <Link variant='button' component={Link1} to='/patches' className={classes.link}>
-                Patches
+                Browse Patches
               </Link>
               <Link variant='button' component={Link1} to='/files' className={classes.link}>
-                Files
+                Browse Files
               </Link>
             </nav>
-            {/* <Button variant='outlined' className={classes.link} component={Link1} to='/login'>
-              Login
-            </Button> */}
+            {user && (
+              <>
+                <PersonIcon />
+                <Typography variant='body2' color='inherit'>
+                  {user.username}
+                </Typography>
+              </>
+            )}
+            {!user && (
+              <Button variant='outlined' className={classes.link} component={Link1} to='/login'>
+                Login
+              </Button>
+            )}
           </Toolbar>
         </AppBar>
       </HideOnScroll>

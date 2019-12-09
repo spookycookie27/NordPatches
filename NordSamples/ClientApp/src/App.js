@@ -9,9 +9,9 @@ import Home from './components/views/Home';
 import PatchBrowser from './components/views/PatchBrowser';
 import FileBrowser from './components/views/FileBrowser';
 import { isSignedIn } from './services/Auth';
-import 'typeface-roboto';
+import { GlobalStateProvider } from './State';
 
-import './App.css';
+import 'typeface-roboto';
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   return (
@@ -19,20 +19,24 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
   );
 };
 
-export default () => (
+const App = () => (
   <div className='App'>
-    <BrowserRouter>
-      <Switch>
-        <Route path='/login' component={Login} />
-        <Route path='/register' component={Register} />
-        <Route path='/forgotPassword' component={ForgotPassword} />
-        <Route path='/resetPassword' component={ResetPassword} />
-        <Layout>
-          <Route exact path='/' component={Home} />
-          <PrivateRoute exact path='/patches' component={PatchBrowser} />
-          <PrivateRoute exact path='/files' component={FileBrowser} />
-        </Layout>
-      </Switch>
-    </BrowserRouter>
+    <GlobalStateProvider>
+      <BrowserRouter>
+        <Switch>
+          <Route path='/login' component={Login} />
+          <Route path='/register' component={Register} />
+          <Route path='/forgotPassword' component={ForgotPassword} />
+          <Route path='/resetPassword' component={ResetPassword} />
+          <Layout>
+            <Route exact path='/' component={Home} />
+            <PrivateRoute exact path='/patches' component={PatchBrowser} />
+            <PrivateRoute exact path='/files' component={FileBrowser} />
+          </Layout>
+        </Switch>
+      </BrowserRouter>
+    </GlobalStateProvider>
   </div>
 );
+
+export default App;

@@ -44,6 +44,10 @@ const Home = () => {
           Login
         </Typography>
         <Typography variant='body1' gutterBottom>
+          For GDPR reasons, We have abandoned the concept of re-using credentials from Nord User Forum and NordSamples.com. Unfortunately you will need to sign
+          up on this new site. You will need to provide Email, Login and Password.
+        </Typography>
+        {/* <Typography variant='body1' gutterBottom>
           We have tried to make things easy for existing users to log in. There are 2 login mechanisms, The first uses your Nord User Forum credentials. The
           second uses the Nord Samples credentials from this website. Logging in for the first time using your existing NUF credentials will automatically
           register a user account (using same password) in the Nord Samples website. After you login for the first time, you will not need to use your NUF login
@@ -60,24 +64,24 @@ const Home = () => {
             DEV thread
           </Link>{' '}
           so that we can link the accounts correctly.
-        </Typography>
+        </Typography> */}
         <Typography variant='h4' gutterBottom>
           What is a 'Patch'
         </Typography>
         <Typography variant='body1' gutterBottom>
-          A 'patch' is an entry or item in the lirary. It could be a Nord Stage2 program with user samples, and mp3s (files). It could be simply a single
-          usersample. It will have searchable metadata such as category, tags, comments etc. I have used the word 'patch' to avoid confusion over programs and
-          samples. It's both! I have included the database spec initially as I know some are interested. This will probably be removed later.
+          A 'patch' is an entry or item in the library. It might be a Nord Stage2 program with user samples and mp3s (files) for example. Or it might simply be
+          a single User Sample. It will have searchable metadata such as category, tags, comments etc. I have used the word 'patch' to avoid confusion over
+          programs and samples. It's both! I have included the database spec initially as I know some are interested. This will probably be removed later.
         </Typography>
         <Typography variant='h4' gutterBottom>
           What is a 'File'
         </Typography>
         <Typography variant='body1' gutterBottom>
           Speaks for itself really. Its a single file that will be used in 1 or more patches. These are included for reference only. The files are accessed by
-          browsing the patches.
+          browsing the patches. There are 2 IDs, one for this database, and one that reflects the attachment ID in the NUF database.
         </Typography>
         <Typography variant='h4' gutterBottom>
-          Doumentation
+          Documentation
         </Typography>
         <Typography variant='h6' gutterBottom>
           Patch spec
@@ -103,15 +107,25 @@ const Home = () => {
               </TableRow>
               <TableRow>
                 <TableCell>Instrument Type</TableCell>
-                <TableCell>The type of patch (enum). [StageClassic | Stage2 | Stage3 | Sample | Lead | Electro]</TableCell>
+                <TableCell>The type of patch. [StageClassic | Stage2 | Stage3 | Sample | Lead | Electro]</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Category</TableCell>
-                <TableCell>The sound category (enum). [Strings | Brass | Grand | Electric Piano | etc]</TableCell>
+                <TableCell>The sound category. [Strings | Brass | Grand | Electric Piano | etc]</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Tags</TableCell>
+                <TableCell>
+                  This is an array of keywords to help descibe a patch. Users can tag their own patches on creation. Admins can adjust tags on all patches.
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Comments</TableCell>
+                <TableCell>This is an array of comments about the patch made by users.</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>NUF user</TableCell>
-                <TableCell>The original Nord User Forum user who originally created the patch</TableCell>
+                <TableCell>The original NUF user who originally created the patch as referenced in the NUF form database</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>App user</TableCell>

@@ -3,22 +3,23 @@ import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import { nufFileLink } from '../common/Common';
 import moment from 'moment';
 
 function getPatchData(patch) {
   var mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
-  var displayDate = patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown';
+  console.log(patch);
   return (
     <>
       <Box>
         <strong>Patch ID:</strong> {patch.id}
       </Box>
       <Box>
-        <strong>Date Created:</strong> {displayDate}
+        <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
       </Box>
       <Box>
-        <strong>Category:</strong> {patch.category || 'TBC'}
+        <strong>Category:</strong> {patch.category ? patch.category.name : 'TBC'}
       </Box>
       <Box>
         <strong>Description:</strong> {patch.description || 'TBC'}
@@ -41,6 +42,12 @@ function getPatchData(patch) {
           ))}
         </Box>
       )}
+      <Box>
+        <strong>Related Patches:</strong> {patch.parent ? <span>{patch.parent.name}</span> : null}
+        {patch.children.map(x => (
+          <span>{x.name}</span>
+        ))}
+      </Box>
     </>
   );
 }
@@ -64,7 +71,7 @@ function getFileData(file) {
         <strong>Version:</strong> {file.version + 1}
       </Box>
       <Box>
-        <a href={`${nufFileLink}${file.attachId}`}>Download: {file.name}</a>
+        <strong>Download:</strong> <a href={`${nufFileLink}${file.attachId}`}>{file.name}</a>
       </Box>
     </Box>
   );
@@ -74,7 +81,7 @@ const PatchBrowser = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
   async function getData() {
-    const url = '/api/patches';
+    const url = '/api/patch';
     const res = await RestUtilities.get(url);
     res
       .json()
@@ -98,11 +105,15 @@ const PatchBrowser = () => {
         columns={[
           { title: 'Name', field: 'name' },
           { title: 'Description', field: 'description' },
-          { title: 'Category', field: 'category' },
-          { title: 'Type', field: 'instrument', render: rowData => <span>{rowData.instrument.name}</span> },
-          { title: 'User', field: 'user', render: rowData => <span>{rowData.user.username}</span> },
           {
-            title: 'Link',
+            title: 'Mp3',
+            field: 'patchFiles',
+            render: rowData => <span>{!!rowData.patchFiles.find(x => x.file.extension === 'mp3') ? <AudiotrackIcon /> : null}</span>
+          },
+          { title: 'Category', field: 'category', render: rowData => <span>{rowData.category ? rowData.category.name : ''}</span> },
+          { title: 'Type', field: 'instrument', render: rowData => <span>{rowData.instrument.name}</span> },
+          {
+            title: 'Forum Link',
             field: 'link',
             render: rowData => (
               <a href={rowData.link} target='_blank' rel='noopener noreferrer'>

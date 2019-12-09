@@ -35,10 +35,10 @@ namespace NordSamples.Controllers
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
         private readonly ApplicationDbContext context;
-        private readonly ILogger<PatchesController> logger;
+        private readonly ILogger<AuthController> logger;
         //public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context, ILogger<PatchesController> logger)
+        public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context, ILogger<AuthController> logger)
         {
             this.userManager = userManager;
             this.jwtOptions = jwtOptions.Value;
@@ -63,13 +63,13 @@ namespace NordSamples.Controllers
 
             int? nufUserId = null;
 
-            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == model.Login.ToUpperInvariant());
-            if (nufUser != null)
-            {
-                if (nufUser.Email.ToUpper() != model.Email.ToUpperInvariant())
-                    return BadRequest("This Username already exists with a different email address. Please choose another.");
-                nufUserId = nufUser.Id;
-            }
+            //NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == model.Login.ToUpperInvariant());
+            //if (nufUser != null)
+            //{
+            //    if (nufUser.Email.ToUpper() != model.Email.ToUpperInvariant())
+            //        return BadRequest("This Username already exists with a different email address. Please choose another.");
+            //    nufUserId = nufUser.Id;
+            //}
 
             AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Login.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
             if (existingUser != null)
@@ -157,7 +157,7 @@ namespace NordSamples.Controllers
             bool isAdmin = roles.Contains(Constants.AdministratorRole);
             string roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
-            DateTime tokenExpiry = DateTime.Now.AddMinutes(10);
+            DateTime tokenExpiry = DateTime.Now.AddMinutes(60);
 
             var claims = new[] {
                     new Claim(ClaimTypes.Name, appUser.Email),
@@ -188,13 +188,12 @@ namespace NordSamples.Controllers
         private async Task<AppUser> CheckCredentials(LoginModel loginModel)
         {
             AppUser appUser;
-            appUser = await CheckNufLogin(loginModel);
-            if (appUser != null)
-            {
-                return appUser;
-            }
+            // appUser = await CheckNufLogin(loginModel);
+            // if (appUser != null)
+            // {
+            //     return appUser;
+            // }
             appUser = await CheckIdentityLogin(loginModel);
-
 
             return appUser;
         }
@@ -212,18 +211,18 @@ namespace NordSamples.Controllers
             return appUser;
         }
 
-        private async Task<AppUser> CheckNufLogin(LoginModel loginModel)
-        {
-            AppUser appUser = null;
-            var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
-            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == loginModel.Login.ToUpperInvariant());
-            if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
-            {
-                appUser = await EnsureUser(loginModel.Password, nufUser);
-            }
+        //private async Task<AppUser> CheckNufLogin(LoginModel loginModel)
+        //{
+        //    AppUser appUser = null;
+        //    var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
+        //    NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == loginModel.Login.ToUpperInvariant());
+        //    if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
+        //    {
+        //        appUser = await EnsureUser(loginModel.Password, nufUser);
+        //    }
 
-            return appUser;
-        }
+        //    return appUser;
+        //}
 
         [AllowAnonymous]
         [HttpPost("[action]")]
@@ -314,43 +313,43 @@ namespace NordSamples.Controllers
             return Ok(returnUser);
         }
 
-        private async Task<AppUser> EnsureUser(string password, NufUser nufUser)
-        {
+        //private async Task<AppUser> EnsureUser(string password, NufUser nufUser)
+        //{
 
-            AppUser user = await userManager.FindByNameAsync(nufUser.Username);
-            if (user != null)
-            {
-                return user;
-            }
+        //    AppUser user = await userManager.FindByNameAsync(nufUser.Username);
+        //    if (user != null)
+        //    {
+        //        return user;
+        //    }
 
-            user = new AppUser() { UserName = nufUser.Username, Email = nufUser.Email, NufUserId = nufUser.Id };
-            await userManager.CreateAsync(user, password);
-            string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            await userManager.ConfirmEmailAsync(user, code);
-            await EnsureRole(user, Constants.UserRole);
-            return user;
-        }
+        //    user = new AppUser() { UserName = nufUser.Username, Email = nufUser.Email, NufUserId = nufUser.Id };
+        //    await userManager.CreateAsync(user, password);
+        //    string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        //    await userManager.ConfirmEmailAsync(user, code);
+        //    await EnsureRole(user, Constants.UserRole);
+        //    return user;
+        //}
 
-        private async Task EnsureRole(AppUser user, string role)
-        {
-            try
-            {
-                if (roleManager == null)
-                {
-                    throw new Exception("roleManager null");
-                }
+        //private async Task EnsureRole(AppUser user, string role)
+        //{
+        //    try
+        //    {
+        //        if (roleManager == null)
+        //        {
+        //            throw new Exception("roleManager null");
+        //        }
 
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
+        //        if (!await roleManager.RoleExistsAsync(role))
+        //        {
+        //            await roleManager.CreateAsync(new IdentityRole(role));
+        //        }
 
-                await userManager.AddToRoleAsync(user, role);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Ensure Role Failed");
-            }
-        }
+        //        await userManager.AddToRoleAsync(user, role);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        logger.LogError(e, "Ensure Role Failed");
+        //    }
+        //}
     }
 }

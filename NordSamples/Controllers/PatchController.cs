@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using LazyCache;
@@ -16,14 +14,14 @@ namespace NordSamples.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PatchesController : ControllerBase
+    public class PatchController : ControllerBase
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<PatchesController> logger;
+        private readonly ILogger<PatchController> logger;
         private readonly IAppCache cache;
 
-        public PatchesController(ApplicationDbContext context, IMapper mapper, ILogger<PatchesController> logger, IAppCache cache)
+        public PatchController(ApplicationDbContext context, IMapper mapper, ILogger<PatchController> logger, IAppCache cache)
         {
             this.context = context;
             this.mapper = mapper;
