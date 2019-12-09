@@ -51,7 +51,14 @@ export default function ForgotPassword(props) {
               disabled={disabled}
             />
           </Grid>
-          <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleForgotPasswordClick()} disabled={disabled}>
+          <Button
+            fullWidth
+            variant='contained'
+            color='secondary'
+            className={classes.submit}
+            onClick={() => handleForgotPasswordClick()}
+            disabled={disabled || isEmailInvalid}
+          >
             Reset Password
           </Button>
           {disabled && !error && (

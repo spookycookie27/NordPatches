@@ -7,6 +7,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import RestUtilities from '../../services/RestUtilities';
 import isEmail from 'validator/lib/isEmail';
+import InlineError from '../common/InlineError';
 import LoginLayout from '../common/LoginLayout';
 import { loginStyles } from '../common/Common';
 
@@ -19,16 +20,17 @@ export default function SignUp(props) {
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState('');
   const [disabled, setDisabled] = useState(false);
-  const isPasswordInvalid = password.length < 5 || password.length > 30;
-  const isUsernameInvalid = username.length < 5 || username.length > 16;
-  const isConfirmPasswordInvalid = confirmPassword.length < 5 || confirmPassword !== password;
+  const [errors, setErrors] = useState(null);
+  const isPasswordInvalid = !!(password.length < 5 || password.length > 30);
+  const isUsernameInvalid = !!(username.length < 5 || username.length > 16);
+  const isConfirmPasswordInvalid = !!(confirmPassword !== password);
   const isEmailInvalid = !isEmail(email);
-  const isActivationCodeInvalid = activationCode && activationCode.length !== 6;
+  const isActivationCodeInvalid = !!(activationCode && activationCode.length !== 6);
   const hasErrors = isPasswordInvalid || isUsernameInvalid || isConfirmPasswordInvalid || isEmailInvalid || isActivationCodeInvalid;
 
   async function handleRegisterClick() {
     const url = '/api/auth/register';
-    const data = { email, password, username };
+    const data = { email, password, username, activationCode };
     setDisabled(true);
     setFeedback('');
     var response = await RestUtilities.post(url, data);
@@ -37,9 +39,19 @@ export default function SignUp(props) {
     } else {
       response
         .json()
-        .then(response => {
-          setFeedback(response);
-          setDisabled(false);
+        .then(res => {
+          if (response.ok) {
+            setFeedback(response);
+            setDisabled(false);
+          } else if (response.status === 400) {
+            setErrors(res.errors ? res.errors : res);
+            setFeedback('There were errors:');
+            setDisabled(false);
+          } else if (response.status === 401) {
+            setFeedback('Oops. Something went wrong');
+            setDisabled(false);
+            setErrors(null);
+          }
         })
         .catch(() => {
           setFeedback('Oops. Something went wrong');
@@ -65,10 +77,11 @@ export default function SignUp(props) {
               autoFocus
               onChange={event => {
                 setEmail(event.target.value);
+                setFeedback(null);
               }}
-              disabled={email && disabled}
-              error={email && isEmailInvalid}
-              helperText={email && isEmailInvalid && 'Not an email address.'}
+              disabled={disabled}
+              error={!!email && isEmailInvalid}
+              helperText={!!email && isEmailInvalid && 'Not an email address.'}
             />
           </Grid>
           <Grid item xs={12}>
@@ -86,10 +99,11 @@ export default function SignUp(props) {
               autoComplete='username'
               onChange={event => {
                 setUsername(event.target.value);
+                setFeedback(null);
               }}
-              disabled={username && disabled}
-              error={username && isUsernameInvalid}
-              helperText={username && isUsernameInvalid && 'Must be minimum 5 characters and maximum of 16'}
+              disabled={disabled}
+              error={!!username && isUsernameInvalid}
+              helperText={!!username && isUsernameInvalid && 'Must be minimum 5 characters and maximum of 16'}
             />
           </Grid>
           <Grid item xs={12}>
@@ -107,10 +121,11 @@ export default function SignUp(props) {
               autoComplete='current-password'
               onChange={event => {
                 setPassword(event.target.value);
+                setFeedback(null);
               }}
-              disabled={password && disabled}
-              error={password && isPasswordInvalid}
-              helperText={password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
+              disabled={disabled}
+              error={!!password && isPasswordInvalid}
+              helperText={!!password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
             />
           </Grid>
           <Grid item xs={12}>
@@ -128,14 +143,15 @@ export default function SignUp(props) {
               id='confirmPassword'
               onChange={event => {
                 setConfirmPassword(event.target.value);
+                setFeedback(null);
               }}
-              error={confirmPassword && isConfirmPasswordInvalid}
-              helperText={confirmPassword && isConfirmPasswordInvalid && 'Passwords must match.'}
+              error={!!confirmPassword && isConfirmPasswordInvalid}
+              helperText={!!confirmPassword && isConfirmPasswordInvalid && 'Passwords must match.'}
               disabled={disabled}
             />
           </Grid>
           <Grid item xs={12}>
-            <Typography component='body1'>
+            <Typography variant='body2'>
               If you have a Nord User Forum account, please enter the activation code found in your user control panel. This will allow us to verify that you
               are the owner of the files you previously uploaded. Verified users will have the ability to edit their previous files.
             </Typography>
@@ -153,9 +169,10 @@ export default function SignUp(props) {
               id='activationCode'
               onChange={event => {
                 setActivationCode(event.target.value);
+                setFeedback(null);
               }}
-              error={activationCode && isActivationCodeInvalid}
-              helperText={activationCode && isActivationCodeInvalid && 'Should be 6 characters'}
+              error={!!activationCode && isActivationCodeInvalid}
+              helperText={!!activationCode && isActivationCodeInvalid && 'Should be 6 characters'}
               disabled={disabled}
             />
           </Grid>
@@ -173,7 +190,11 @@ export default function SignUp(props) {
         {feedback && (
           <Grid container>
             <Grid item xs={12}>
-              <Typography component='p'>{feedback}</Typography>
+              <Typography variant='body2'>{feedback}</Typography>
+              <InlineError field='username' errors={errors} />
+              <InlineError field='email' errors={errors} />
+              <InlineError field='password' errors={errors} />
+              <InlineError field='activationCode' errors={errors} />
             </Grid>
           </Grid>
         )}

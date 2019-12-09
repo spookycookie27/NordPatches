@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import { setToken } from '../../services/Auth';
 import RestUtilities from '../../services/RestUtilities';
 import LoginLayout from '../common/LoginLayout';
+import InlineError from '../common/InlineError';
 import { loginStyles } from '../common/Common';
 import { dispatch } from '../../State';
 
@@ -17,10 +18,11 @@ function SignInSide(props) {
   const [password, setPassword] = useState('');
   const [disabled, setDisabled] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [errors, setErrors] = useState(null);
 
-  var isPasswordInvalid = !!(password && (password.length < 5 || password.length > 30));
-  var isUsernameInvalid = !!((username && username.length < 5) || username.length > 16);
-
+  const isPasswordInvalid = !!(password.length < 5 || password.length > 30);
+  const isUsernameInvalid = !!(username.length < 5 || username.length > 16);
+  const hasErrors = isUsernameInvalid || isPasswordInvalid;
   async function handleLoginClick() {
     setDisabled(true);
     const url = '/api/auth/login';
@@ -36,9 +38,14 @@ function SignInSide(props) {
             user: res.user
           });
           props.history.push('/');
-        } else {
-          setFeedback(res);
+        } else if (response.status === 400) {
+          setErrors(res.errors ? res.errors : res);
+          setFeedback('There were errors:');
           setDisabled(false);
+        } else if (response.status === 401) {
+          setFeedback('The username and password combination was not recognised.');
+          setDisabled(false);
+          setErrors(null);
         }
       })
       .catch(() => {
@@ -67,12 +74,14 @@ function SignInSide(props) {
               autoFocus
               onChange={event => {
                 setUsername(event.target.value);
+                setFeedback(null);
               }}
               disabled={disabled}
-              error={isUsernameInvalid}
-              helperText={isUsernameInvalid && 'Must be minimum 5 characters and maximum of 16'}
+              error={isUsernameInvalid && !!username}
+              helperText={isUsernameInvalid && !!username && 'Must be minimum 5 characters and maximum of 16'}
             />
           </Grid>
+
           <Grid item xs={12}>
             <TextField
               minLength={5}
@@ -89,20 +98,23 @@ function SignInSide(props) {
               autoComplete='current-password'
               onChange={event => {
                 setPassword(event.target.value);
+                setFeedback(null);
               }}
-              error={isPasswordInvalid}
-              helperText={isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
+              error={!!password && isPasswordInvalid}
+              helperText={!!password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
               disabled={disabled}
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled}>
+        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled || hasErrors}>
           Sign In
         </Button>
         {feedback && (
           <Grid container>
             <Grid item xs={12}>
-              <Typography component='body1'>{feedback}</Typography>
+              <Typography component='p'>{feedback}</Typography>
+              <InlineError field='username' errors={errors} />
+              <InlineError field='password' errors={errors} />
             </Grid>
           </Grid>
         )}

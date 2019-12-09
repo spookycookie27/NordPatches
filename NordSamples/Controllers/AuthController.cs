@@ -36,7 +36,6 @@ namespace NordSamples.Controllers
         private readonly IEmailSender emailSender;
         private readonly ApplicationDbContext context;
         private readonly ILogger<AuthController> logger;
-        //public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context, ILogger<AuthController> logger)
         {
@@ -55,36 +54,29 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            //ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Something is wrong with the form. Check for errors");
-            }
-
             int? nufUserId = null;
 
-            //NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == model.Login.ToUpperInvariant());
-            //if (nufUser != null)
-            //{
-            //    if (nufUser.Email.ToUpper() != model.Email.ToUpperInvariant())
-            //        return BadRequest("This Username already exists with a different email address. Please choose another.");
-            //    nufUserId = nufUser.Id;
-            //}
+            nufUserId = await CheckActivationCode(model, nufUserId);
 
-            AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Login.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
+            AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Username.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
             if (existingUser != null)
             {
                 if (existingUser.NormalizedEmail == model.Email.ToUpperInvariant())
                 {
-                    return BadRequest("You already have an account using this email address.");
+                    ModelState.AddModelError("email", "You already have an account using this email address.");
                 }
-                if (existingUser.NormalizedEmail != model.Email.ToUpperInvariant() || existingUser.NormalizedUserName != model.Login.ToUpperInvariant())
+                else if (existingUser.NormalizedUserName == model.Username.ToUpperInvariant())
                 {
-                    return BadRequest("This UserName is already in use. Please choose another.");
+                    ModelState.AddModelError("username", "This username is already in use. Please choose another.");
                 }
             }
 
-            var user = new AppUser { UserName = model.Login, Email = model.Email, NufUserId = nufUserId };
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = new AppUser { UserName = model.Username, Email = model.Email, NufUserId = nufUserId };
             IdentityResult result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -103,10 +95,10 @@ namespace NordSamples.Controllers
                 {
                     await signInManager.SignInAsync(user, false);
                 }
-                return Ok("success");
+                return Ok();
             }
 
-            return BadRequest("Something went wrong.");
+            return Unauthorized();
         }
 
         // GET: api/Auth/ConfirmEmail
@@ -114,21 +106,19 @@ namespace NordSamples.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
-            if (userId == null || code == null)
-            {
-                return BadRequest();
-            }
-
             AppUser user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{userId}'.");
+                return Unauthorized();
             }
 
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             IdentityResult result = await userManager.ConfirmEmailAsync(user, code);
-            string url = result.Succeeded ? "/login?nufDisabled=true" : "/error";
-            return Redirect(url);
+            if (result.Succeeded)
+            {
+                return Redirect("/login");
+            }
+            return Unauthorized();
         }
 
         // POST: api/Auth/Login
@@ -136,18 +126,13 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Something wrong with the form");
-            }
-
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             AppUser appUser = await CheckCredentials(loginModel);
 
             if (appUser == null)
             {
-                return Unauthorized("Your username and password combination was not recognised.");
+                return Unauthorized();
             }
 
             // This doesn't count login failures towards account lockout
@@ -185,44 +170,6 @@ namespace NordSamples.Controllers
             return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), user, tokenExpiry });
         }
 
-        private async Task<AppUser> CheckCredentials(LoginModel loginModel)
-        {
-            AppUser appUser;
-            // appUser = await CheckNufLogin(loginModel);
-            // if (appUser != null)
-            // {
-            //     return appUser;
-            // }
-            appUser = await CheckIdentityLogin(loginModel);
-
-            return appUser;
-        }
-
-        private async Task<AppUser> CheckIdentityLogin(LoginModel loginModel)
-        {
-            AppUser appUser = null;
-            SignInResult result = await signInManager.PasswordSignInAsync(loginModel.Login, loginModel.Password, loginModel.RememberMe,
-                lockoutOnFailure: false);
-            if (result.Succeeded)
-            {
-                appUser = await userManager.FindByNameAsync(loginModel.Login);
-            }
-
-            return appUser;
-        }
-
-        //private async Task<AppUser> CheckNufLogin(LoginModel loginModel)
-        //{
-        //    AppUser appUser = null;
-        //    var phpBbCryptoServiceProvider = new PhpBbCryptoServiceProvider();
-        //    NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.Username.ToUpper() == loginModel.Login.ToUpperInvariant());
-        //    if (nufUser != null && phpBbCryptoServiceProvider.PhpBbCheckHash(loginModel.Password, nufUser.Password))
-        //    {
-        //        appUser = await EnsureUser(loginModel.Password, nufUser);
-        //    }
-
-        //    return appUser;
-        //}
 
         [AllowAnonymous]
         [HttpPost("[action]")]
@@ -232,7 +179,7 @@ namespace NordSamples.Controllers
             if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
             {
                 // Don't reveal that the user does not exist or is not confirmed
-                return BadRequest();
+                return Ok();
             }
 
             // For more information on how to enable account confirmation and password reset please
@@ -264,18 +211,13 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> ResetPassword(PasswordResetModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
             string decoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
 
             AppUser user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return NotFound($"Unable to load user with Email '{model.Email}'.");
+                return Unauthorized();
             }
 
             IdentityResult result = await userManager.ResetPasswordAsync(user, decoded, model.Password);
@@ -290,7 +232,7 @@ namespace NordSamples.Controllers
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
 
@@ -311,6 +253,37 @@ namespace NordSamples.Controllers
             var returnUser = mapper.Map<UserViewModel>(user);
 
             return Ok(returnUser);
+        }
+
+        private async Task<int?> CheckActivationCode(RegisterModel model, int? nufUserId)
+        {
+            if (string.IsNullOrEmpty(model.ActivationCode)) return null;
+            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper() == model.ActivationCode.ToUpperInvariant());
+            if (nufUser != null)
+            {
+                nufUserId = nufUser.Id;
+            }
+
+            return nufUserId;
+        }
+        private async Task<AppUser> CheckCredentials(LoginModel loginModel)
+        {
+            AppUser appUser;
+            appUser = await CheckIdentityLogin(loginModel);
+            return appUser;
+        }
+
+        private async Task<AppUser> CheckIdentityLogin(LoginModel loginModel)
+        {
+            AppUser appUser = null;
+            SignInResult result = await signInManager.PasswordSignInAsync(loginModel.Username, loginModel.Password, loginModel.RememberMe,
+                lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+                appUser = await userManager.FindByNameAsync(loginModel.Username);
+            }
+
+            return appUser;
         }
 
         //private async Task<AppUser> EnsureUser(string password, NufUser nufUser)

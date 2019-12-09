@@ -95,7 +95,11 @@ namespace NordSamples
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt =>
-                    opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+                {
+                    opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    opt.SerializerSettings.ContractResolver =
+                        new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
+                });
 
             services.AddRazorPages();
 

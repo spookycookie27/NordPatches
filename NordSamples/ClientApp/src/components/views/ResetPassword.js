@@ -9,32 +9,52 @@ import RestUtilities from '../../services/RestUtilities';
 import queryString from 'query-string';
 import isEmail from 'validator/lib/isEmail';
 import LoginLayout from '../common/LoginLayout';
+import InlineError from '../common/InlineError';
 import { loginStyles, regexEx } from '../common/Common';
 
 export default function ResetPassword(props) {
   const classes = loginStyles();
   const [email, setEmail] = useState('');
-  const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [errors, setErrors] = useState(null);
   const [code, setCode] = useState('');
   const [disabled, setDisabled] = useState(false);
+  const [feedback, setFeedback] = useState('');
 
   if (!code) {
     const search = props.location.search;
     const parsed = queryString.parse(search);
     setCode(parsed.code);
   }
-
-  var isPasswordInvalid = !!(password && !regexEx.test(password));
-
+  const isEmailInvalid = !isEmail(email);
+  const isPasswordInvalid = !!(password && !regexEx.test(password));
+  const hasErrors = isEmailInvalid || isPasswordInvalid;
   async function handleResetPasswordClick() {
     setDisabled(true);
     const url = '/api/auth/ResetPassword';
     const data = { email, password, code };
-    await RestUtilities.post(url, data)
-      .then(() => props.history.push('/login'))
-      .catch(() => setError(true));
+    var response = await RestUtilities.post(url, data);
+    if (response.ok) {
+      setFeedback('Your password was reset. Please sign in using the new password.');
+    } else {
+      response
+        .json()
+        .then(res => {
+          if (response.status === 400) {
+            setErrors(res.errors ? res.errors : res);
+            setFeedback('There were errors:');
+            setDisabled(false);
+          } else if (response.status === 401) {
+            setFeedback('Oops. Something went wrong.');
+            setDisabled(false);
+            setErrors(null);
+          }
+        })
+        .catch(() => {
+          setFeedback('Oops. Something went wrong');
+          setDisabled(false);
+        });
+    }
   }
 
   return (
@@ -54,13 +74,10 @@ export default function ResetPassword(props) {
               autoFocus
               onChange={event => {
                 setEmail(event.target.value);
-                setError(false);
+                setFeedback(null);
               }}
-              onBlur={() => {
-                setIsEmailInvalid(!isEmail(email));
-              }}
-              error={isEmailInvalid}
-              helperText={isEmailInvalid && 'Not an email address.'}
+              error={!!email && isEmailInvalid}
+              helperText={!!email && isEmailInvalid && 'Not an email address.'}
               disabled={disabled}
             />
           </Grid>
@@ -79,21 +96,30 @@ export default function ResetPassword(props) {
               autoComplete='current-password'
               onChange={event => {
                 setPassword(event.target.value);
-                setError(false);
+                setFeedback(null);
               }}
-              error={isPasswordInvalid}
-              helperText={isPasswordInvalid && 'Must include 1 number, 1 uppercase leter, 1 lowercase letter and 1  special character'}
+              error={!!password && isPasswordInvalid}
+              helperText={!!password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
               disabled={disabled}
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleResetPasswordClick()} disabled={disabled}>
+        <Button
+          fullWidth
+          variant='contained'
+          color='secondary'
+          className={classes.submit}
+          onClick={() => handleResetPasswordClick()}
+          disabled={disabled || hasErrors}
+        >
           Reset Password
         </Button>
-        {error && (
+        {feedback && (
           <Grid container>
             <Grid item xs={12}>
-              <Typography component='p'>Oops. Something went wrong</Typography>
+              <Typography variant='body2'>{feedback}</Typography>
+              <InlineError field='email' errors={errors} />
+              <InlineError field='password' errors={errors} />
             </Grid>
           </Grid>
         )}
