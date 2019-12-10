@@ -39,19 +39,15 @@ namespace NordSamples.Controllers
             {
                 async Task<List<Data.Models.Patch>> PatchGetter() =>
                     await context.Patches
-                     .Include(x => x.NufUser)
                      .Include(x => x.Instrument)
                      .Include(x => x.Category)
-                     .Include(x => x.Tags)
-                     .Include(x => x.Comments)
-                     .Include(x => x.Children)
-                     .Include(x => x.Parent)
                      .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
                      .AsNoTracking()
                      .ToListAsync();
 
-                List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
+                List<Data.Models.Patch> cachedPatches = await PatchGetter();
+                //List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
 
                 model = mapper.Map<List<Patch>>(cachedPatches);
 
@@ -68,7 +64,21 @@ namespace NordSamples.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
-            var patch = await context.Patches.FindAsync(id);
+            var patch = await context.Patches
+                .Include(x => x.NufUser)
+                .Include(x => x.Instrument)
+                .Include(x => x.Category)
+                .Include(x => x.Tags)
+                .Include(x => x.Comments)
+                .Include(x => x.Children)
+                    .ThenInclude(x => x.PatchFiles)
+                        .ThenInclude(pf => pf.File)
+                .Include(x => x.Parent)
+                    .ThenInclude(x => x.PatchFiles)
+                        .ThenInclude(pf => pf.File)
+                .Include(x => x.PatchFiles)
+                    .ThenInclude(pf => pf.File)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (patch == null)
             {

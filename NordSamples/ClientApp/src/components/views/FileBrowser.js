@@ -68,7 +68,7 @@ const PatchBrowser = () => {
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
       <MaterialTable
-        options={{ pageSize: 20, padding: 'dense' }}
+        options={{ pageSize: 15, padding: 'dense' }}
         columns={[
           { title: 'ID', field: 'id' },
           { title: 'Name', field: 'name' },

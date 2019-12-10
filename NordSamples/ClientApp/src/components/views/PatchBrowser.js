@@ -1,85 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@material-ui/core/Button';
+import PatchViewer from './PatchViewer';
 import { nufFileLink } from '../common/Common';
-import moment from 'moment';
-
-function getPatchData(patch) {
-  var mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
-  console.log(patch);
-  return (
-    <>
-      <Box>
-        <strong>Patch ID:</strong> {patch.id}
-      </Box>
-      <Box>
-        <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
-      </Box>
-      <Box>
-        <strong>Category:</strong> {patch.category ? patch.category.name : 'TBC'}
-      </Box>
-      <Box>
-        <strong>Description:</strong> {patch.description || 'TBC'}
-      </Box>
-      <Box>
-        <strong>Instrument Type:</strong> {patch.instrument.name || 'none'}
-      </Box>
-      <Box>
-        <strong>User:</strong> {patch.user.username || 'none'}
-      </Box>
-      <Box>
-        <strong>User ID:</strong> {patch.user.nufUserId || 'none'}
-      </Box>
-      {mp3s && (
-        <Box>
-          {mp3s.map(mp3 => (
-            <audio key={mp3.id} controls>
-              <source src={`${nufFileLink}${mp3.attachId}`} type='audio/mpeg' />
-            </audio>
-          ))}
-        </Box>
-      )}
-      <Box>
-        <strong>Related Patches:</strong> {patch.parent ? <span>{patch.parent.name}</span> : null}
-        {patch.children.map(x => (
-          <span>{x.name}</span>
-        ))}
-      </Box>
-    </>
-  );
-}
-
-function getFileData(file) {
-  return (
-    <Box key={file.id}>
-      <Box>
-        <strong>File ID:</strong> {file.id}
-      </Box>
-      <Box>
-        <strong>Name:</strong> {file.name}
-      </Box>
-      <Box>
-        <strong>Size (bytes):</strong> {file.size}
-      </Box>
-      <Box>
-        <strong>Extension:</strong> {file.extension}
-      </Box>
-      <Box>
-        <strong>Version:</strong> {file.version + 1}
-      </Box>
-      <Box>
-        <strong>Download:</strong> <a href={`${nufFileLink}${file.attachId}`}>{file.name}</a>
-      </Box>
-    </Box>
-  );
-}
+import Player from '../common/Player';
+import ZoomInIcon from '@material-ui/icons/ZoomIn';
 
 const PatchBrowser = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [patchId, setPatchId] = React.useState(null);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   async function getData() {
     const url = '/api/patch';
     const res = await RestUtilities.get(url);
@@ -97,18 +40,38 @@ const PatchBrowser = () => {
     getData();
   }, []);
 
+  function renderMp3(patch) {
+    const mp3s = patch && patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
+    if (!mp3s[0]) return null;
+    return <Player src={`${nufFileLink}${mp3s[0].attachId}`} />;
+  }
+
+  function renderViewIcon(patch) {
+    return <ZoomInIcon />;
+  }
+
   return (
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
       <MaterialTable
-        options={{ pageSize: 20, padding: 'dense' }}
+        //onRowClick={(e, rowData) => {}}
+        actions={[
+          {
+            icon: () => <ZoomInIcon />,
+            onClick: (event, rowData) => {
+              setPatchId(rowData.id);
+              handleOpen();
+            }
+          }
+        ]}
+        options={{ pageSize: 10, padding: 'dense' }}
         columns={[
           { title: 'Name', field: 'name' },
           { title: 'Description', field: 'description' },
           {
             title: 'Mp3',
             field: 'patchFiles',
-            render: rowData => <span>{!!rowData.patchFiles.find(x => x.file.extension === 'mp3') ? <AudiotrackIcon /> : null}</span>
+            render: rowData => renderMp3(rowData)
           },
           { title: 'Category', field: 'category', render: rowData => <span>{rowData.category ? rowData.category.name : ''}</span> },
           { title: 'Type', field: 'instrument', render: rowData => <span>{rowData.instrument.name}</span> },
@@ -124,21 +87,17 @@ const PatchBrowser = () => {
         ]}
         data={data}
         title='Patches List'
-        detailPanel={patch => {
-          return (
-            <Box m={2}>
-              <Grid container spacing={3} justify='center'>
-                <Grid item xs={6}>
-                  {getPatchData(patch)}
-                </Grid>
-                <Grid item xs={6}>
-                  {patch.patchFiles.map(x => getFileData(x.file))}
-                </Grid>
-              </Grid>
-            </Box>
-          );
-        }}
       />
+      <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
+        <DialogContent dividers>
+          <PatchViewer patchId={patchId} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color='primary' variant='contained'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

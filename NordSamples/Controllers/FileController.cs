@@ -39,6 +39,7 @@ namespace NordSamples.Controllers
             {
                 async Task<List<Data.Models.File>> PatchGetter() =>
                     await context.Files
+                        .Include(x => x.NufUser)
                         .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.Patch)
                      .AsNoTracking()

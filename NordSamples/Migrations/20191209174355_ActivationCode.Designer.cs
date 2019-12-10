@@ -10,8 +10,8 @@ using NordSamples.Data;
 namespace NordSamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20191209083357_NufUserCodeAdd")]
-    partial class NufUserCodeAdd
+    [Migration("20191209174355_ActivationCode")]
+    partial class ActivationCode
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -316,6 +316,8 @@ namespace NordSamples.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NufUserId");
+
                     b.ToTable("File");
                 });
 
@@ -347,18 +349,14 @@ namespace NordSamples.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ActivationCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FileId")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(6)")
+                        .HasMaxLength(6);
 
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FileId");
 
                     b.ToTable("NufUser");
                 });
@@ -518,11 +516,11 @@ namespace NordSamples.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("NordSamples.Data.Models.NufUser", b =>
+            modelBuilder.Entity("NordSamples.Data.Models.File", b =>
                 {
-                    b.HasOne("NordSamples.Data.Models.File", null)
-                        .WithMany("NufUsers")
-                        .HasForeignKey("FileId");
+                    b.HasOne("NordSamples.Data.Models.NufUser", "NufUser")
+                        .WithMany()
+                        .HasForeignKey("NufUserId");
                 });
 
             modelBuilder.Entity("NordSamples.Data.Models.Patch", b =>

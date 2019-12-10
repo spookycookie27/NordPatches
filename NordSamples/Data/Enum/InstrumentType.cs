@@ -3,7 +3,7 @@
     public enum InstrumentType
     {
         None = 0,
-        UserSample = 1, // .nsmp and .nwiproj
+        Sample = 1, // .nsmp and .nwiproj
         Lead = 2,
         Electro = 3,
         Stage1 = 4, // .nspg

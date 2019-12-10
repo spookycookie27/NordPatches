@@ -16,6 +16,7 @@ namespace NordSamples.Models.ViewModels
         public Instrument Instrument { get; set; }
         public Category Category { get; set; }
         public User User { get; set; }
+        public int? ParentPatchId { get; set; }
 
         public Patch Parent { get; set; }
         public ICollection<PatchFile> PatchFiles { get; set; }

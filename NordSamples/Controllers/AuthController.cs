@@ -56,7 +56,7 @@ namespace NordSamples.Controllers
         {
             int? nufUserId = null;
 
-            nufUserId = await CheckActivationCode(model, nufUserId);
+            nufUserId = await CheckActivationCode(model);
 
             AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Username.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
             if (existingUser != null)
@@ -255,9 +255,10 @@ namespace NordSamples.Controllers
             return Ok(returnUser);
         }
 
-        private async Task<int?> CheckActivationCode(RegisterModel model, int? nufUserId)
+        private async Task<int?> CheckActivationCode(RegisterModel model)
         {
             if (string.IsNullOrEmpty(model.ActivationCode)) return null;
+            int? nufUserId = null;
             NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper() == model.ActivationCode.ToUpperInvariant());
             if (nufUser != null)
             {

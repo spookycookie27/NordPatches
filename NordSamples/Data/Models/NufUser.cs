@@ -9,6 +9,7 @@ namespace NordSamples.Data.Models
         [MaxLength(255)]
         public string Username { get; set; }
 
+        [MaxLength(6)]
         public string ActivationCode { get; set; }
     }
 }
