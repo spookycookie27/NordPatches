@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
+import ExternalLink from '@material-ui/core/Link';
 import RestUtilities from '../../services/RestUtilities';
 import isEmail from 'validator/lib/isEmail';
 import InlineError from '../common/InlineError';
@@ -152,8 +153,12 @@ export default function SignUp(props) {
           </Grid>
           <Grid item xs={12}>
             <Typography variant='body2'>
-              If you have a Nord User Forum account, please enter the activation code found in your user control panel. This will allow us to verify that you
-              are the owner of the files you previously uploaded. Verified users will have the ability to edit their previous files.
+              If you have a Nord User Forum account, please enter the activation code found in your{' '}
+              <ExternalLink href='https://www.norduserforum.com/ucp.php?i=164' underline='always' variant='inherit' color='primary' target='_blank'>
+                user control panel.
+              </ExternalLink>
+              This will allow us to verify that you are the owner of the files you previously uploaded. Verified users will have the ability to edit their
+              previous files.
             </Typography>
           </Grid>
           <Grid item xs={12}>
@@ -202,10 +207,14 @@ export default function SignUp(props) {
         <Box mt={5}>
           <Grid container justify='flex-end'>
             <Grid item xs>
-              <Link to={'/forgotPassword'}>Forgot password?</Link>
+              <Link to={'/forgotPassword'} className={classes.link}>
+                Forgot password?
+              </Link>
             </Grid>
             <Grid item>
-              <Link to={'/login'}>Already have an account? Sign in</Link>
+              <Link to={'/login'} className={classes.link}>
+                Already have an account? Sign in
+              </Link>
             </Grid>
           </Grid>
         </Box>

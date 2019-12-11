@@ -24,9 +24,9 @@ const useStyles = makeStyles(theme => ({
     minHeight: '100vh'
   },
   main: {
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(3),
-    paddingTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    paddingTop: theme.spacing(0)
   },
   footer: {
     padding: theme.spacing(3, 2),

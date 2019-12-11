@@ -46,8 +46,8 @@ namespace NordSamples.Controllers
                      .AsNoTracking()
                      .ToListAsync();
 
-                List<Data.Models.Patch> cachedPatches = await PatchGetter();
-                //List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
+                //List<Data.Models.Patch> cachedPatches = await PatchGetter();
+                List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
 
                 model = mapper.Map<List<Patch>>(cachedPatches);
 

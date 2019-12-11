@@ -47,20 +47,20 @@ function getFileData(file) {
 const PatchBrowser = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
-  async function getData() {
-    const url = '/api/file';
-    const res = await RestUtilities.get(url);
-    res
-      .json()
-      .then(res => {
-        setData(res);
-      })
-      .catch(err => {
-        setError(true);
-        console.log(err);
-      });
-  }
   useEffect(() => {
+    const getData = async () => {
+      const url = '/api/file';
+      const res = await RestUtilities.get(url);
+      res
+        .json()
+        .then(res => {
+          setData(res);
+        })
+        .catch(err => {
+          setError(true);
+          console.log(err);
+        });
+    };
     getData();
   }, []);
 
@@ -68,7 +68,7 @@ const PatchBrowser = () => {
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
       <MaterialTable
-        options={{ pageSize: 15, padding: 'dense' }}
+        options={{ pageSize: 20, padding: 'dense' }}
         columns={[
           { title: 'ID', field: 'id' },
           { title: 'Name', field: 'name' },

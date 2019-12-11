@@ -34,6 +34,10 @@ export const loginStyles = makeStyles(theme => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2)
+  },
+  link: {
+    textDecoration: 'none',
+    color: theme.palette.primary.main
   }
 }));
 

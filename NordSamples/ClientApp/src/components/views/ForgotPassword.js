@@ -79,7 +79,9 @@ export default function ForgotPassword(props) {
         <Box mt={5}>
           <Grid container>
             <Grid item xs>
-              <Link to={'/login'}>Already have an account? Sign in</Link>
+              <Link to={'/login'} className={classes.link}>
+                Already have an account? Sign in
+              </Link>
             </Grid>
           </Grid>
         </Box>

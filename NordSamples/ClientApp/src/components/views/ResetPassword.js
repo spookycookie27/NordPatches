@@ -126,10 +126,14 @@ export default function ResetPassword(props) {
         <Box mt={5}>
           <Grid container justify='flex-end'>
             <Grid item xs>
-              <Link to={'/forgotPassword'}>Forgot password?</Link>
+              <Link to={'/forgotPassword'} className={classes.link}>
+                Forgot password?
+              </Link>
             </Grid>
             <Grid item>
-              <Link to={'/login'}>Already have an account? Sign in</Link>
+              <Link to={'/login'} className={classes.link}>
+                Already have an account? Sign in
+              </Link>
             </Grid>
           </Grid>
         </Box>

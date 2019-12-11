@@ -121,10 +121,14 @@ function SignInSide(props) {
         <Box mt={5}>
           <Grid container>
             <Grid item xs>
-              <Link to={'/forgotPassword'}>Forgot password?</Link>
+              <Link to={'/forgotPassword'} className={classes.link}>
+                Forgot password?
+              </Link>
             </Grid>
             <Grid item>
-              <Link to={'/register'}>{"Don't have an account? Sign Up"}</Link>
+              <Link to={'/register'} className={classes.link}>
+                {"Don't have an account? Sign Up"}
+              </Link>
             </Grid>
           </Grid>
         </Box>

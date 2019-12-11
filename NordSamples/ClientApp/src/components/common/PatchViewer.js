@@ -5,9 +5,10 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
+//import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import { nufFileLink } from '../common/Common';
+import { nufFileLink } from './Common';
+import FullPlayer from '../common/FullPlayer';
 import moment from 'moment';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -43,7 +44,6 @@ const PatchViewer = props => {
     const res = await RestUtilities.get(url);
     res.json().then(patch => {
       setPatch(patch);
-      console.log(patch);
     });
   }
   useEffect(() => {
@@ -75,14 +75,23 @@ const PatchViewer = props => {
 
   function renderPatch(patch) {
     const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
+    const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
     return (
-      <Grid container spacing={2} justify='center'>
-        <Grid item xs={12}>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
           <Typography className={classes.title} color='textSecondary' gutterBottom>
-            {patch.name}
+            View : {patch.name}
           </Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={6}>
+          <Box m={2}>
+            {mp3s.map(mp3 => {
+              if (!mp3) return null;
+              return <FullPlayer src={`${nufFileLink}${mp3.attachId}`} key={mp3.id} duration progress />;
+            })}
+          </Box>
+        </Grid>
+        <Grid item xs={6}>
           <Box>
             <strong>User:</strong> {patch.user.username}
           </Box>
@@ -104,16 +113,15 @@ const PatchViewer = props => {
           <Box>
             <strong>Parent ID:</strong> {patch.parentPatchId}
           </Box>
+          <Box>
+            <strong>Link:</strong>{' '}
+            <a href={patch.link} target='_blank' rel='noopener noreferrer'>
+              Click
+            </a>
+          </Box>
         </Grid>
-        <Grid item xs={4}>
-          {patch.patchFiles.map(x => renderFile(x.file))}
-        </Grid>
-        <Grid item xs={4}>
-          {mp3s.map(mp3 => (
-            <audio key={mp3.id} controls className={classes.audio}>
-              <source src={`${nufFileLink}${mp3.attachId}`} type='audio/mpeg' />
-            </audio>
-          ))}
+        <Grid item xs={6}>
+          <Box>{files.map(x => renderFile(x))}</Box>
         </Grid>
       </Grid>
     );
