@@ -9,7 +9,9 @@ import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
@@ -19,7 +21,10 @@ const useStyles = makeStyles(theme => ({
   title: {
     fontSize: '16px'
   },
-  label: { fontSize: '12px' }
+  label: { fontSize: '12px' },
+  submit: {
+    margin: theme.spacing(3, 0, 2)
+  }
 }));
 
 const PatchViewer = props => {
@@ -165,12 +170,19 @@ const PatchViewer = props => {
                   defaultValue={[top100Films[0].title]}
                   freeSolo
                   renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant='outlined' label={option} {...getTagProps({ index })} />)}
-                  renderInput={params => <TextField {...params} variant='standard' label='Tags' placeholder='Type tag and press return' fullWidth />}
+                  renderInput={params => (
+                    <TextField {...params} variant='standard' label='Tags (temp list of movies!)' placeholder='Type tag and press return' fullWidth />
+                  )}
                 />
               </Grid>
             </Grid>
           </form>
         </CardContent>
+        <CardActions>
+          <Button size='small' color='primary' variant='contained' onClick={() => console.log('clicked')}>
+            Update
+          </Button>
+        </CardActions>
       </Card>
     </>
   );

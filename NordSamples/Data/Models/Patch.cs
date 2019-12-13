@@ -20,6 +20,7 @@ namespace NordSamples.Data.Models
 
         [ForeignKey("Parent")]
         public int? ParentPatchId { get; set; }
+        public bool Removed { get; set; }
 
         public NufUser NufUser { get; set; }
         public AppUser AppUser { get; set; }

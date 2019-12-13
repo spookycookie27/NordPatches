@@ -7,6 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import PatchViewer from '../common/PatchViewer';
 import PatchEditor from '../common/PatchEditor';
+import Link from '@material-ui/core/Link';
 import { nufFileLink } from '../common/Common';
 import FullPlayer from '../common/FullPlayer';
 import { useGlobalState } from '../../State';
@@ -87,10 +88,10 @@ const PatchBrowser = props => {
         actions={getActionConfig()}
         options={{
           pageSize: 10,
-          filtering: true,
-          search: false
+          filtering: true
         }}
         columns={[
+          { title: 'Id', field: 'id' },
           { title: 'Name', field: 'name' },
           { title: 'Description', field: 'description' },
           {
@@ -110,9 +111,9 @@ const PatchBrowser = props => {
             field: 'link',
             filtering: false,
             render: rowData => (
-              <a href={rowData.link} target='_blank' rel='noopener noreferrer'>
+              <Link href={rowData.link} target='_blank' rel='noopener noreferrer'>
                 Click
-              </a>
+              </Link>
             )
           },
           {
@@ -127,11 +128,11 @@ const PatchBrowser = props => {
       />
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
         <DialogContent dividers>
-          {action === 'view' && <PatchViewer patchId={patchId} />}
-          {action === 'edit' && <PatchEditor patchId={patchId} />}
+          {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
+          {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color='primary' variant='contained'>
+          <Button onClick={handleClose} color='secondary'>
             Close
           </Button>
         </DialogActions>

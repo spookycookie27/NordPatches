@@ -16,7 +16,9 @@ namespace NordSamples.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<AppUser>().ToTable("AspNetUsers");
-            modelBuilder.Entity<Patch>().ToTable("Patch");
+            modelBuilder.Entity<Patch>().ToTable("Patch")
+                .Property(p => p.Removed)
+                .HasDefaultValue(0);
             modelBuilder.Entity<File>().ToTable("File")
                 .Property(b => b.DateCreated)
                 .HasDefaultValueSql("getDate()");

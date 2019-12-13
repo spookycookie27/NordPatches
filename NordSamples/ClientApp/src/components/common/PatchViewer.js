@@ -5,7 +5,6 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
-//import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import { nufFileLink } from './Common';
 import FullPlayer from '../common/FullPlayer';
@@ -80,7 +79,7 @@ const PatchViewer = props => {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <Typography className={classes.title} color='textSecondary' gutterBottom>
-            View : {patch.name}
+            {patch.name}
           </Typography>
         </Grid>
         <Grid item xs={6}>
@@ -93,7 +92,7 @@ const PatchViewer = props => {
         </Grid>
         <Grid item xs={6}>
           <Box>
-            <strong>User:</strong> {patch.user.username}
+            <strong>User:</strong> {patch.user && patch.user.username}
           </Box>
           <Box>
             <strong>Patch ID:</strong> {patch.id}
@@ -108,7 +107,7 @@ const PatchViewer = props => {
             <strong>Description:</strong> {patch.description || 'tbc'}
           </Box>
           <Box>
-            <strong>Instrument Type:</strong> {patch.instrument.name}
+            <strong>Instrument Type:</strong> {patch.instrument && patch.instrument.name}
           </Box>
           <Box>
             <strong>Parent ID:</strong> {patch.parentPatchId}
@@ -129,24 +128,16 @@ const PatchViewer = props => {
 
   if (!patch) return null;
   return (
-    <>
-      <Card className={classes.mainCard}>
-        <CardContent>{renderPatch(patch)}</CardContent>
-      </Card>
-      <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
-        Variations
-      </Typography>
-      {patch.parent && (
-        <Card className={classes.card}>
-          <CardContent>{renderPatch(patch.parent)}</CardContent>
-        </Card>
-      )}
-      {patch.children.map(x => (
-        <Card key={x.id} className={classes.card}>
-          <CardContent>{renderPatch(x)}</CardContent>
-        </Card>
-      ))}
-    </>
+    <Card className={classes.mainCard}>
+      <CardContent>{renderPatch(patch)}</CardContent>
+      <CardContent>
+        <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
+          Variations
+        </Typography>
+        {patch.parent && renderPatch(patch.parent)}
+        {patch.children.map(x => renderPatch(x))}
+      </CardContent>
+    </Card>
   );
 };
 
