@@ -40,8 +40,6 @@ namespace NordSamples.Controllers
             {
                 async Task<List<Data.Models.Patch>> PatchGetter() =>
                     await context.Patches
-                     .Include(x => x.Instrument)
-                     .Include(x => x.Category)
                      .Include(x => x.Tags)
                      .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
@@ -68,8 +66,6 @@ namespace NordSamples.Controllers
         {
             var patch = await context.Patches
                 .Include(x => x.NufUser)
-                .Include(x => x.Instrument)
-                .Include(x => x.Category)
                 .Include(x => x.Tags)
                 .Include(x => x.Ratings)
                 .Include(x => x.Comments)

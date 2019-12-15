@@ -15,6 +15,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import { dispatch } from '../../State';
+import { categories, instruments } from '../../Constants';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -151,12 +152,9 @@ const PatchViewer = props => {
                     Type
                   </InputLabel>
                   <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)}>
-                    <MenuItem value={1}>User Sample</MenuItem>
-                    <MenuItem value={2}>Lead</MenuItem>
-                    <MenuItem value={3}>Electro</MenuItem>
-                    <MenuItem value={4}>Stage 1</MenuItem>
-                    <MenuItem value={5}>Stage 2</MenuItem>
-                    <MenuItem value={6}>Stage 3</MenuItem>
+                    {Object.entries(instruments).map(([key, value]) => (
+                      <MenuItem value={key}>{value}</MenuItem>
+                    ))}
                   </Select>
                 </Grid>
                 <Grid item xs={6}>
@@ -164,30 +162,9 @@ const PatchViewer = props => {
                     Category
                   </InputLabel>
                   <Select fullWidth id='instrumentId' value={categoryId} onChange={event => setCategoryId(event.target.value)}>
-                    <MenuItem value={23}>Acoustic</MenuItem>
-                    <MenuItem value={22}>Arpeggio</MenuItem>
-                    <MenuItem value={6}>Bass</MenuItem>
-                    <MenuItem value={4}>Brass</MenuItem>
-                    <MenuItem value={21}>Clavinet</MenuItem>
-                    <MenuItem value={8}>Drums</MenuItem>
-                    <MenuItem value={10}>Effects</MenuItem>
-                    <MenuItem value={11}>Electronic</MenuItem>
-                    <MenuItem value={20}>EPiano</MenuItem>
-                    <MenuItem value={12}>Ethnic</MenuItem>
-                    <MenuItem value={19}>Fantasy</MenuItem>
-                    <MenuItem value={18}>Grand</MenuItem>
-                    <MenuItem value={7}>Guitar</MenuItem>
-                    <MenuItem value={2}>Lead</MenuItem>
-                    <MenuItem value={24}>Nature</MenuItem>
-                    <MenuItem value={13}>Organ</MenuItem>
-                    <MenuItem value={5}>Pads</MenuItem>
-                    <MenuItem value={9}>Percussion</MenuItem>
-                    <MenuItem value={17}>Pluck</MenuItem>
-                    <MenuItem value={3}>Strings</MenuItem>
-                    <MenuItem value={1}>Synth</MenuItem>
-                    <MenuItem value={16}>Upright</MenuItem>
-                    <MenuItem value={15}>Vocal</MenuItem>
-                    <MenuItem value={14}>Wind</MenuItem>
+                    {Object.entries(categories).map(([key, value]) => (
+                      <MenuItem value={key}>{value}</MenuItem>
+                    ))}
                   </Select>
                 </Grid>
                 {tags ? (

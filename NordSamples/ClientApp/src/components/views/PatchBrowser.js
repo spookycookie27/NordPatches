@@ -9,6 +9,7 @@ import FullPlayer from '../common/FullPlayer';
 import { useGlobalState } from '../../State';
 import { dispatch } from '../../State';
 import theme from '../../theme';
+import { categories, instruments } from '../../Constants';
 
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
@@ -86,6 +87,10 @@ const PatchBrowser = props => {
     return actionsConfig;
   };
 
+  function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
+  }
+
   return (
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
@@ -119,14 +124,14 @@ const PatchBrowser = props => {
           {
             title: 'Category',
             field: 'category',
-            customFilterAndSearch: (term, rowData) => rowData.category && rowData.category.name.toLowerCase().includes(term.toLowerCase()),
-            render: rowData => <span>{rowData.category ? rowData.category.name : ''}</span>
+            render: rowData => <span>{categories[rowData.categoryId]}</span>,
+            customFilterAndSearch: (term, rowData) => rowData.categoryId && categories[rowData.categoryId].toLowerCase().includes(term.toLowerCase())
           },
           {
             title: 'Type',
             field: 'instrument',
-            render: rowData => <span>{rowData.instrument.name}</span>,
-            customFilterAndSearch: (term, rowData) => rowData.instrument && rowData.instrument.name.toLowerCase().includes(term.toLowerCase())
+            render: rowData => <span>{instruments[rowData.instrumentId]}</span>,
+            customFilterAndSearch: (term, rowData) => instruments[rowData.instrumentId].toLowerCase().includes(term.toLowerCase())
           },
           {
             title: 'Mp3',
