@@ -106,7 +106,7 @@ const PatchBrowser = props => {
           pageSize: 10
         }}
         columns={[
-          { title: 'Id', field: 'id', filtering: false },
+          { title: 'Id', field: 'id' },
           { title: 'Name', field: 'name' },
           { title: 'Description', field: 'description' },
           {
@@ -123,21 +123,42 @@ const PatchBrowser = props => {
           },
           {
             title: 'Category',
-            field: 'category',
+            field: 'categoryId',
             render: rowData => <span>{categories[rowData.categoryId]}</span>,
-            customFilterAndSearch: (term, rowData) => rowData.categoryId && categories[rowData.categoryId].toLowerCase().includes(term.toLowerCase())
+            customFilterAndSearch: (term, rowData) => rowData.categoryId && categories[rowData.categoryId].toLowerCase().includes(term.toLowerCase()),
+            customSort: (a, b) => {
+              if (a.categoryId === b.categoryId) {
+                return 0;
+              } else if (!a.categoryId) {
+                return 1;
+              } else if (!b.categoryId) {
+                return -1;
+              } else {
+                return categories[a.categoryId] < categories[b.categoryId] ? -1 : 1;
+              }
+            }
           },
           {
             title: 'Type',
-            field: 'instrument',
+            field: 'instrumentId',
             render: rowData => <span>{instruments[rowData.instrumentId]}</span>,
-            customFilterAndSearch: (term, rowData) => instruments[rowData.instrumentId].toLowerCase().includes(term.toLowerCase())
+            customFilterAndSearch: (term, rowData) => instruments[rowData.instrumentId].toLowerCase().includes(term.toLowerCase()),
+            customSort: (a, b) => {
+              if (a.instrumentId === b.instrumentId) {
+                return 0;
+              } else if (!a.instrumentId) {
+                return 1;
+              } else if (!b.instrumentId) {
+                return -1;
+              } else {
+                return instruments[a.instrumentId] < instruments[b.instrumentId] ? -1 : 1;
+              }
+            }
           },
           {
             title: 'Mp3',
             field: 'patchFiles',
-            render: rowData => renderMp3(rowData),
-            filtering: false
+            render: rowData => renderMp3(rowData)
           }
         ]}
         data={patches}

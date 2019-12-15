@@ -84,6 +84,14 @@ const PatchViewer = props => {
     getData();
   }, []);
 
+  const renderOptions = entity => {
+    return Object.entries(entity).map(([key, value]) => (
+      <MenuItem key={key} value={key}>
+        {value}
+      </MenuItem>
+    ));
+  };
+
   if (!patch) return null;
   return (
     <>
@@ -152,9 +160,7 @@ const PatchViewer = props => {
                     Type
                   </InputLabel>
                   <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)}>
-                    {Object.entries(instruments).map(([key, value]) => (
-                      <MenuItem value={key}>{value}</MenuItem>
-                    ))}
+                    {renderOptions(instruments)}
                   </Select>
                 </Grid>
                 <Grid item xs={6}>
@@ -162,9 +168,7 @@ const PatchViewer = props => {
                     Category
                   </InputLabel>
                   <Select fullWidth id='instrumentId' value={categoryId} onChange={event => setCategoryId(event.target.value)}>
-                    {Object.entries(categories).map(([key, value]) => (
-                      <MenuItem value={key}>{value}</MenuItem>
-                    ))}
+                    {renderOptions(categories)}
                   </Select>
                 </Grid>
                 {tags ? (
