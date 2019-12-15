@@ -1,5 +1,6 @@
 using AutoMapper;
 using NordSamples.Data.Models;
+using NordSamples.Models.ViewModels;
 
 namespace NordSamples.Models
 {
@@ -9,18 +10,20 @@ namespace NordSamples.Models
         {
             CreateMap<AppUser, UserViewModel>();
 
-            CreateMap<NordSamples.Data.Models.Patch, NordSamples.Models.ViewModels.Patch>()
+            CreateMap<Data.Models.Patch, ViewModels.Patch>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.NufUser));
-            CreateMap<NordSamples.Data.Models.File, NordSamples.Models.ViewModels.File>();
-            CreateMap<NordSamples.Data.Models.NufUser, NordSamples.Models.ViewModels.User>()
+            CreateMap<ViewModels.Patch, Data.Models.Patch>()
+                .ForMember(dest => dest.NufUser, opt => opt.MapFrom(src => src.User));
+            CreateMap<Data.Models.File, ViewModels.File>();
+            CreateMap<NufUser, User>()
                 .ForMember(dest => dest.NufUserId, opt => opt.MapFrom(src => src.Id));
 
-            CreateMap<NordSamples.Data.Models.AppUser, NordSamples.Models.ViewModels.User>();
-            CreateMap<NordSamples.Data.Models.PatchFile, NordSamples.Models.ViewModels.PatchFile>();
-            CreateMap<NordSamples.Data.Models.Instrument, NordSamples.Models.ViewModels.Instrument>();
-            CreateMap<NordSamples.Data.Models.Category, NordSamples.Models.ViewModels.Category>();
-            CreateMap<NordSamples.Data.Models.Tag, NordSamples.Models.ViewModels.Tag>();
-            CreateMap<NordSamples.Data.Models.Comment, NordSamples.Models.ViewModels.Comment>()
+            CreateMap<AppUser, User>();
+            CreateMap<Data.Models.PatchFile, ViewModels.PatchFile>();
+            CreateMap<Data.Models.Instrument, ViewModels.Instrument>();
+            CreateMap<Data.Models.Category, ViewModels.Category>();
+            CreateMap<Data.Models.Tag, ViewModels.Tag>();
+            CreateMap<Data.Models.Comment, ViewModels.Comment>()
             .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.AppUser));
         }
     }

@@ -27,11 +27,12 @@ namespace NordSamples.Data.Models
         public Instrument Instrument { get; set; }
         public Category Category { get; set; }
         public Patch Parent { get; set; }
+
         public ICollection<Tag> Tags { get; set; }
+        public ICollection<Rating> Ratings { get; set; }
         public ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Patch> Children { get; set; }
 
         public List<PatchFile> PatchFiles { get; set; }
-        //public ICollection<File> Files { get; set; }
     }
 }

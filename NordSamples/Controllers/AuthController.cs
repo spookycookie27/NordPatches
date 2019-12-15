@@ -21,6 +21,8 @@ using NordSamples.Data;
 using Microsoft.EntityFrameworkCore;
 using NordSamples.Data.Models;
 using Microsoft.Extensions.Logging;
+using NordSamples.Models.Requests;
+using NordSamples.Models.ViewModels;
 
 namespace NordSamples.Controllers
 {

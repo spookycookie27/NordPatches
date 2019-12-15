@@ -2,25 +2,23 @@ import React, { useState, useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import Button from '@material-ui/core/Button';
 import PatchViewer from '../common/PatchViewer';
 import PatchEditor from '../common/PatchEditor';
-import Link from '@material-ui/core/Link';
 import { nufFileLink } from '../common/Common';
 import FullPlayer from '../common/FullPlayer';
 import { useGlobalState } from '../../State';
+import { dispatch } from '../../State';
 import theme from '../../theme';
 
 const PatchBrowser = props => {
+  const [patches] = useGlobalState('patches');
   const [user] = useGlobalState('user');
-  const [data, setData] = useState([]);
   const [error, setError] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [patchId, setPatchId] = React.useState(null);
   const [action, setAction] = React.useState('view');
   const preventDefault = event => event.preventDefault();
+
   const handleOpen = () => {
     setOpen(true);
   };
@@ -35,7 +33,10 @@ const PatchBrowser = props => {
       res
         .json()
         .then(res => {
-          setData(res);
+          dispatch({
+            type: 'setPatches',
+            patches: res
+          });
         })
         .catch(err => {
           setError(true);
@@ -44,14 +45,24 @@ const PatchBrowser = props => {
     getData();
   }, []);
 
-  function renderMp3(patch) {
+  const renderMp3 = patch => {
     const mp3s = patch && patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
     if (!mp3s[0]) return null;
     return <FullPlayer src={`${nufFileLink}${mp3s[0].attachId}`} onClick={preventDefault} inverse />;
-  }
+  };
+
+  const getTags = tags => {
+    return tags.length > 0
+      ? tags.map((t, i) => (
+          <span key={t.name}>
+            {t.name}
+            {i < tags.length - 1 && ', '}
+          </span>
+        ))
+      : null;
+  };
 
   const getActionConfig = () => {
-    console.log(user);
     const actionsConfig = [
       {
         icon: 'chevron_right',
@@ -87,13 +98,24 @@ const PatchBrowser = props => {
         }}
         actions={getActionConfig()}
         options={{
-          pageSize: 10,
-          filtering: true
+          pageSize: 10
         }}
         columns={[
-          { title: 'Id', field: 'id' },
+          { title: 'Id', field: 'id', filtering: false },
           { title: 'Name', field: 'name' },
           { title: 'Description', field: 'description' },
+          {
+            title: 'Tags',
+            field: 'tags',
+            render: rowData => getTags(rowData.tags),
+            customFilterAndSearch: (term, rowData) => {
+              return rowData.tags
+                .map(t => t.name.toLowerCase())
+                .some(v => {
+                  return v.indexOf(term.toLowerCase()) >= 0;
+                });
+            }
+          },
           {
             title: 'Category',
             field: 'category',
@@ -107,35 +129,18 @@ const PatchBrowser = props => {
             customFilterAndSearch: (term, rowData) => rowData.instrument && rowData.instrument.name.toLowerCase().includes(term.toLowerCase())
           },
           {
-            title: 'Forum Link',
-            field: 'link',
-            filtering: false,
-            render: rowData => (
-              <Link href={rowData.link} target='_blank' rel='noopener noreferrer'>
-                Click
-              </Link>
-            )
-          },
-          {
             title: 'Mp3',
             field: 'patchFiles',
             render: rowData => renderMp3(rowData),
             filtering: false
           }
         ]}
-        data={data}
+        data={patches}
         title='Patches List'
       />
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
-        <DialogContent dividers>
-          {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
-          {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color='secondary'>
-            Close
-          </Button>
-        </DialogActions>
+        {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
+        {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
       </Dialog>
     </div>
   );

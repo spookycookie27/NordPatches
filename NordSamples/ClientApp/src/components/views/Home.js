@@ -30,12 +30,12 @@ const Home = () => {
     <div className='Home'>
       <Container maxWidth='md'>
         <Typography variant='h2' gutterBottom>
-          Welcome to Nord Samples
+          Welcome to the Unoffical Nord User Samples website
         </Typography>
         <Typography variant='body1' gutterBottom>
           This website is for Nord lovers everywhere to come together and build the best user library of Nord sounds and samples on the net. Most of the sounds
           from Nord User Forum have been added to this library as a starting point. We need help in categorising and editing the metadata and mp3s for the
-          exisiting sounds. This homepage is temporary and will be redesigned later.
+          exisiting sounds. This site is written and maintained by 'SpookyCookie' from the Nord User Forum. If you have any questions PM me directly.
         </Typography>
         <Typography variant='body1' gutterBottom>
           The library is organised into Patches and Files. The term "Patches" is deliberately ambiguous!
@@ -44,30 +44,11 @@ const Home = () => {
           Login
         </Typography>
         <Typography variant='body1' gutterBottom>
-          For GDPR reasons, We have abandoned the concept of re-using any credentials from Nord User Forum and NordSamples.com. It was unlikely we would get the
-          buy in from every user! Unfortunately you will need to sign up on this new site. You will need to provide Email, Username, Password and an optional
-          Activation Code which you can find in the NUF user form user control panel. This code is unique to your user account and cannot be guessed easily.
-          Using this code will mean you have the ability to to edit your old patches previously uploaded to the NUF forum. This is because using the code will
-          prove that you are the same user. We strongly encourage you to take the time to retrieve the code before registering on NordSamples.com.
+          To register, you will need to provide Email, Username, Password and an optional Activation Code which you can find in the NUF user form user control
+          panel. This code is unique to your user account and cannot be guessed easily. Using this code will mean you have the ability to to edit your old
+          patches previously uploaded to the NUF forum. This is because using the code will prove that you are the same user. We strongly encourage you to take
+          the time to retrieve the code before registering on NordSamples.com.
         </Typography>
-        {/* <Typography variant='body1' gutterBottom>
-          We have tried to make things easy for existing users to log in. There are 2 login mechanisms, The first uses your Nord User Forum credentials. The
-          second uses the Nord Samples credentials from this website. Logging in for the first time using your existing NUF credentials will automatically
-          register a user account (using same password) in the Nord Samples website. After you login for the first time, you will not need to use your NUF login
-          again (but you always have the option). If you reset your password on this website it will update your account on the Nord Samples website only. You
-          cannot reset the the password on the Nord User Forum by using the password reset on website. We might not be able to permanently keep the NUF
-          credentials in sync, so this might change in the future. If you are forced to register manually, Please let us know in the{' '}
-          <Link
-            href='https://www.norduserforum.com/nord-user-samples-nsmp-samples-f14/nord-user-sample-library-development-thread-t18694-10.html'
-            target='_blank'
-            color='secondary'
-            variant='body1'
-            className={classes.link}
-          >
-            DEV thread
-          </Link>{' '}
-          so that we can link the accounts correctly.
-        </Typography> */}
         <Typography variant='h4' gutterBottom>
           What is a 'Patch'
         </Typography>

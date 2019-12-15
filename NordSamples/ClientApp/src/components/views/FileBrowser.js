@@ -58,7 +58,6 @@ const PatchBrowser = () => {
         })
         .catch(err => {
           setError(true);
-          console.log(err);
         });
     };
     getData();

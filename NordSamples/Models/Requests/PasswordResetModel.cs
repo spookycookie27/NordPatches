@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NordSamples.Models
+namespace NordSamples.Models.Requests
 {
     public class PasswordResetModel
     {

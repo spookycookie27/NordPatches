@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NordSamples.Models
+namespace NordSamples.Models.ViewModels
 {
     public class BlobUrlModel
-    {       
+    {
             [Required]
             public string BlobUrl { get; set; }
 

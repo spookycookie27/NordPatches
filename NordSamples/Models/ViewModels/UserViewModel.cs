@@ -1,4 +1,4 @@
-namespace NordSamples.Models
+namespace NordSamples.Models.ViewModels
 {
     public class UserViewModel
     {

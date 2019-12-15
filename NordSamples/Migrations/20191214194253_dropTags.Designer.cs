@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NordSamples.Data;
 
 namespace NordSamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191214194253_dropTags")]
+    partial class dropTags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -432,41 +434,6 @@ namespace NordSamples.Migrations
                     b.ToTable("PatchFile");
                 });
 
-            modelBuilder.Entity("NordSamples.Data.Models.Rating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("PatchId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int")
-                        .HasMaxLength(255);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PatchId");
-
-                    b.ToTable("Rating");
-                });
-
-            modelBuilder.Entity("NordSamples.Data.Models.Tag", b =>
-                {
-                    b.Property<int>("PatchId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
-
-                    b.HasKey("PatchId", "Name");
-
-                    b.ToTable("Tag");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -575,24 +542,6 @@ namespace NordSamples.Migrations
 
                     b.HasOne("NordSamples.Data.Models.Patch", "Patch")
                         .WithMany("PatchFiles")
-                        .HasForeignKey("PatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NordSamples.Data.Models.Rating", b =>
-                {
-                    b.HasOne("NordSamples.Data.Models.Patch", "Patch")
-                        .WithMany("Ratings")
-                        .HasForeignKey("PatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NordSamples.Data.Models.Tag", b =>
-                {
-                    b.HasOne("NordSamples.Data.Models.Patch", "Patch")
-                        .WithMany("Tags")
                         .HasForeignKey("PatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

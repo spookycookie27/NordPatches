@@ -23,7 +23,9 @@ namespace NordSamples.Data
                 .Property(b => b.DateCreated)
                 .HasDefaultValueSql("getDate()");
             modelBuilder.Entity<Category>().ToTable("Category");
-            modelBuilder.Entity<Tag>().ToTable("Tags");
+            modelBuilder.Entity<Tag>().ToTable("Tag")
+                .HasKey(c => new { c.PatchId, c.Name });
+            modelBuilder.Entity<Rating>().ToTable("Rating");
             modelBuilder.Entity<Instrument>().ToTable("Instrument");
             modelBuilder.Entity<NufUser>().ToTable("NufUser");
             modelBuilder.Entity<AppUser>().ToTable("AspNetUsers");
@@ -47,6 +49,7 @@ namespace NordSamples.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<File> Files { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Instrument> Instruments { get; set; }
         public DbSet<NufUser> NufUsers { get; set; }

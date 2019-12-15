@@ -12,7 +12,8 @@ const applyMiddleware = (...args) => creator => {
 };
 
 const defaultState = {
-  user: null
+  user: null,
+  patches: []
 };
 
 const LOCAL_STORAGE_KEY = 'nord-samples';
@@ -31,10 +32,35 @@ const reducer = (state = initialState, action) => {
         ...state,
         user: action.user
       };
+    case 'setPatches':
+      return {
+        ...state,
+        patches: action.patches
+      };
+    case 'updatePatch': {
+      const foundIndex = state.patches.findIndex(x => x.id === action.patch.id);
+      state.patches[foundIndex] = action.patch;
+      return { ...state };
+    }
     default:
       return state;
   }
 };
+
+// function updateObjectInArray(array, action) {
+//   return array.map((item, index) => {
+//     if (index !== action.index) {
+//       // This isn't the item we care about - keep it as-is
+//       return item;
+//     }
+
+//     // Otherwise, this is the one we want - return an updated value
+//     return {
+//       ...item,
+//       ...action.item
+//     };
+//   });
+// }
 
 const saveStateToStorage = ({ getState }) => next => action => {
   const returnValue = next(action);
