@@ -5,6 +5,8 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { nufFileLink } from '../common/Common';
 import moment from 'moment';
+import { useGlobalState } from '../../State';
+import { dispatch } from '../../State';
 
 function getFileMetaData(file) {
   return (
@@ -45,7 +47,7 @@ function getFileData(file) {
 }
 
 const PatchBrowser = () => {
-  const [data, setData] = useState([]);
+  const [files] = useGlobalState('patches');
   const [error, setError] = useState(false);
   useEffect(() => {
     const getData = async () => {
@@ -54,7 +56,10 @@ const PatchBrowser = () => {
       res
         .json()
         .then(res => {
-          setData(res);
+          dispatch({
+            type: 'setFiles',
+            files: res
+          });
         })
         .catch(err => {
           setError(true);
@@ -75,7 +80,7 @@ const PatchBrowser = () => {
           { title: 'Size', field: 'size' },
           { title: 'Extension', field: 'extension' }
         ]}
-        data={data}
+        data={files}
         title='Files List'
         detailPanel={file => {
           return (

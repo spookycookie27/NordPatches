@@ -13,7 +13,8 @@ const applyMiddleware = (...args) => creator => {
 
 const defaultState = {
   user: null,
-  patches: []
+  patches: [],
+  files: []
 };
 
 const LOCAL_STORAGE_KEY = 'nord-samples';
@@ -36,6 +37,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         patches: action.patches
+      };
+    case 'setFiles':
+      return {
+        ...state,
+        files: action.files
       };
     case 'updatePatch': {
       const foundIndex = state.patches.findIndex(x => x.id === action.patch.id);

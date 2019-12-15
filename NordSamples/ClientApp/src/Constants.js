@@ -1,5 +1,5 @@
 export const blobUrl = 'https://mfsresources.blob.core.windows.net';
-export const siteName = 'Nord (Unofficial) User Samples';
+export const siteName = 'Nord User Samples (Unofficial) ';
 export const categories = {
   23: 'Acoustic',
   22: 'Arpeggio',
