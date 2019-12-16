@@ -11,6 +11,7 @@ import LoginLayout from '../common/LoginLayout';
 import InlineError from '../common/InlineError';
 import { loginStyles } from '../common/Common';
 import { dispatch } from '../../State';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 function SignInSide(props) {
   const classes = loginStyles();
@@ -109,6 +110,11 @@ function SignInSide(props) {
         <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled || hasErrors}>
           Sign In
         </Button>
+        {disabled && (
+          <Box m={2}>
+            <LinearProgress color='secondary' />
+          </Box>
+        )}
         {feedback && (
           <Grid container>
             <Grid item xs={12}>
