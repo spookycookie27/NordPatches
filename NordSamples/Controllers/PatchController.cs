@@ -40,6 +40,7 @@ namespace NordSamples.Controllers
             {
                 async Task<List<Data.Models.Patch>> PatchGetter() =>
                     await context.Patches
+                     .Where(x => !x.Removed)
                      .Include(x => x.Tags)
                      .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
@@ -90,13 +91,14 @@ namespace NordSamples.Controllers
 
         // PUT: api/Patches/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> PutPatch([FromRoute] int id, [FromBody] Patch patch)
         {
             if (!PatchExists(id))
             {
                 return NotFound();
             }
-
+            patch.DateUpdated = DateTime.Now;
             var exisitingPatch = context.Patches.Where(x => x.Id == id).Include(x => x.Tags).SingleOrDefault();
             context.Entry(exisitingPatch).CurrentValues.SetValues(patch);
             UpdateTags(id, patch, exisitingPatch);

@@ -17,6 +17,7 @@ namespace NordSamples.Models.ViewModels
         public Category Category { get; set; }
         public User User { get; set; }
         public int? ParentPatchId { get; set; }
+        public bool Removed { get; set; }
 
         public Patch Parent { get; set; }
         public ICollection<PatchFile> PatchFiles { get; set; }

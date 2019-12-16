@@ -8,6 +8,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import { categories, instruments, blobUrl } from '../../Constants';
 import Button from '@material-ui/core/Button';
 import { nufFileLink } from './Common';
 import FullPlayer from '../common/FullPlayer';
@@ -79,71 +80,74 @@ const PatchViewer = props => {
     const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
     const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
     return (
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Typography className={classes.title} color='textSecondary' gutterBottom>
-            {patch.name}
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Box m={2}>
-            {mp3s.map(mp3 => {
-              if (!mp3) return null;
-              return <FullPlayer src={`${nufFileLink}${mp3.attachId}`} key={mp3.id} duration progress />;
-            })}
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box>
-            <strong>User:</strong> {patch.user && patch.user.username}
-          </Box>
-          <Box>
-            <strong>Patch ID:</strong> {patch.id}
-          </Box>
-          <Box>
-            <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
-          </Box>
-          <Box>
-            <strong>Category:</strong> {patch.category ? patch.category.name : ''}
-          </Box>
-          <Box>
-            <strong>Description:</strong> {patch.description || 'tbc'}
-          </Box>
-          <Box>
-            <strong>Instrument Type:</strong> {patch.instrument && patch.instrument.name}
-          </Box>
-          <Box>
-            <strong>Parent ID:</strong> {patch.parentPatchId}
-          </Box>
-          <Box>
-            <strong>Link:</strong>{' '}
-            <a href={patch.link} target='_blank' rel='noopener noreferrer'>
-              Click
-            </a>
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box>{files.map(x => renderFile(x))}</Box>
-        </Grid>
-      </Grid>
+      <Card className={classes.mainCard} key={patch.id}>
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Typography className={classes.title} color='textSecondary' gutterBottom>
+                {patch.name}
+              </Typography>
+              <Box>
+                <strong>User:</strong> {patch.user && patch.user.username}
+              </Box>
+              <Box>
+                <strong>Patch ID:</strong> {patch.id}
+              </Box>
+              <Box>
+                <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
+              </Box>
+              <Box>
+                <strong>Category:</strong> {patch.categoryId && categories[patch.categoryId]}
+              </Box>
+              <Box>
+                <strong>Description:</strong> {patch.description || 'tbc'}
+              </Box>
+              <Box>
+                <strong>Instrument Type:</strong> {patch.instrumentId && instruments[patch.instrumentId]}
+              </Box>
+              <Box>
+                <strong>Parent ID:</strong> {patch.parentPatchId}
+              </Box>
+              <Box>
+                <strong>Link:</strong>{' '}
+                <a href={patch.link} target='_blank' rel='noopener noreferrer'>
+                  Click
+                </a>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography className={classes.title} color='textSecondary' gutterBottom>
+                Files
+              </Typography>
+              <Box m={3}>
+                {mp3s.map(mp3 => {
+                  if (!mp3) return null;
+                  const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
+                  return <FullPlayer src={link} key={mp3.id} duration progress filename={mp3.name} />;
+                })}
+              </Box>
+              <Box mt={2}>{files.map(x => renderFile(x))}</Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!patch) return null;
+  var hasVariations = patch.parent || patch.children.length > 0;
   return (
     <>
-      <DialogContent dividers>
-        <Card className={classes.mainCard}>
-          <CardContent>{renderPatch(patch)}</CardContent>
-          <CardContent>
-            <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
-              Variations
-            </Typography>
-            {patch.parent && renderPatch(patch.parent)}
-            {patch.children.map(x => renderPatch(x))}
-          </CardContent>
-        </Card>
-      </DialogContent>
+      <DialogContent>{renderPatch(patch)}</DialogContent>
+      {hasVariations && (
+        <DialogContent>
+          <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
+            Variations
+          </Typography>
+          {patch.parent && renderPatch(patch.parent)}
+          {patch.children.length > 0 && patch.children.map(x => renderPatch(x))}
+        </DialogContent>
+      )}
       <DialogActions>
         <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>
           Close

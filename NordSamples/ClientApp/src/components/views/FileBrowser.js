@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
@@ -47,8 +47,7 @@ function getFileData(file) {
 }
 
 const PatchBrowser = () => {
-  const [files] = useGlobalState('patches');
-  const [error, setError] = useState(false);
+  const [files] = useGlobalState('files');
   useEffect(() => {
     const getData = async () => {
       const url = '/api/file';
@@ -62,15 +61,14 @@ const PatchBrowser = () => {
           });
         })
         .catch(err => {
-          setError(true);
+          console.log(err);
         });
     };
     getData();
   }, []);
 
   return (
-    <div className='Patchlist'>
-      {error && <p>There was an error getting data</p>}
+    <div className='FilesList'>
       <MaterialTable
         options={{ pageSize: 20, padding: 'dense' }}
         columns={[
@@ -81,8 +79,9 @@ const PatchBrowser = () => {
           { title: 'Extension', field: 'extension' }
         ]}
         data={files}
-        title='Files List'
+        title='Files List (still in progress)'
         detailPanel={file => {
+          console.log(file);
           return (
             <Box m={2}>
               <Grid container spacing={3} justify='center'>

@@ -4,12 +4,13 @@ import MaterialTable from 'material-table';
 import Dialog from '@material-ui/core/Dialog';
 import PatchViewer from '../common/PatchViewer';
 import PatchEditor from '../common/PatchEditor';
+import PatchCreator from '../common/PatchCreator';
 import { nufFileLink } from '../common/Common';
 import FullPlayer from '../common/FullPlayer';
 import { useGlobalState } from '../../State';
 import { dispatch } from '../../State';
 import theme from '../../theme';
-import { categories, instruments } from '../../Constants';
+import { categories, instruments, blobUrl } from '../../Constants';
 
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
@@ -18,7 +19,6 @@ const PatchBrowser = props => {
   const [open, setOpen] = React.useState(false);
   const [patchId, setPatchId] = React.useState(null);
   const [action, setAction] = React.useState('view');
-  const preventDefault = event => event.preventDefault();
 
   const handleOpen = () => {
     setOpen(true);
@@ -48,8 +48,11 @@ const PatchBrowser = props => {
 
   const renderMp3 = patch => {
     const mp3s = patch && patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
-    if (!mp3s[0]) return null;
-    return <FullPlayer src={`${nufFileLink}${mp3s[0].attachId}`} onClick={preventDefault} inverse />;
+    if (mp3s.length === 0) return null;
+    return mp3s.map(mp3 => {
+      const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
+      return <FullPlayer src={link} key={mp3.id} inverse />;
+    });
   };
 
   const getTags = tags => {
@@ -65,6 +68,15 @@ const PatchBrowser = props => {
 
   const getActionConfig = () => {
     const actionsConfig = [
+      // {
+      //   icon: 'add',
+      //   tooltip: 'Add Patch',
+      //   isFreeAction: true,
+      //   onClick: event => {
+      //     setAction('create');
+      //     handleOpen();
+      //   }
+      // },
       {
         icon: 'chevron_right',
         onClick: (event, rowData) => {
@@ -86,10 +98,6 @@ const PatchBrowser = props => {
     }
     return actionsConfig;
   };
-
-  function getKeyByValue(object, value) {
-    return Object.keys(object).find(key => object[key] === value);
-  }
 
   return (
     <div className='Patchlist'>
@@ -167,6 +175,7 @@ const PatchBrowser = props => {
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
         {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
+        {action === 'create' && <PatchCreator onClose={handleClose} />}
       </Dialog>
     </div>
   );

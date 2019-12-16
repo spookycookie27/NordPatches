@@ -12,10 +12,16 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
+import { nufFileLink } from './Common';
+import Box from '@material-ui/core/Box';
+import FullPlayer from '../common/FullPlayer';
 import { makeStyles } from '@material-ui/core/styles';
-import { dispatch } from '../../State';
-import { categories, instruments } from '../../Constants';
+import { dispatch, useGlobalState } from '../../State';
+import { categories, instruments, blobUrl } from '../../Constants';
+import UploadDropZone from './UploadDropZone';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -32,14 +38,18 @@ const useStyles = makeStyles(theme => ({
 
 const PatchViewer = props => {
   const classes = useStyles();
+  const [user] = useGlobalState('user');
   const [patch, setPatch] = React.useState(null);
   const [name, setName] = React.useState('');
   const [link, setLink] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [instrumentId, setInstrumentId] = React.useState('');
   const [categoryId, setCategoryId] = React.useState('');
-  const [parentPatchId, setParentPatchId] = React.useState('');
   const [tags, setTags] = React.useState(null);
+  const [showDropZone, setShowDropZone] = React.useState(true);
+  const [removed, setRemoved] = React.useState(false);
+  const [parentPatchId, setParentPatchId] = React.useState('');
+  const [showSpinner, setShowSpinner] = React.useState(false);
   const isNameInvalid = name.length < 5 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   const isLinkInvalid = link.length > 1000;
@@ -54,8 +64,9 @@ const PatchViewer = props => {
       setLink(patch.link);
       setInstrumentId(patch.instrumentId);
       setCategoryId(patch.categoryId);
-      setParentPatchId(patch.parentPatchId);
+      setParentPatchId(patch.parentPatchId || '');
       setTags(patch.tags.map(x => x.name));
+      setRemoved(patch.removed);
     });
   };
 
@@ -71,6 +82,7 @@ const PatchViewer = props => {
     updatedPatch.categoryId = categoryId;
     updatedPatch.parentPatchId = parentPatchId;
     updatedPatch.tags = patchTags;
+    updatedPatch.removed = removed;
     const url = `/api/patch/${props.patchId}`;
     await RestUtilities.put(url, updatedPatch);
     dispatch({
@@ -91,8 +103,42 @@ const PatchViewer = props => {
       </MenuItem>
     ));
   };
+  const onUpload = async acceptedFiles => {
+    setShowSpinner(true);
+    console.log('showspinner = true');
+    const url = `/api/File/${props.patchId}`;
+    if (acceptedFiles.length > 0) {
+      acceptedFiles.forEach(async file => {
+        const formData = new FormData();
+        formData.append('File', file);
+        formData.append('PatchId', props.patchId);
+        formData.append('AppUserId', user.id);
+        formData.append('NufUserId', user.nufUserId);
+        formData.append('Extension', 'mp3');
+        const response = await RestUtilities.postFormData(url, formData);
+        if (response.ok) {
+          response.json().then(file => {
+            if (response.ok) {
+              patch.patchFiles.push({ file, patchId: props.patchId, fileId: file.id });
+              dispatch({
+                type: 'updatePatch',
+                patch: patch
+              });
+              setShowDropZone(false);
+              setShowSpinner(false);
+            } else {
+              console.log('not ok');
+            }
+          });
+        } else {
+          console.log('not ok');
+        }
+      });
+    }
+  };
 
   if (!patch) return null;
+  const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   return (
     <>
       <DialogContent dividers>
@@ -167,7 +213,7 @@ const PatchViewer = props => {
                   <InputLabel id='categoryLabel' className={classes.label}>
                     Category
                   </InputLabel>
-                  <Select fullWidth id='instrumentId' value={categoryId} onChange={event => setCategoryId(event.target.value)}>
+                  <Select fullWidth id='instrumentId' value={categoryId ? categoryId : 0} onChange={event => setCategoryId(event.target.value)}>
                     {renderOptions(categories)}
                   </Select>
                 </Grid>
@@ -186,17 +232,61 @@ const PatchViewer = props => {
                       freeSolo
                       renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant='outlined' label={option} {...getTagProps({ index })} />)}
                       renderInput={params => <TextField {...params} placeholder='Type tag and press return' fullWidth />}
-                      onChange={(event, value) => {
+                      onChange={(_event, value) => {
                         setTags(value);
                       }}
                     />
                   </Grid>
                 ) : null}
+                <Grid item xs={6}>
+                  <TextField
+                    value={parentPatchId}
+                    fullWidth
+                    type='number'
+                    id='parentPatchId'
+                    label='Parent PatchID'
+                    name='parentPatchId'
+                    onChange={event => setParentPatchId(event.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControlLabel
+                    value='start'
+                    control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
+                    label='Remove (duplicate)'
+                    labelPlacement='start'
+                  />
+                </Grid>
               </Grid>
             </form>
           </CardContent>
+          <CardContent>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography className={classes.title} color='textSecondary' gutterBottom>
+                  {mp3s.length === 0 ? 'Add Mp3' : 'Mp3'}
+                </Typography>
+              </Grid>
+
+              {showDropZone && (
+                <Grid item xs={6}>
+                  <UploadDropZone patchId={patch.id} accept='audio/mp3' extension='mp3' onAccept={onUpload} showSpinner={showSpinner} />
+                </Grid>
+              )}
+              <Grid item xs={6}>
+                <Box m={2}>
+                  {mp3s.map(mp3 => {
+                    if (!mp3) return null;
+                    const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
+                    return <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />;
+                  })}
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
         </Card>
       </DialogContent>
+
       <DialogActions>
         <Button size='small' color='primary' variant='contained' onClick={handleUpdate}>
           Update

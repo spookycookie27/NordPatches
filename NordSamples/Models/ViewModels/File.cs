@@ -15,5 +15,6 @@ namespace NordSamples.Models.ViewModels
         public int? NufUserId { get; set; }
         public int AttachId { get; set; }
         public string AppUserId { get; set; }
+        public bool IsBlob { get; set; }
     }
 }

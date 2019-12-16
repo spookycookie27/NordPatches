@@ -23,6 +23,11 @@ const useStyles = makeStyles(theme => ({
   controls: {
     display: 'flex',
     alignItems: 'center'
+  },
+  title: {
+    margin: 0,
+    padding: '0 !important',
+    fontSize: '12px'
   }
 }));
 
@@ -62,6 +67,11 @@ const FullPlayer = props => {
       </Grid>
       {props.progress && (
         <Grid item xs={8}>
+          {props.filename && (
+            <Grid item xs={12} className={classes.title}>
+              {props.filename}
+            </Grid>
+          )}
           <progress max={1} value={played} style={{ width: '100%' }} />
         </Grid>
       )}
