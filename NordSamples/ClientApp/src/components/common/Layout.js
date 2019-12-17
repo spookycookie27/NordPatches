@@ -16,6 +16,8 @@ import Link from '@material-ui/core/Link';
 import PersonIcon from '@material-ui/icons/Person';
 import { useGlobalState } from '../../State';
 import { siteName } from '../../Constants';
+import { signOut } from '../../services/Auth';
+import { dispatch } from '../../State';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -110,6 +112,14 @@ const Link1 = React.forwardRef((props, ref) => <RouterLink innerRef={ref} {...pr
 function Layout(props) {
   const [user] = useGlobalState('user');
   const classes = useStyles();
+  const onSignoutClick = () => {
+    signOut();
+    dispatch({
+      type: 'setUser',
+      user: null
+    });
+  };
+
   return (
     <div className={classes.root}>
       <HideOnScroll {...props}>
@@ -135,6 +145,9 @@ function Layout(props) {
                 <Typography variant='body2' color='inherit'>
                   {user.username}
                 </Typography>
+                <Button variant='outlined' className={classes.link} onClick={onSignoutClick}>
+                  Logout
+                </Button>
               </>
             )}
             {!user && (

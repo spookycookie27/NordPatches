@@ -138,16 +138,18 @@ const PatchViewer = props => {
   var hasVariations = patch.parent || patch.children.length > 0;
   return (
     <>
-      <DialogContent>{renderPatch(patch)}</DialogContent>
-      {hasVariations && (
-        <DialogContent>
-          <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
-            Variations
-          </Typography>
-          {patch.parent && renderPatch(patch.parent)}
-          {patch.children.length > 0 && patch.children.map(x => renderPatch(x))}
-        </DialogContent>
-      )}
+      <DialogContent>
+        {renderPatch(patch)}
+        {hasVariations && (
+          <>
+            <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
+              Variations
+            </Typography>
+            {patch.parent && renderPatch(patch.parent)}
+            {patch.children.length > 0 && patch.children.map(x => renderPatch(x))}
+          </>
+        )}
+      </DialogContent>
       <DialogActions>
         <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>
           Close
