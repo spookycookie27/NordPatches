@@ -15,6 +15,7 @@ import { categories, instruments, blobUrl } from '../../Constants';
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
   const [user] = useGlobalState('user');
+  const [pageSize] = useGlobalState('pageSize');
   const [error, setError] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [patchId, setPatchId] = React.useState(null);
@@ -66,6 +67,13 @@ const PatchBrowser = props => {
       : null;
   };
 
+  const handlePageSizeChange = size => {
+    dispatch({
+      type: 'setPageSize',
+      pageSize: size
+    });
+  };
+
   const getActionConfig = () => {
     const actionsConfig = [
       // {
@@ -111,7 +119,7 @@ const PatchBrowser = props => {
         }}
         actions={getActionConfig()}
         options={{
-          pageSize: 10
+          pageSize: pageSize
         }}
         columns={[
           { title: 'Id', field: 'id' },
@@ -171,6 +179,7 @@ const PatchBrowser = props => {
         ]}
         data={patches}
         title='Patches List'
+        onChangeRowsPerPage={handlePageSizeChange}
       />
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}

@@ -13,12 +13,9 @@ import CardContent from '@material-ui/core/CardContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
-import { nufFileLink } from './Common';
-import Box from '@material-ui/core/Box';
-import FullPlayer from '../common/FullPlayer';
 import { makeStyles } from '@material-ui/core/styles';
 import { dispatch } from '../../State';
-import { categories, instruments, blobUrl } from '../../Constants';
+import { categories, instruments } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
 
 const useStyles = makeStyles(theme => ({
@@ -41,10 +38,10 @@ const PatchCreator = props => {
   const [description, setDescription] = React.useState('');
   const [instrumentId, setInstrumentId] = React.useState('');
   const [categoryId, setCategoryId] = React.useState('');
-  const [tags, setTags] = React.useState(null);
+  const [tags, setTags] = React.useState('');
   const [patchFiles, setPatchFiles] = React.useState([]);
-  const [showDropZone, setShowDropZone] = React.useState(true);
-  const [parentPatchId, setParentPatchId] = React.useState(null);
+  const [files, setFiles] = React.useState([]);
+  const [parentPatchId, setParentPatchId] = React.useState('');
   const isNameInvalid = name.length < 5 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   // const isLinkInvalid = link.length > 1000;
@@ -76,13 +73,16 @@ const PatchCreator = props => {
       </MenuItem>
     ));
   };
-  const onUpload = file => {
-    const pf = patchFiles.push({ file, fileId: file.id });
+
+  const onUploadFiles = files => {
+    setFiles(files);
+    var pf = [];
+    files.forEach(file => {
+      pf.push({ file, fileId: file.id });
+    });
     setPatchFiles(pf);
-    setShowDropZone(false);
   };
 
-  const mp3s = patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   return (
     <>
       <DialogContent dividers>
@@ -131,7 +131,7 @@ const PatchCreator = props => {
                   <InputLabel id='typeLabel' className={classes.label}>
                     Type
                   </InputLabel>
-                  <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
+                  <Select fullWidth id='instrumentId' value={instrumentId ? instrumentId : 1} onChange={event => setInstrumentId(event.target.value)} required>
                     {renderOptions(instruments)}
                   </Select>
                 </Grid>
@@ -173,6 +173,18 @@ const PatchCreator = props => {
                     onChange={event => setParentPatchId(event.target.value)}
                   />
                 </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    minLength={0}
+                    maxLength={1000}
+                    value={link}
+                    fullWidth
+                    id='link'
+                    label='Web Link'
+                    name='link'
+                    onChange={event => setLink(event.target.value)}
+                  />
+                </Grid>
               </Grid>
             </form>
           </CardContent>
@@ -180,24 +192,9 @@ const PatchCreator = props => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Typography className={classes.title} color='textSecondary' gutterBottom>
-                  Edit MP3s
+                  Add Nord Files and Mp3s
                 </Typography>
-              </Grid>
-
-              {showDropZone && (
-                <Grid item xs={6}>
-                  <UploadDropZone accept='audio/mp3' extension='mp3' onUpload={onUpload} />
-                </Grid>
-              )}
-
-              <Grid item xs={6}>
-                <Box m={2}>
-                  {mp3s.map(mp3 => {
-                    if (!mp3) return null;
-                    const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
-                    return <FullPlayer src={link} key={mp3.id} duration progress />;
-                  })}
-                </Box>
+                <UploadDropZone onAccept={onUploadFiles} auto />
               </Grid>
             </Grid>
           </CardContent>

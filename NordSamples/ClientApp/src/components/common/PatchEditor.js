@@ -13,6 +13,7 @@ import CardContent from '@material-ui/core/CardContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
 import { nufFileLink } from './Common';
@@ -33,6 +34,14 @@ const useStyles = makeStyles(theme => ({
   label: { fontSize: '12px' },
   submit: {
     margin: theme.spacing(3, 0, 2)
+  },
+  fileContainer: {
+    padding: theme.spacing(1),
+    marginBottom: theme.spacing(2)
+  },
+  file: {
+    color: 'inherit',
+    textDecoration: 'none'
   }
 }));
 
@@ -46,30 +55,60 @@ const PatchViewer = props => {
   const [instrumentId, setInstrumentId] = React.useState('');
   const [categoryId, setCategoryId] = React.useState('');
   const [tags, setTags] = React.useState(null);
-  const [showDropZone, setShowDropZone] = React.useState(true);
   const [removed, setRemoved] = React.useState(false);
   const [parentPatchId, setParentPatchId] = React.useState('');
   const [showSpinner, setShowSpinner] = React.useState(false);
+  const [acceptedFiles, setAcceptedFiles] = React.useState([]);
   const isNameInvalid = name.length < 5 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   const isLinkInvalid = link.length > 1000;
 
-  const getData = async () => {
-    const url = `/api/patch/${props.patchId}`;
-    const res = await RestUtilities.get(url);
-    res.json().then(patch => {
-      setPatch(patch);
-      setName(patch.name);
-      setDescription(patch.description);
-      setLink(patch.link);
-      setInstrumentId(patch.instrumentId);
-      setCategoryId(patch.categoryId);
-      setParentPatchId(patch.parentPatchId || '');
-      setTags(patch.tags.map(x => x.name));
-      setRemoved(patch.removed);
+  const getExtension = file => {
+    const regex = /(?:\.([^.]+))?$/;
+    const type = file.type;
+    const actualExtension = regex.exec(file.name)[1];
+    return type.startsWith('audio') ? 'mp3' : actualExtension;
+  };
+
+  const onAccept = files => {
+    setAcceptedFiles(files);
+  };
+
+  const uploadFiles = async () => {
+    const url = `/api/File/${props.patchId}`;
+    acceptedFiles.forEach((file, i) => {
+      const formData = new FormData();
+      formData.append('File', file);
+      formData.append('PatchId', props.patchId);
+      formData.append('AppUserId', user.id);
+      formData.append('NufUserId', user.nufUserId);
+      formData.append('Extension', getExtension(file));
+      RestUtilities.postFormData(url, formData).then(response => {
+        if (response.ok) {
+          response.json().then(file => {
+            patch.patchFiles.push({ file, patchId: props.patchId, fileId: file.id });
+            dispatch({
+              type: 'updatePatch',
+              patch: patch
+            });
+            if (i === acceptedFiles.length - 1) {
+              setShowSpinner(false);
+              handleUpdate();
+            }
+          });
+        }
+      });
     });
   };
 
+  const handleUpdateClick = () => {
+    if (acceptedFiles.length > 0) {
+      setShowSpinner(true);
+      uploadFiles();
+    } else {
+      handleUpdate();
+    }
+  };
   const handleUpdate = async () => {
     const patchTags = tags.map(x => {
       return { patchId: props.patchId, name: x };
@@ -93,9 +132,27 @@ const PatchViewer = props => {
   };
 
   useEffect(() => {
+    const getData = async () => {
+      const url = `/api/patch/${props.patchId}`;
+      const res = await RestUtilities.get(url);
+      res.json().then(patch => {
+        setPatch(patch);
+        setName(patch.name);
+        setDescription(patch.description);
+        setLink(patch.link);
+        setInstrumentId(patch.instrumentId);
+        setCategoryId(patch.categoryId);
+        setParentPatchId(patch.parentPatchId || '');
+        setTags(patch.tags.map(x => x.name));
+        setRemoved(patch.removed);
+      });
+    };
     getData();
-  }, []);
+  }, [props]);
 
+  if (!patch) return null;
+  const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
+  const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
   const renderOptions = entity => {
     return Object.entries(entity).map(([key, value]) => (
       <MenuItem key={key} value={key}>
@@ -103,42 +160,30 @@ const PatchViewer = props => {
       </MenuItem>
     ));
   };
-  const onUpload = async acceptedFiles => {
-    setShowSpinner(true);
-    console.log('showspinner = true');
-    const url = `/api/File/${props.patchId}`;
-    if (acceptedFiles.length > 0) {
-      acceptedFiles.forEach(async file => {
-        const formData = new FormData();
-        formData.append('File', file);
-        formData.append('PatchId', props.patchId);
-        formData.append('AppUserId', user.id);
-        formData.append('NufUserId', user.nufUserId);
-        formData.append('Extension', 'mp3');
-        const response = await RestUtilities.postFormData(url, formData);
-        if (response.ok) {
-          response.json().then(file => {
-            if (response.ok) {
-              patch.patchFiles.push({ file, patchId: props.patchId, fileId: file.id });
-              dispatch({
-                type: 'updatePatch',
-                patch: patch
-              });
-              setShowDropZone(false);
-              setShowSpinner(false);
-            } else {
-              console.log('not ok');
-            }
-          });
-        } else {
-          console.log('not ok');
-        }
-      });
-    }
+
+  const renderFile = file => {
+    return (
+      <Paper className={classes.fileContainer} key={file.id}>
+        <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
+          <Box>
+            <Box>
+              <strong>Name:</strong> {file.name}
+            </Box>
+            <Box>
+              <strong>File ID:</strong> {file.id}
+            </Box>
+            <Box>
+              <strong>Size (bytes):</strong> {file.size}
+            </Box>
+            <Box>
+              <strong>Version:</strong> {file.version + 1}
+            </Box>
+          </Box>
+        </a>
+      </Paper>
+    );
   };
 
-  if (!patch) return null;
-  const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   return (
     <>
       <DialogContent dividers>
@@ -262,24 +307,27 @@ const PatchViewer = props => {
           </CardContent>
           <CardContent>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography className={classes.title} color='textSecondary' gutterBottom>
-                  {mp3s.length === 0 ? 'Add Mp3' : 'Mp3'}
-                </Typography>
-              </Grid>
-
-              {showDropZone && (
-                <Grid item xs={6}>
-                  <UploadDropZone patchId={patch.id} accept='audio/mp3' extension='mp3' onAccept={onUpload} showSpinner={showSpinner} />
-                </Grid>
-              )}
               <Grid item xs={6}>
-                <Box m={2}>
-                  {mp3s.map(mp3 => {
-                    if (!mp3) return null;
-                    const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
-                    return <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />;
-                  })}
+                <Typography className={classes.title} color='textSecondary'>
+                  Existing Files
+                </Typography>
+                {mp3s.map(mp3 => {
+                  if (!mp3) return null;
+                  const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
+                  return (
+                    <Box m={3}>
+                      <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />
+                    </Box>
+                  );
+                })}
+                <Box mt={2}>{files.map(x => renderFile(x))}</Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography className={classes.title} color='textSecondary'>
+                  Add Files
+                </Typography>
+                <Box my={2}>
+                  <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} />
                 </Box>
               </Grid>
             </Grid>
@@ -288,7 +336,7 @@ const PatchViewer = props => {
       </DialogContent>
 
       <DialogActions>
-        <Button size='small' color='primary' variant='contained' onClick={handleUpdate}>
+        <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick}>
           Update
         </Button>
         <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>

@@ -14,7 +14,8 @@ const applyMiddleware = (...args) => creator => {
 const defaultState = {
   user: null,
   patches: [],
-  files: []
+  files: [],
+  pageSize: 10
 };
 
 const LOCAL_STORAGE_KEY = 'nord-samples';
@@ -24,7 +25,7 @@ const parseState = str => {
 };
 
 const stateFromStorage = parseState(localStorage.getItem(LOCAL_STORAGE_KEY));
-const initialState = stateFromStorage || defaultState;
+const initialState = { ...defaultState, ...stateFromStorage };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
@@ -42,6 +43,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         files: action.files
+      };
+    case 'setPageSize':
+      return {
+        ...state,
+        pageSize: action.pageSize
       };
     case 'updatePatch': {
       const foundIndex = state.patches.findIndex(x => x.id === action.patch.id);

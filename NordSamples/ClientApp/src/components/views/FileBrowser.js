@@ -48,6 +48,7 @@ function getFileData(file) {
 
 const PatchBrowser = () => {
   const [files] = useGlobalState('files');
+  const [pageSize] = useGlobalState('pageSize');
   useEffect(() => {
     const getData = async () => {
       const url = '/api/file';
@@ -67,10 +68,17 @@ const PatchBrowser = () => {
     getData();
   }, []);
 
+  const handlePageSizeChange = size => {
+    dispatch({
+      type: 'setPageSize',
+      pageSize: size
+    });
+  };
+
   return (
     <div className='FilesList'>
       <MaterialTable
-        options={{ pageSize: 20, padding: 'dense' }}
+        options={{ pageSize: pageSize, padding: 'dense' }}
         columns={[
           { title: 'ID', field: 'id' },
           { title: 'Name', field: 'name' },
@@ -80,6 +88,7 @@ const PatchBrowser = () => {
         ]}
         data={files}
         title='Files List (still in progress)'
+        onChangeRowsPerPage={handlePageSizeChange}
         detailPanel={file => {
           console.log(file);
           return (

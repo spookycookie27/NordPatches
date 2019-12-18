@@ -133,10 +133,10 @@ function Layout(props) {
                 Home
               </Link>
               <Link variant='button' component={Link1} to='/patches' className={classes.link}>
-                Browse Patches
+                Patches
               </Link>
               <Link variant='button' component={Link1} to='/files' className={classes.link}>
-                Browse Files
+                Files
               </Link>
             </nav>
             {user && (

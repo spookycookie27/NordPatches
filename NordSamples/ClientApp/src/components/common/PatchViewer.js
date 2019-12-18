@@ -42,18 +42,18 @@ const PatchViewer = props => {
   const classes = useStyles();
   const [patch, setPatch] = React.useState(null);
 
-  async function getData() {
-    const url = `/api/patch/${props.patchId}`;
-    const res = await RestUtilities.get(url);
-    res.json().then(patch => {
-      setPatch(patch);
-    });
-  }
   useEffect(() => {
+    const getData = async () => {
+      const url = `/api/patch/${props.patchId}`;
+      const res = await RestUtilities.get(url);
+      res.json().then(patch => {
+        setPatch(patch);
+      });
+    };
     getData();
-  }, []);
+  }, [props]);
 
-  function renderFile(file) {
+  const renderFile = file => {
     return (
       <Paper className={classes.fileContainer} key={file.id}>
         <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
@@ -74,7 +74,7 @@ const PatchViewer = props => {
         </a>
       </Paper>
     );
-  }
+  };
 
   function renderPatch(patch) {
     const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
