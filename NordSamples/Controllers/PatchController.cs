@@ -89,6 +89,24 @@ namespace NordSamples.Controllers
             return model;
         }
 
+        // POST: api/Patches
+        [HttpPost]
+        [Authorize(Roles = "Administrator,User")]
+        public async Task<ActionResult<Patch>> PostPatch(Patch patch)
+        {
+            var patchToInsert = mapper.Map<Data.Models.Patch>(patch);
+            patchToInsert.DateCreated = DateTime.UtcNow;
+            patchToInsert.Tags = new List<NordSamples.Data.Models.Tag>();
+            foreach (var tag in patch.Tags)
+            {
+                patchToInsert.Tags.Add(new Data.Models.Tag { Name = tag.Name });
+            }
+            context.Patches.Add(patchToInsert);
+            await context.SaveChangesAsync();
+
+            return CreatedAtAction("GetPatch", patchToInsert);
+        }
+
         // PUT: api/Patches/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Administrator")]
@@ -98,7 +116,7 @@ namespace NordSamples.Controllers
             {
                 return NotFound();
             }
-            patch.DateUpdated = DateTime.Now;
+            patch.DateUpdated = DateTime.UtcNow;
             var exisitingPatch = context.Patches.Where(x => x.Id == id).Include(x => x.Tags).SingleOrDefault();
             context.Entry(exisitingPatch).CurrentValues.SetValues(patch);
             UpdateTags(id, patch, exisitingPatch);
@@ -133,34 +151,33 @@ namespace NordSamples.Controllers
                     tagsToRemove.Add(tag);
                 }
             }
+            // foreach (var tag in patch.Tags)
+            // {
+            //     if (!exisitingPatch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id))
+            //     {
+            //         var newTag = new NordSamples.Data.Models.Tag { PatchId = id, Name = tag.Name };
+            //         tagsToAdd.Add(newTag);
+            //     }
+            // }
+            //context.Tags.AddRange(tagsToAdd);
+            context.Tags.RemoveRange(tagsToRemove);
+        }
+
+        private void InsertTags(Patch patch, Data.Models.Patch patchToInsert)
+        {
+            var tagsToAdd = new List<NordSamples.Data.Models.Tag>();
             foreach (var tag in patch.Tags)
             {
-                if (!exisitingPatch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id))
-                {
-                    var newTag = new NordSamples.Data.Models.Tag { PatchId = id, Name = tag.Name };
-                    tagsToAdd.Add(newTag);
-                }
+                var newTag = new NordSamples.Data.Models.Tag { Name = tag.Name, Patch = patchToInsert };
+                tagsToAdd.Add(newTag);
             }
             context.Tags.AddRange(tagsToAdd);
-            context.Tags.RemoveRange(tagsToRemove);
         }
 
         private bool PatchExists(int id)
         {
             return context.Patches.Any(e => e.Id == id);
         }
-
-        // POST: api/Patches
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
-        // [HttpPost]
-        // public async Task<ActionResult<Patch>> PostPatch(Patch patch)
-        // {
-        //     context.Patches.Add(patch);
-        //     await context.SaveChangesAsync();
-
-        //     return CreatedAtAction("GetPatch", new { id = patch.Id }, patch);
-        // }
 
         // DELETE: api/Patches/5
         // [HttpDelete("{id}")]

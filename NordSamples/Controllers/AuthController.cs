@@ -144,14 +144,14 @@ namespace NordSamples.Controllers
             bool isAdmin = roles.Contains(Constants.AdministratorRole);
             string roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
-            DateTime tokenExpiry = DateTime.Now.AddMinutes(60);
+            DateTime tokenExpiry = DateTime.UtcNow.AddMinutes(60);
 
             var claims = new[] {
                     new Claim(ClaimTypes.Name, appUser.Email),
                     new Claim(JwtRegisteredClaimNames.Sub, appUser.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Exp, $"{new DateTimeOffset(tokenExpiry).ToUnixTimeSeconds()}"),
-                    new Claim(JwtRegisteredClaimNames.Nbf, $"{new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds()}") ,
+                    new Claim(JwtRegisteredClaimNames.Nbf, $"{new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()}") ,
                     new Claim(ClaimTypes.Role, roleToUse),
                 };
 

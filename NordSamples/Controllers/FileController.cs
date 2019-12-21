@@ -53,7 +53,7 @@ namespace NordSamples.Controllers
             {
                 Name = blob.Name,
                 Comment = comment,
-                DateCreated = DateTime.Now,
+                DateCreated = DateTime.UtcNow,
                 AppUserId = appUserId,
                 NufUserId = nufUserId,
                 IsBlob = true,

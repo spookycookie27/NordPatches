@@ -184,7 +184,6 @@ const PatchBrowser = props => {
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
         {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
-        {action === 'create' && <PatchCreator onClose={handleClose} />}
       </Dialog>
     </div>
   );

@@ -6,6 +6,7 @@ import Register from './components/views/Register';
 import ForgotPassword from './components/views/ForgotPassword';
 import ResetPassword from './components/views/ResetPassword';
 import Home from './components/views/Home';
+import AddPatch from './components/views/AddPatch';
 import PatchBrowser from './components/views/PatchBrowser';
 import FileBrowser from './components/views/FileBrowser';
 import { isSignedIn } from './services/Auth';
@@ -30,6 +31,7 @@ const App = () => (
           <Route path='/resetPassword' component={ResetPassword} />
           <Layout>
             <Route exact path='/' component={Home} />
+            <PrivateRoute exact path='/addpatch' component={AddPatch} />
             <PrivateRoute exact path='/patches' component={PatchBrowser} />
             <PrivateRoute exact path='/files' component={FileBrowser} />
           </Layout>

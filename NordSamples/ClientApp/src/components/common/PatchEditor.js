@@ -58,8 +58,9 @@ const PatchViewer = props => {
   const [removed, setRemoved] = React.useState(false);
   const [parentPatchId, setParentPatchId] = React.useState('');
   const [showSpinner, setShowSpinner] = React.useState(false);
+  const [disableUpdate, setDisableUpdate] = React.useState(false);
   const [acceptedFiles, setAcceptedFiles] = React.useState([]);
-  const isNameInvalid = name.length < 5 || name.length > 255;
+  const isNameInvalid = name.length < 1 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   const isLinkInvalid = link.length > 1000;
 
@@ -87,13 +88,9 @@ const PatchViewer = props => {
         if (response.ok) {
           response.json().then(file => {
             patch.patchFiles.push({ file, patchId: props.patchId, fileId: file.id });
-            dispatch({
-              type: 'updatePatch',
-              patch: patch
-            });
             if (i === acceptedFiles.length - 1) {
+              handleUpdate(patch);
               setShowSpinner(false);
-              handleUpdate();
             }
           });
         }
@@ -102,18 +99,19 @@ const PatchViewer = props => {
   };
 
   const handleUpdateClick = () => {
+    setDisableUpdate(true);
     if (acceptedFiles.length > 0) {
       setShowSpinner(true);
       uploadFiles();
     } else {
-      handleUpdate();
+      handleUpdate(patch);
     }
   };
-  const handleUpdate = async () => {
+
+  const handleUpdate = async updatedPatch => {
     const patchTags = tags.map(x => {
       return { patchId: props.patchId, name: x };
     });
-    const updatedPatch = patch;
     updatedPatch.name = name;
     updatedPatch.link = link;
     updatedPatch.description = description;
@@ -201,7 +199,6 @@ const PatchViewer = props => {
                     <Grid item xs={6}>
                       <TextField
                         autoFocus
-                        minLength={5}
                         maxLength={255}
                         value={name}
                         required
@@ -258,7 +255,7 @@ const PatchViewer = props => {
                   <InputLabel id='categoryLabel' className={classes.label}>
                     Category
                   </InputLabel>
-                  <Select fullWidth id='instrumentId' value={categoryId ? categoryId : 0} onChange={event => setCategoryId(event.target.value)}>
+                  <Select fullWidth id='categoryId' value={categoryId ? categoryId : 0} onChange={event => setCategoryId(event.target.value)}>
                     {renderOptions(categories)}
                   </Select>
                 </Grid>
@@ -336,7 +333,7 @@ const PatchViewer = props => {
       </DialogContent>
 
       <DialogActions>
-        <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick}>
+        <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disable={disableUpdate}>
           Update
         </Button>
         <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>

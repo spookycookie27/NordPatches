@@ -54,6 +54,10 @@ const reducer = (state = initialState, action) => {
       state.patches[foundIndex] = action.patch;
       return { ...state };
     }
+    case 'insertPatch': {
+      state.patches.push(action.patch);
+      return { ...state };
+    }
     default:
       return state;
   }

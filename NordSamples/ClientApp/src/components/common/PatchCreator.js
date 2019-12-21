@@ -14,9 +14,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
-import { dispatch } from '../../State';
 import { categories, instruments } from '../../Constants';
+import { dispatch, useGlobalState } from '../../State';
 import UploadDropZone from './UploadDropZone';
+import { CardActions } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -33,20 +34,34 @@ const useStyles = makeStyles(theme => ({
 
 const PatchCreator = props => {
   const classes = useStyles();
+  const [user] = useGlobalState('user');
   const [name, setName] = React.useState('');
   const [link, setLink] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [instrumentId, setInstrumentId] = React.useState('');
-  const [categoryId, setCategoryId] = React.useState('');
-  const [tags, setTags] = React.useState('');
-  const [patchFiles, setPatchFiles] = React.useState([]);
+  const [instrumentId, setInstrumentId] = React.useState(1);
+  const [categoryId, setCategoryId] = React.useState(0);
+  const [tags, setTags] = React.useState([]);
   const [files, setFiles] = React.useState([]);
   const [parentPatchId, setParentPatchId] = React.useState('');
+  const [showSpinner, setShowSpinner] = React.useState(false);
+  const [disable, setDisable] = React.useState(false);
   const isNameInvalid = name.length < 5 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
-  // const isLinkInvalid = link.length > 1000;
+  const isLinkInvalid = link.length > 1000;
+
+  const getExtension = file => {
+    const regex = /(?:\.([^.]+))?$/;
+    const type = file.type;
+    const actualExtension = regex.exec(file.name)[1];
+    return type.startsWith('audio') ? 'mp3' : actualExtension;
+  };
 
   const handleInsert = async () => {
+    setShowSpinner(true);
+    setDisable(true);
+    const patchTags = tags.map(x => {
+      return { name: x };
+    });
     const newPatch = {
       name,
       link,
@@ -54,16 +69,42 @@ const PatchCreator = props => {
       instrumentId,
       categoryId,
       parentPatchId,
-      tags
+      tags: patchTags,
+      user
     };
     const url = `/api/patch/`;
-    await RestUtilities.post(url, newPatch);
-    dispatch({
-      type: 'insertPatch',
-      patch: newPatch
-    });
-    // next handle files upload
-    props.onClose();
+    const response = await RestUtilities.post(url, newPatch);
+    if (response.ok) {
+      const insertedPatch = await response.json();
+      if (files.length > 0) {
+        const url = `/api/File/${insertedPatch.id}`;
+        files.forEach(async (file, i) => {
+          const formData = new FormData();
+          formData.append('File', file);
+          formData.append('PatchId', insertedPatch.id);
+          formData.append('AppUserId', user.id);
+          formData.append('NufUserId', user.nufUserId);
+          formData.append('Extension', getExtension(file));
+          var response = await RestUtilities.postFormData(url, formData);
+          if (response.ok) {
+            response.json().then(file => {
+              insertedPatch.patchFiles.push({ file, patchId: insertedPatch.id, fileId: file.id });
+              if (i === files.length - 1) {
+                const url = `/api/patch/${insertedPatch.id}`;
+                RestUtilities.put(url, insertedPatch);
+                dispatch({
+                  type: 'insertPatch',
+                  patch: insertedPatch
+                });
+                setShowSpinner(false);
+              }
+            });
+          }
+        });
+      } else {
+        setShowSpinner(false);
+      }
+    }
   };
 
   const renderOptions = entity => {
@@ -76,140 +117,127 @@ const PatchCreator = props => {
 
   const onUploadFiles = files => {
     setFiles(files);
-    var pf = [];
-    files.forEach(file => {
-      pf.push({ file, fileId: file.id });
-    });
-    setPatchFiles(pf);
   };
 
   return (
-    <>
-      <DialogContent dividers>
-        <Card className={classes.mainCard}>
-          <CardContent>
-            <form className={classes.root} noValidate autoComplete='off'>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography className={classes.title} color='textSecondary' gutterBottom>
-                    Create Patch
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    autoFocus
-                    minLength={5}
-                    maxLength={255}
-                    value={name}
-                    required
-                    fullWidth
-                    id='name'
-                    label='Name'
-                    name='name'
-                    onChange={event => setName(event.target.value)}
-                    error={isNameInvalid && !!name}
-                    helperText={isNameInvalid && !!name && 'Must be less than 255 characters'}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    multiline
-                    rowsMax='2'
-                    minLength={0}
-                    maxLength={1000}
-                    value={description}
-                    fullWidth
-                    id='description'
-                    label='Description'
-                    name='description'
-                    onChange={event => setDescription(event.target.value)}
-                    error={isDescriptionInvalid && !!description}
-                    helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <InputLabel id='typeLabel' className={classes.label}>
-                    Type
-                  </InputLabel>
-                  <Select fullWidth id='instrumentId' value={instrumentId ? instrumentId : 1} onChange={event => setInstrumentId(event.target.value)} required>
-                    {renderOptions(instruments)}
-                  </Select>
-                </Grid>
-                <Grid item xs={6}>
-                  <InputLabel id='categoryLabel' className={classes.label}>
-                    Category
-                  </InputLabel>
-                  <Select fullWidth id='instrumentId' value={categoryId ? categoryId : 0} onChange={event => setCategoryId(event.target.value)}>
-                    {renderOptions(categories)}
-                  </Select>
-                </Grid>
-                <Grid item xs={12}>
-                  <InputLabel id='categoryLabel' className={classes.label}>
-                    Tags
-                  </InputLabel>
-                  <Autocomplete
-                    autoHighlight={false}
-                    autoComplete={true}
-                    multiple
-                    id='tags-standard'
-                    size='medium'
-                    value={tags}
-                    freeSolo
-                    renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant='outlined' label={option} {...getTagProps({ index })} />)}
-                    renderInput={params => <TextField {...params} placeholder='Type tag and press return' fullWidth />}
-                    onChange={(_event, value) => {
-                      setTags(value);
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    value={parentPatchId}
-                    fullWidth
-                    type='number'
-                    id='parentPatchId'
-                    label='Parent PatchID'
-                    name='parentPatchId'
-                    onChange={event => setParentPatchId(event.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    minLength={0}
-                    maxLength={1000}
-                    value={link}
-                    fullWidth
-                    id='link'
-                    label='Web Link'
-                    name='link'
-                    onChange={event => setLink(event.target.value)}
-                  />
-                </Grid>
-              </Grid>
-            </form>
-          </CardContent>
-          <CardContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography className={classes.title} color='textSecondary' gutterBottom>
-                  Add Nord Files and Mp3s
-                </Typography>
-                <UploadDropZone onAccept={onUploadFiles} auto />
-              </Grid>
+    <Card className={classes.mainCard}>
+      <CardContent>
+        <form className={classes.root} noValidate autoComplete='off'>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography className={classes.title} color='textSecondary' gutterBottom>
+                Create Patch
+              </Typography>
             </Grid>
-          </CardContent>
-        </Card>
-      </DialogContent>
-
-      <DialogActions>
-        <Button size='small' color='primary' variant='contained' onClick={handleInsert}>
+            <Grid item xs={6}>
+              <TextField
+                autoFocus
+                minLength={5}
+                maxLength={255}
+                value={name}
+                required
+                fullWidth
+                id='name'
+                label='Name'
+                name='name'
+                onChange={event => setName(event.target.value)}
+                error={isNameInvalid && !!name}
+                helperText={isNameInvalid && !!name && 'Must be less than 255 characters'}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                multiline
+                rowsMax='2'
+                minLength={0}
+                maxLength={1000}
+                value={description}
+                fullWidth
+                id='description'
+                label='Description'
+                name='description'
+                onChange={event => setDescription(event.target.value)}
+                error={isDescriptionInvalid && !!description}
+                helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <InputLabel id='typeLabel' className={classes.label}>
+                Type
+              </InputLabel>
+              <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
+                {renderOptions(instruments)}
+              </Select>
+            </Grid>
+            <Grid item xs={6}>
+              <InputLabel id='categoryLabel' className={classes.label}>
+                Category
+              </InputLabel>
+              <Select fullWidth id='categoryId' value={categoryId} onChange={event => setCategoryId(event.target.value)} required>
+                {renderOptions(categories)}
+              </Select>
+            </Grid>
+            <Grid item xs={12}>
+              <InputLabel id='categoryLabel' className={classes.label}>
+                Tags
+              </InputLabel>
+              <Autocomplete
+                autoHighlight={false}
+                autoComplete={true}
+                multiple
+                id='tags-standard'
+                size='medium'
+                value={tags}
+                freeSolo
+                renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant='outlined' label={option} {...getTagProps({ index })} />)}
+                renderInput={params => <TextField {...params} placeholder='Type tag and press return' fullWidth />}
+                onChange={(_event, value) => {
+                  setTags(value);
+                }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                value={parentPatchId}
+                fullWidth
+                type='number'
+                id='parentPatchId'
+                label='Parent PatchID'
+                name='parentPatchId'
+                onChange={event => setParentPatchId(event.target.value)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                minLength={0}
+                maxLength={1000}
+                value={link}
+                fullWidth
+                id='link'
+                label='Web Link'
+                name='link'
+                onChange={event => setLink(event.target.value)}
+              />
+            </Grid>
+          </Grid>
+        </form>
+      </CardContent>
+      <CardContent>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography className={classes.title} color='textSecondary' gutterBottom>
+              Add Nord Files and Mp3s
+            </Typography>
+            <UploadDropZone onAccept={onUploadFiles} auto showSpinner={showSpinner} />
+          </Grid>
+        </Grid>
+      </CardContent>
+      <CardActions>
+        <Button size='small' color='primary' variant='contained' onClick={handleInsert} disabled={disable}>
           Create
         </Button>
-        <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>
-          Close
-        </Button>
-      </DialogActions>
-    </>
+      </CardActions>
+    </Card>
   );
 };
 

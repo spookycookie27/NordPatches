@@ -138,6 +138,9 @@ function Layout(props) {
               <Link variant='button' component={Link1} to='/files' className={classes.link}>
                 Files
               </Link>
+              <Link variant='button' component={Link1} to='/addpatch' className={classes.link}>
+                Add New
+              </Link>
             </nav>
             {user && (
               <>

@@ -13,16 +13,17 @@ namespace NordSamples.Models
             CreateMap<Data.Models.Patch, ViewModels.Patch>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.NufUser));
             CreateMap<ViewModels.Patch, Data.Models.Patch>()
-                .ForMember(dest => dest.NufUser, opt => opt.MapFrom(src => src.User));
+                .ForMember(dest => dest.AppUserId, opt => opt.MapFrom(src => src.User.Id))
+                .ForMember(dest => dest.NufUserId, opt => opt.MapFrom(src => src.User.NufUserId));
             CreateMap<Data.Models.File, ViewModels.File>();
             CreateMap<NufUser, User>()
                 .ForMember(dest => dest.NufUserId, opt => opt.MapFrom(src => src.Id));
-
             CreateMap<AppUser, User>();
             CreateMap<Data.Models.PatchFile, ViewModels.PatchFile>();
             CreateMap<Data.Models.Instrument, ViewModels.Instrument>();
             CreateMap<Data.Models.Category, ViewModels.Category>();
             CreateMap<Data.Models.Tag, ViewModels.Tag>();
+            CreateMap<ViewModels.Tag, Data.Models.Tag>();
             CreateMap<Data.Models.Comment, ViewModels.Comment>()
             .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.AppUser));
         }
