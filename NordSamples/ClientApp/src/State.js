@@ -14,6 +14,7 @@ const applyMiddleware = (...args) => creator => {
 const defaultState = {
   user: null,
   patches: [],
+  myPatches: [],
   files: [],
   pageSize: 10
 };
@@ -39,6 +40,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         patches: action.patches
       };
+    case 'setMyPatches':
+      return {
+        ...state,
+        myPatches: action.patches
+      };
     case 'setFiles':
       return {
         ...state,
@@ -50,8 +56,12 @@ const reducer = (state = initialState, action) => {
         pageSize: action.pageSize
       };
     case 'updatePatch': {
-      const foundIndex = state.patches.findIndex(x => x.id === action.patch.id);
+      let foundIndex = state.patches.findIndex(x => x.id === action.patch.id);
       state.patches[foundIndex] = action.patch;
+      foundIndex = state.myPatches.findIndex(x => x.id === action.patch.id);
+      if (foundIndex >= 0) {
+        state.myPatches[foundIndex] = action.patch;
+      }
       return { ...state };
     }
     case 'insertPatch': {

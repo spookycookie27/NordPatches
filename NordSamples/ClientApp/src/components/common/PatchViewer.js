@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
 
 const PatchViewer = props => {
   const classes = useStyles();
-  const [patch, setPatch] = React.useState(null);
+  const [patch, setPatch] = useState(null);
 
   useEffect(() => {
     const getData = async () => {

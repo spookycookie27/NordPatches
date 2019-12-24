@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NordSamples.Models.ViewModels
+namespace NordSamples.Models
 {
     public class File
     {

@@ -21,8 +21,6 @@ using NordSamples.Data;
 using Microsoft.EntityFrameworkCore;
 using NordSamples.Data.Models;
 using Microsoft.Extensions.Logging;
-using NordSamples.Models.Requests;
-using NordSamples.Models.ViewModels;
 
 namespace NordSamples.Controllers
 {
@@ -147,8 +145,9 @@ namespace NordSamples.Controllers
             DateTime tokenExpiry = DateTime.UtcNow.AddMinutes(60);
 
             var claims = new[] {
-                    new Claim(ClaimTypes.Name, appUser.Email),
-                    new Claim(JwtRegisteredClaimNames.Sub, appUser.Email),
+                    new Claim(ClaimTypes.Name, appUser.UserName),
+                    new Claim(ClaimTypes.Sid, appUser.Id),
+                    new Claim(ClaimTypes.PrimarySid, appUser.NufUserId.ToString()),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Exp, $"{new DateTimeOffset(tokenExpiry).ToUnixTimeSeconds()}"),
                     new Claim(JwtRegisteredClaimNames.Nbf, $"{new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()}") ,
@@ -165,7 +164,7 @@ namespace NordSamples.Controllers
                 expires: tokenExpiry,
                 signingCredentials: credentials);
 
-            var user = mapper.Map<NordSamples.Models.ViewModels.User>(appUser);
+            var user = mapper.Map<User>(appUser);
             user.Role = roleToUse.ToLowerInvariant();
 
 

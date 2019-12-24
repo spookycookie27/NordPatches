@@ -93,7 +93,8 @@ namespace NordSamples
                     policy.Requirements.Add(new UserRoleRequirement()));
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+            services.AddMvc()
+            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt =>
                 {
                     opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;

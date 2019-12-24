@@ -28,7 +28,8 @@ const useStyles = makeStyles(theme => ({
   main: {
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(2),
-    paddingTop: theme.spacing(0)
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   },
   footer: {
     padding: theme.spacing(3, 2),
@@ -43,11 +44,21 @@ const useStyles = makeStyles(theme => ({
   toolbar: {
     flexWrap: 'wrap'
   },
-  toolbarTitle: {
+  toolbarNav: {
     flexGrow: 1
   },
   link: {
     margin: theme.spacing(1, 1.5),
+    color: 'white',
+    '&:hover': {
+      textDecoration: 'none'
+    },
+    // border: '1px solid',
+    // borderColor: 'rgba(0, 0, 0, 0.23)',
+    padding: theme.spacing(1)
+  },
+  logoutLink: {
+    margin: theme.spacing(1, 0, 1, 1.5),
     color: 'white'
   },
   scrollButton: {
@@ -118,6 +129,7 @@ function Layout(props) {
       type: 'setUser',
       user: null
     });
+    props.history.push('/login');
   };
 
   return (
@@ -125,21 +137,21 @@ function Layout(props) {
       <HideOnScroll {...props}>
         <AppBar elevation={0} className={classes.appBar}>
           <Toolbar className={classes.toolbar}>
-            <Typography variant='h6' color='inherit' noWrap className={classes.toolbarTitle}>
-              {siteName}
-            </Typography>
-            <nav>
+            <nav className={classes.toolbarNav}>
               <Link variant='button' component={Link1} to='/' className={classes.link}>
                 Home
               </Link>
+              <Link variant='button' component={Link1} to='/addpatch' className={classes.link}>
+                Add New
+              </Link>
+              <Link variant='button' component={Link1} to='/mypatches' className={classes.link}>
+                My Patches
+              </Link>
               <Link variant='button' component={Link1} to='/patches' className={classes.link}>
-                Patches
+                ALl Patches
               </Link>
               <Link variant='button' component={Link1} to='/files' className={classes.link}>
                 Files
-              </Link>
-              <Link variant='button' component={Link1} to='/addpatch' className={classes.link}>
-                Add New
               </Link>
             </nav>
             {user && (
@@ -148,13 +160,13 @@ function Layout(props) {
                 <Typography variant='body2' color='inherit'>
                   {user.username}
                 </Typography>
-                <Button variant='outlined' className={classes.link} onClick={onSignoutClick}>
+                <Button variant='outlined' className={classes.logoutLink} onClick={onSignoutClick}>
                   Logout
                 </Button>
               </>
             )}
             {!user && (
-              <Button variant='outlined' className={classes.link} component={Link1} to='/login'>
+              <Button variant='outlined' className={classes.logoutLink} component={Link1} to='/login'>
                 Login
               </Button>
             )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactPlayer from 'react-player';
 import Duration from '../../services/Duration';
 import Grid from '@material-ui/core/Grid';
@@ -32,9 +32,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const FullPlayer = props => {
-  const [playing, setPlaying] = React.useState(false);
-  const [played, setPlayed] = React.useState(0);
-  const [duration, setDuration] = React.useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [played, setPlayed] = useState(0);
+  const [duration, setDuration] = useState(0);
   const player = React.createRef();
   const classes = useStyles();
   return (

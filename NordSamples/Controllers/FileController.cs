@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using NordSamples.Data;
-using NordSamples.Models.ViewModels;
+using NordSamples.Models;
 
 namespace NordSamples.Controllers
 {
@@ -39,7 +39,7 @@ namespace NordSamples.Controllers
 
         // POST: api/File
         [HttpPost("{id}")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> PostFile([FromRoute] int id, IFormCollection collection)
         {
             var file = collection.Files[0];

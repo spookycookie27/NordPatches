@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
@@ -13,6 +13,7 @@ import CardContent from '@material-ui/core/CardContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import InlineError from '../common/InlineError';
 import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
@@ -48,18 +49,20 @@ const useStyles = makeStyles(theme => ({
 const PatchViewer = props => {
   const classes = useStyles();
   const [user] = useGlobalState('user');
-  const [patch, setPatch] = React.useState(null);
-  const [name, setName] = React.useState('');
-  const [link, setLink] = React.useState('');
-  const [description, setDescription] = React.useState('');
-  const [instrumentId, setInstrumentId] = React.useState('');
-  const [categoryId, setCategoryId] = React.useState('');
-  const [tags, setTags] = React.useState(null);
-  const [removed, setRemoved] = React.useState(false);
-  const [parentPatchId, setParentPatchId] = React.useState('');
-  const [showSpinner, setShowSpinner] = React.useState(false);
-  const [disableUpdate, setDisableUpdate] = React.useState(false);
-  const [acceptedFiles, setAcceptedFiles] = React.useState([]);
+  const [patch, setPatch] = useState(null);
+  const [name, setName] = useState('');
+  const [link, setLink] = useState('');
+  const [description, setDescription] = useState('');
+  const [instrumentId, setInstrumentId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [tags, setTags] = useState(null);
+  const [removed, setRemoved] = useState(false);
+  const [parentPatchId, setParentPatchId] = useState('');
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [disableUpdate, setDisableUpdate] = useState(false);
+  const [acceptedFiles, setAcceptedFiles] = useState([]);
+  const [feedback, setFeedback] = useState('');
+  const [errors, setErrors] = useState(null);
   const isNameInvalid = name.length < 1 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   const isLinkInvalid = link.length > 1000;
@@ -93,6 +96,17 @@ const PatchViewer = props => {
               setShowSpinner(false);
             }
           });
+        } else if (response.status === 400) {
+          response.json().then(res => {
+            setErrors(res.errors ? res.errors : res);
+            setFeedback('There were errors:');
+            setDisableUpdate(false);
+            setShowSpinner(false);
+          });
+        } else {
+          setFeedback('There was a server error, please try again.');
+          setDisableUpdate(false);
+          setShowSpinner(false);
         }
       });
     });
@@ -116,17 +130,30 @@ const PatchViewer = props => {
     updatedPatch.link = link;
     updatedPatch.description = description;
     updatedPatch.instrumentId = instrumentId;
-    updatedPatch.categoryId = categoryId;
+    updatedPatch.categoryId = categoryId ? categoryId : '';
     updatedPatch.parentPatchId = parentPatchId;
     updatedPatch.tags = patchTags;
     updatedPatch.removed = removed;
     const url = `/api/patch/${props.patchId}`;
-    await RestUtilities.put(url, updatedPatch);
-    dispatch({
-      type: 'updatePatch',
-      patch: updatedPatch
-    });
-    props.onClose();
+    var response = await RestUtilities.put(url, updatedPatch);
+    if (response.ok) {
+      dispatch({
+        type: 'updatePatch',
+        patch: updatedPatch
+      });
+      props.onClose();
+    } else if (response.status === 400) {
+      response.json().then(res => {
+        setErrors(res.errors ? res.errors : res);
+        setFeedback('There were errors:');
+        setDisableUpdate(false);
+        setShowSpinner(false);
+      });
+    } else {
+      setFeedback('There was a server error, please try again.');
+      setDisableUpdate(false);
+      setShowSpinner(false);
+    }
   };
 
   useEffect(() => {
@@ -151,14 +178,25 @@ const PatchViewer = props => {
   if (!patch) return null;
   const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
-  const renderOptions = entity => {
-    return Object.entries(entity).map(([key, value]) => (
-      <MenuItem key={key} value={key}>
-        {value}
-      </MenuItem>
-    ));
-  };
 
+  const renderOptions = (entity, includeNone) => {
+    const options = [];
+    if (includeNone) {
+      options.push(
+        <MenuItem value='0'>
+          <em>None</em>
+        </MenuItem>
+      );
+    }
+    Object.entries(entity).map(([key, value]) =>
+      options.push(
+        <MenuItem key={key} value={key}>
+          {value}
+        </MenuItem>
+      )
+    );
+    return options;
+  };
   const renderFile = file => {
     return (
       <Paper className={classes.fileContainer} key={file.id}>
@@ -255,7 +293,7 @@ const PatchViewer = props => {
                   <InputLabel id='categoryLabel' className={classes.label}>
                     Category
                   </InputLabel>
-                  <Select fullWidth id='categoryId' value={categoryId ? categoryId : 0} onChange={event => setCategoryId(event.target.value)}>
+                  <Select fullWidth id='categoryId' value={categoryId ? categoryId : ''} onChange={event => setCategoryId(event.target.value)}>
                     {renderOptions(categories)}
                   </Select>
                 </Grid>
@@ -312,7 +350,7 @@ const PatchViewer = props => {
                   if (!mp3) return null;
                   const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
                   return (
-                    <Box m={3}>
+                    <Box m={3} key={mp3.id}>
                       <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />
                     </Box>
                   );
@@ -327,13 +365,19 @@ const PatchViewer = props => {
                   <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} />
                 </Box>
               </Grid>
+              <Grid item xs={12}>
+                <Typography component='p'>{feedback}</Typography>
+                <InlineError field='name' errors={errors} />
+                <InlineError field='description' errors={errors} />
+                <InlineError field='categoryId' errors={errors} />
+              </Grid>
             </Grid>
           </CardContent>
         </Card>
       </DialogContent>
 
       <DialogActions>
-        <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disable={disableUpdate}>
+        <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
           Update
         </Button>
         <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>

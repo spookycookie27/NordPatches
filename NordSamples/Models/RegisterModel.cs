@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NordSamples.Models.Requests
+namespace NordSamples.Models
 {
     public class RegisterModel
     {

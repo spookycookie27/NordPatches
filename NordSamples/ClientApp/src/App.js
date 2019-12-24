@@ -7,7 +7,8 @@ import ForgotPassword from './components/views/ForgotPassword';
 import ResetPassword from './components/views/ResetPassword';
 import Home from './components/views/Home';
 import AddPatch from './components/views/AddPatch';
-import PatchBrowser from './components/views/PatchBrowser';
+import AllPatches from './components/views/AllPatches';
+import MyPatches from './components/views/MyPatches';
 import FileBrowser from './components/views/FileBrowser';
 import { isSignedIn } from './services/Auth';
 import { GlobalStateProvider } from './State';
@@ -32,7 +33,8 @@ const App = () => (
           <Layout>
             <Route exact path='/' component={Home} />
             <PrivateRoute exact path='/addpatch' component={AddPatch} />
-            <PrivateRoute exact path='/patches' component={PatchBrowser} />
+            <PrivateRoute exact path='/patches' component={AllPatches} />
+            <PrivateRoute exact path='/mypatches' component={MyPatches} />
             <PrivateRoute exact path='/files' component={FileBrowser} />
           </Layout>
         </Switch>

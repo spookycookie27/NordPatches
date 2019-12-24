@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Dialog from '@material-ui/core/Dialog';
-import PatchViewer from '../common/PatchViewer';
-import PatchEditor from '../common/PatchEditor';
-import PatchCreator from '../common/PatchCreator';
-import { nufFileLink } from '../common/Common';
-import FullPlayer from '../common/FullPlayer';
+import PatchViewer from './PatchViewer';
+import PatchEditor from './PatchEditor';
+import { nufFileLink } from './Common';
+import FullPlayer from './FullPlayer';
 import { useGlobalState } from '../../State';
 import { dispatch } from '../../State';
 import theme from '../../theme';
@@ -14,12 +13,13 @@ import { categories, instruments, blobUrl } from '../../Constants';
 
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
+  const [myPatches] = useGlobalState('myPatches');
   const [user] = useGlobalState('user');
   const [pageSize] = useGlobalState('pageSize');
   const [error, setError] = useState(false);
-  const [open, setOpen] = React.useState(false);
-  const [patchId, setPatchId] = React.useState(null);
-  const [action, setAction] = React.useState('view');
+  const [open, setOpen] = useState(false);
+  const [patchId, setPatchId] = useState(null);
+  const [action, setAction] = useState('view');
 
   const handleOpen = () => {
     setOpen(true);
@@ -29,7 +29,7 @@ const PatchBrowser = props => {
   };
 
   useEffect(() => {
-    const getData = async () => {
+    const getAllData = async () => {
       const url = '/api/patch';
       const res = await RestUtilities.get(url);
       res
@@ -44,8 +44,27 @@ const PatchBrowser = props => {
           setError(true);
         });
     };
-    getData();
-  }, []);
+    const getMyData = async () => {
+      const url = '/api/patch/user';
+      const res = await RestUtilities.get(url);
+      res
+        .json()
+        .then(res => {
+          dispatch({
+            type: 'setMyPatches',
+            patches: res
+          });
+        })
+        .catch(err => {
+          setError(true);
+        });
+    };
+    if (props.myPatches) {
+      getMyData();
+    } else {
+      getAllData();
+    }
+  }, [props]);
 
   const renderMp3 = patch => {
     const mp3s = patch && patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
@@ -76,15 +95,6 @@ const PatchBrowser = props => {
 
   const getActionConfig = () => {
     const actionsConfig = [
-      // {
-      //   icon: 'add',
-      //   tooltip: 'Add Patch',
-      //   isFreeAction: true,
-      //   onClick: event => {
-      //     setAction('create');
-      //     handleOpen();
-      //   }
-      // },
       {
         icon: 'chevron_right',
         onClick: (event, rowData) => {
@@ -94,7 +104,7 @@ const PatchBrowser = props => {
         }
       }
     ];
-    if (user.role === 'administrator') {
+    if (user.role === 'administrator' || props.myPatches) {
       actionsConfig.push({
         icon: 'edit',
         onClick: (event, rowData) => {
@@ -177,8 +187,8 @@ const PatchBrowser = props => {
             render: rowData => renderMp3(rowData)
           }
         ]}
-        data={patches}
-        title='Patches List'
+        data={props.myPatches ? myPatches : patches}
+        title={props.myPatches ? 'My Patches' : 'All Patches'}
         onChangeRowsPerPage={handlePageSizeChange}
       />
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>

@@ -1,4 +1,4 @@
-namespace NordSamples.Models.Requests
+namespace NordSamples.Models
 {
     public class CheckToken
     {

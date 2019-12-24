@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using LazyCache;
@@ -9,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NordSamples.Data;
-using NordSamples.Models.ViewModels;
+using NordSamples.Data.Constants;
+using NordSamples.Models;
 
 namespace NordSamples.Controllers
 {
@@ -33,9 +35,9 @@ namespace NordSamples.Controllers
         // GET: api/Patches
         [HttpGet]
         [Authorize(Roles = "Administrator,User")]
-        public async Task<ActionResult<List<Models.ViewModels.Patch>>> GetPatches()
+        public async Task<ActionResult<List<Patch>>> GetPatches()
         {
-            List<Models.ViewModels.Patch> model;
+            List<Patch> model;
             try
             {
                 async Task<List<Data.Models.Patch>> PatchGetter() =>
@@ -50,7 +52,62 @@ namespace NordSamples.Controllers
                 List<Data.Models.Patch> cachedPatches = await PatchGetter();
                 //List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
 
-                model = mapper.Map<List<Models.ViewModels.Patch>>(cachedPatches);
+                model = mapper.Map<List<Patch>>(cachedPatches);
+
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An error occurred creating the DB.");
+                model = null;
+            }
+            return model;
+        }
+
+        // GET: api/Patches
+        [HttpGet("user")]
+        [Authorize(Roles = "Administrator,User")]
+        public async Task<ActionResult<List<Patch>>> GetUserPatches()
+        {
+            List<Patch> model;
+            bool isAuthorized;
+            string appUserId;
+            string primarySid;
+            int? nufUserId;
+            try
+            {
+                ClaimsPrincipal user = HttpContext.User;
+                if (user.Identity.IsAuthenticated)
+                {
+                    isAuthorized = user.IsInRole(Constants.AdministratorRole) || user.IsInRole(Constants.UserRole);
+
+                    appUserId = user.HasClaim(x => x.Type == ClaimTypes.Sid)
+                        ? user.Claims.Where(x => x.Type == ClaimTypes.Sid).FirstOrDefault().Value
+                        : null;
+                    primarySid = user.HasClaim(x => x.Type == ClaimTypes.PrimarySid)
+                        ? user.Claims.Where(x => x.Type == ClaimTypes.PrimarySid).FirstOrDefault().Value
+                        : null;
+
+                    nufUserId = primarySid != null
+                        ? (int?)int.Parse(primarySid)
+                        : null;
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+
+                async Task<List<Data.Models.Patch>> PatchGetter() =>
+                    await context.Patches
+                     .Where(x => x.AppUserId == appUserId || (nufUserId != null && x.NufUserId == nufUserId))
+                     .Include(x => x.Tags)
+                     .Include(x => x.PatchFiles)
+                        .ThenInclude(pf => pf.File)
+                     .AsNoTracking()
+                     .ToListAsync();
+
+                List<Data.Models.Patch> cachedPatches = await PatchGetter();
+
+                model = mapper.Map<List<Patch>>(cachedPatches);
 
             }
             catch (Exception e)
@@ -63,7 +120,7 @@ namespace NordSamples.Controllers
 
         // GET: api/Patches/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Models.ViewModels.Patch>> GetPatch(int id)
+        public async Task<ActionResult<Patch>> GetPatch(int id)
         {
             var patch = await context.Patches
                 .Include(x => x.NufUser)
@@ -85,7 +142,7 @@ namespace NordSamples.Controllers
                 return NotFound();
             }
 
-            var model = mapper.Map<Models.ViewModels.Patch>(patch);
+            var model = mapper.Map<Patch>(patch);
             return model;
         }
 
@@ -109,7 +166,7 @@ namespace NordSamples.Controllers
 
         // PUT: api/Patches/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,User")]
         public async Task<IActionResult> PutPatch([FromRoute] int id, [FromBody] Patch patch)
         {
             if (!PatchExists(id))
@@ -151,15 +208,15 @@ namespace NordSamples.Controllers
                     tagsToRemove.Add(tag);
                 }
             }
-            // foreach (var tag in patch.Tags)
-            // {
-            //     if (!exisitingPatch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id))
-            //     {
-            //         var newTag = new NordSamples.Data.Models.Tag { PatchId = id, Name = tag.Name };
-            //         tagsToAdd.Add(newTag);
-            //     }
-            // }
-            //context.Tags.AddRange(tagsToAdd);
+            foreach (var tag in patch.Tags)
+            {
+                if (!exisitingPatch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id))
+                {
+                    var newTag = new NordSamples.Data.Models.Tag { PatchId = id, Name = tag.Name };
+                    tagsToAdd.Add(newTag);
+                }
+            }
+            context.Tags.AddRange(tagsToAdd);
             context.Tags.RemoveRange(tagsToRemove);
         }
 
