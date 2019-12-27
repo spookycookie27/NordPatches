@@ -17,7 +17,8 @@ const useStyles = makeStyles({
     margin: theme.spacing(3)
   },
   table: {
-    minWidth: 650
+    minWidth: 650,
+    margin: 0
   },
   link: {
     textDecoration: 'underline'
@@ -70,7 +71,7 @@ const Home = () => {
         <Typography variant='h6' gutterBottom>
           Patch spec
         </Typography>
-        <Paper className={classes.root}>
+        <Paper>
           <Table className={classes.table} aria-label='simple table'>
             <TableBody>
               <TableRow>
