@@ -126,22 +126,16 @@ const PatchViewer = props => {
       <Card className={classes.mainCard} key={patch.id}>
         <CardContent>
           <Grid container spacing={2}>
-            <Grid item sm={6}>
+            <Grid item md={6} xs={12}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
                 {patch.name}
               </Typography>
-              <Box className={classes.ratingBox}>
-                <strong>Overall Rating:</strong>
-                <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />
-              </Box>
-              <Box>
-                <strong>User:</strong> {patch.user && patch.user.username}
-              </Box>
               <Box>
                 <strong>Patch ID:</strong> {patch.id}
               </Box>
-              <Box>
-                <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
+              <Box className={classes.ratingBox}>
+                <strong>Overall Rating:</strong>
+                <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />
               </Box>
               <Box>
                 <strong>Category:</strong> {patch.categoryId && categories[patch.categoryId]}
@@ -151,6 +145,12 @@ const PatchViewer = props => {
               </Box>
               <Box>
                 <strong>Instrument Type:</strong> {patch.instrumentId && instruments[patch.instrumentId]}
+              </Box>
+              <Box>
+                <strong>User:</strong> {patch.user && patch.user.username}
+              </Box>
+              <Box>
+                <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
               </Box>
               <Box>
                 <strong>Parent ID:</strong> {patch.parentPatchId}
@@ -174,11 +174,11 @@ const PatchViewer = props => {
                 />
               </Box>
             </Grid>
-            <Grid item sm={6}>
+            <Grid item md={6} xs={12}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
                 Files
               </Typography>
-              <Box m={3}>
+              <Box my={3} mx={1}>
                 {mp3s.map(mp3 => {
                   if (!mp3) return null;
                   const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;

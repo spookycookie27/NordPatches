@@ -8,8 +8,10 @@ import { nufFileLink } from './Common';
 import FullPlayer from './FullPlayer';
 import { useGlobalState } from '../../State';
 import { dispatch } from '../../State';
+import Rating from '@material-ui/lab/Rating';
 import theme from '../../theme';
 import { categories, instruments, blobUrl } from '../../Constants';
+import { Typography } from '@material-ui/core';
 
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
@@ -24,6 +26,7 @@ const PatchBrowser = props => {
   const handleOpen = () => {
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -65,6 +68,12 @@ const PatchBrowser = props => {
       getAllData();
     }
   }, [props]);
+
+  const renderRating = patch => {
+    const count = patch.ratings.length;
+    const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
+    return <Rating name='rating' value={average} precision={0.5} readOnly size='small' />;
+  };
 
   const renderMp3 = patch => {
     const mp3s = patch && patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
@@ -116,7 +125,6 @@ const PatchBrowser = props => {
     }
     return actionsConfig;
   };
-
   return (
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
@@ -134,7 +142,16 @@ const PatchBrowser = props => {
         columns={[
           { title: 'Id', field: 'id' },
           { title: 'Name', field: 'name' },
-          { title: 'Description', field: 'description' },
+          {
+            title: 'Description',
+            field: 'description',
+            cellStyle: { maxWidth: '300px' },
+            render: rowData => (
+              <Typography noWrap variant='body2'>
+                {rowData.description}
+              </Typography>
+            )
+          },
           {
             title: 'Tags',
             field: 'tags',
@@ -185,6 +202,11 @@ const PatchBrowser = props => {
             title: 'Mp3',
             field: 'patchFiles',
             render: rowData => renderMp3(rowData)
+          },
+          {
+            title: 'Rating',
+            field: 'rating',
+            render: rowData => renderRating(rowData)
           }
         ]}
         data={props.myPatches ? myPatches : patches}

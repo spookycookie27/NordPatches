@@ -40,7 +40,7 @@ const FullPlayer = props => {
   return (
     <Grid container spacing={2} className={props.inverse ? classes.mp3PlayerInverse : classes.mp3Player}>
       <Grid item xs={2}>
-        <Box className={classes.controls}>
+        <Box className={classes.controls} m={0}>
           <ReactPlayer
             ref={player}
             className='react-player'

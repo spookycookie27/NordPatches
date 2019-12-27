@@ -15,23 +15,18 @@ namespace NordSamples.Models
         public string Link { get; set; }
 
         [Required]
-        [Range(1, 7, ErrorMessage = "Invalid CategoryId")]
+        [Range(1, 7, ErrorMessage = "Invalid InstrumentId")]
         public int InstrumentId { get; set; }
 
-        [Required]
         [Range(1, 30, ErrorMessage = "Invalid CategoryId")]
         public int? CategoryId { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
 
-        public Instrument Instrument { get; set; }
-        public Category Category { get; set; }
-
         public User User { get; set; }
         public int? ParentPatchId { get; set; }
         public bool Removed { get; set; }
 
-        public Patch Parent { get; set; }
         public ICollection<PatchFile> PatchFiles { get; set; }
         public ICollection<Tag> Tags { get; set; }
         public ICollection<Comment> Comments { get; set; }

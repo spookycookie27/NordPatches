@@ -46,6 +46,7 @@ namespace NordSamples.Controllers
                     await context.Patches
                      .Where(x => !x.Removed)
                      .Include(x => x.Tags)
+                     .Include(x => x.Ratings)
                      .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
                      .AsNoTracking()
@@ -86,6 +87,7 @@ namespace NordSamples.Controllers
                     await context.Patches
                      .Where(x => x.AppUserId == appUserId || (nufUserId != null && x.NufUserId == nufUserId))
                      .Include(x => x.Tags)
+                     .Include(x => x.Ratings)
                      .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
                      .AsNoTracking()
