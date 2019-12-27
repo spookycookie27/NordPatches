@@ -30,7 +30,7 @@ const Home = () => {
     <div className='Home'>
       <Container maxWidth='md'>
         <Typography variant='h2' gutterBottom>
-          The Unoffical Nord User Samples
+          Unoffical User Sample Collection
         </Typography>
         <Typography variant='body1' gutterBottom>
           This website is for Nord lovers everywhere to come together and build the best user library of Nord sounds and samples on the net. Most of the sounds

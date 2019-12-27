@@ -20,6 +20,7 @@ namespace NordSamples.Models
             CreateMap<AppUser, User>();
             CreateMap<Data.Models.PatchFile, PatchFile>();
             CreateMap<Data.Models.Instrument, Instrument>();
+            CreateMap<Data.Models.Rating, Rating>();
             CreateMap<Data.Models.Category, Category>();
             CreateMap<Data.Models.Tag, Tag>();
             CreateMap<Tag, Data.Models.Tag>();

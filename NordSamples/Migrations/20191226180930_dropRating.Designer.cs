@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NordSamples.Data;
 
 namespace NordSamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191226180930_dropRating")]
+    partial class dropRating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -432,25 +434,6 @@ namespace NordSamples.Migrations
                     b.ToTable("PatchFile");
                 });
 
-            modelBuilder.Entity("NordSamples.Data.Models.Rating", b =>
-                {
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)")
-                        .HasMaxLength(450);
-
-                    b.Property<int>("PatchId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.HasKey("AppUserId", "PatchId");
-
-                    b.HasIndex("PatchId");
-
-                    b.ToTable("Rating");
-                });
-
             modelBuilder.Entity("NordSamples.Data.Models.Tag", b =>
                 {
                     b.Property<int>("PatchId")
@@ -573,21 +556,6 @@ namespace NordSamples.Migrations
 
                     b.HasOne("NordSamples.Data.Models.Patch", "Patch")
                         .WithMany("PatchFiles")
-                        .HasForeignKey("PatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NordSamples.Data.Models.Rating", b =>
-                {
-                    b.HasOne("NordSamples.Data.Models.AppUser", "AppUser")
-                        .WithMany()
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NordSamples.Data.Models.Patch", "Patch")
-                        .WithMany("Ratings")
                         .HasForeignKey("PatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

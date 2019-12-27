@@ -4,7 +4,7 @@ import PatchCreator from '../common/PatchCreator';
 
 const AddPatch = () => {
   return (
-    <div className='Home'>
+    <div className='AddPatch'>
       <Container maxWidth='md'>
         <PatchCreator />
       </Container>

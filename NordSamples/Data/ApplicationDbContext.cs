@@ -28,7 +28,8 @@ namespace NordSamples.Data
                 .HasKey(t => new { t.PatchId, t.Name });
 
             modelBuilder.Entity<Category>().ToTable("Category");
-            modelBuilder.Entity<Rating>().ToTable("Rating");
+            modelBuilder.Entity<Rating>().ToTable("Rating")
+                .HasKey(r => new { r.AppUserId, r.PatchId });
             modelBuilder.Entity<Instrument>().ToTable("Instrument");
             modelBuilder.Entity<NufUser>().ToTable("NufUser");
             modelBuilder.Entity<AppUser>().ToTable("AspNetUsers");

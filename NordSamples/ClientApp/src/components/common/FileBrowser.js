@@ -3,9 +3,10 @@ import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import { nufFileLink } from '../common/Common';
+import { nufFileLink } from './Common';
 import moment from 'moment';
 import { useGlobalState } from '../../State';
+import theme from '../../theme';
 import { dispatch } from '../../State';
 
 function getFileMetaData(file) {
@@ -46,7 +47,7 @@ function getFileData(file) {
   );
 }
 
-const PatchBrowser = () => {
+const FileBrowser = () => {
   const [files] = useGlobalState('files');
   const [pageSize] = useGlobalState('pageSize');
   useEffect(() => {
@@ -78,7 +79,8 @@ const PatchBrowser = () => {
   return (
     <div className='FilesList'>
       <MaterialTable
-        options={{ pageSize: pageSize, padding: 'dense' }}
+        theme={theme}
+        options={{ pageSize }}
         columns={[
           { title: 'ID', field: 'id' },
           { title: 'Name', field: 'name' },
@@ -87,10 +89,9 @@ const PatchBrowser = () => {
           { title: 'Extension', field: 'extension' }
         ]}
         data={files}
-        title='Files List (still in progress)'
+        title='Files List'
         onChangeRowsPerPage={handlePageSizeChange}
         detailPanel={file => {
-          console.log(file);
           return (
             <Box m={2}>
               <Grid container spacing={3} justify='center'>
@@ -108,4 +109,4 @@ const PatchBrowser = () => {
     </div>
   );
 };
-export default PatchBrowser;
+export default FileBrowser;

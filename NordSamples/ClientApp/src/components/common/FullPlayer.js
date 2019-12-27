@@ -9,7 +9,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
   mp3Player: {
-    borderRadius: '25px',
+    borderRadius: '10px',
     backgroundColor: '#cc0930',
     color: 'white',
     display: 'flex',

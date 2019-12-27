@@ -34,6 +34,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const getExtension = file => {
+  const regex = /(?:\.([^.]+))?$/;
+  const type = file.type;
+  const actualExtension = regex.exec(file.name)[1];
+  return type.startsWith('audio') ? 'mp3' : actualExtension;
+};
+
 const PatchCreator = props => {
   const classes = useStyles();
   const [user] = useGlobalState('user');
@@ -56,13 +63,6 @@ const PatchCreator = props => {
   const isCategoryInvalid = categoryId < 1;
   const isInstrumentInvalid = instrumentId < 1;
   const isFormInvalid = isNameInvalid || isDescriptionInvalid || isLinkInvalid || isCategoryInvalid || isInstrumentInvalid;
-
-  const getExtension = file => {
-    const regex = /(?:\.([^.]+))?$/;
-    const type = file.type;
-    const actualExtension = regex.exec(file.name)[1];
-    return type.startsWith('audio') ? 'mp3' : actualExtension;
-  };
 
   const handleInsert = async () => {
     if (isFormInvalid) {
@@ -171,7 +171,7 @@ const PatchCreator = props => {
                 Create Patch
               </Typography>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6} xs={12}>
               <TextField
                 minLength={5}
                 maxLength={255}
@@ -186,7 +186,7 @@ const PatchCreator = props => {
                 helperText={isNameInvalid && !!name && 'Must be more than 5 and less than 255 characters'}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6} xs={12}>
               <TextField
                 multiline
                 rowsMax='2'
@@ -202,7 +202,7 @@ const PatchCreator = props => {
                 helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6} xs={12}>
               <FormControl fullWidth error={instrumentId !== '' && isInstrumentInvalid} required>
                 <InputLabel id='typeLabel'>Type</InputLabel>
                 <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
@@ -211,7 +211,7 @@ const PatchCreator = props => {
                 <FormHelperText>{instrumentId !== '' && isInstrumentInvalid ? 'Please choose the type of patch' : ''}</FormHelperText>
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6} xs={12}>
               <FormControl error={categoryId !== '' && isCategoryInvalid} fullWidth required>
                 <InputLabel id='categoryLabel'>Category</InputLabel>
                 <Select fullWidth id='categoryId' value={categoryId} onChange={event => setCategoryId(event.target.value)} required>
@@ -239,7 +239,7 @@ const PatchCreator = props => {
                 }}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6} xs={12}>
               <TextField
                 value={parentPatchId}
                 fullWidth
@@ -251,7 +251,7 @@ const PatchCreator = props => {
                 onChange={event => setParentPatchId(event.target.value)}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6} xs={12}>
               <TextField
                 minLength={0}
                 maxLength={1000}

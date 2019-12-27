@@ -35,6 +35,7 @@ namespace NordSamples.Models
         public ICollection<PatchFile> PatchFiles { get; set; }
         public ICollection<Tag> Tags { get; set; }
         public ICollection<Comment> Comments { get; set; }
+        public ICollection<Rating> Ratings { get; set; }
         public ICollection<Patch> Children { get; set; }
     }
 }

@@ -9,7 +9,7 @@ import Home from './components/views/Home';
 import AddPatch from './components/views/AddPatch';
 import AllPatches from './components/views/AllPatches';
 import MyPatches from './components/views/MyPatches';
-import FileBrowser from './components/views/FileBrowser';
+import Files from './components/views/Files';
 import { isSignedIn } from './services/Auth';
 import { GlobalStateProvider } from './State';
 
@@ -35,7 +35,7 @@ const App = () => (
             <PrivateRoute exact path='/addpatch' component={AddPatch} />
             <PrivateRoute exact path='/patches' component={AllPatches} />
             <PrivateRoute exact path='/mypatches' component={MyPatches} />
-            <PrivateRoute exact path='/files' component={FileBrowser} />
+            <PrivateRoute exact path='/files' component={Files} />
           </Layout>
         </Switch>
       </BrowserRouter>

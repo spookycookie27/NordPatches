@@ -11,7 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NordSamples.Data;
 using NordSamples.Data.Constants;
-using NordSamples.Models;
+using NordSamples.Data.Models;
+using Patch = NordSamples.Models.Patch;
+using Tag = NordSamples.Data.Models.Tag;
 
 namespace NordSamples.Controllers
 {
@@ -69,32 +71,16 @@ namespace NordSamples.Controllers
         public async Task<ActionResult<List<Patch>>> GetUserPatches()
         {
             List<Patch> model;
-            bool isAuthorized;
-            string appUserId;
-            string primarySid;
             int? nufUserId;
             try
             {
                 ClaimsPrincipal user = HttpContext.User;
-                if (user.Identity.IsAuthenticated)
-                {
-                    isAuthorized = user.IsInRole(Constants.AdministratorRole) || user.IsInRole(Constants.UserRole);
+                string appUserId = user.Claims.Single(x => x.Type == ClaimTypes.Sid).Value;
+                string primarySid = user.Claims.Single(x => x.Type == ClaimTypes.PrimarySid).Value;
 
-                    appUserId = user.HasClaim(x => x.Type == ClaimTypes.Sid)
-                        ? user.Claims.Where(x => x.Type == ClaimTypes.Sid).FirstOrDefault().Value
-                        : null;
-                    primarySid = user.HasClaim(x => x.Type == ClaimTypes.PrimarySid)
-                        ? user.Claims.Where(x => x.Type == ClaimTypes.PrimarySid).FirstOrDefault().Value
-                        : null;
-
-                    nufUserId = primarySid != null
-                        ? (int?)int.Parse(primarySid)
-                        : null;
-                }
-                else
-                {
-                    return Unauthorized();
-                }
+                nufUserId = primarySid != null
+                    ? (int?)int.Parse(primarySid)
+                    : null;
 
                 async Task<List<Data.Models.Patch>> PatchGetter() =>
                     await context.Patches
@@ -153,7 +139,7 @@ namespace NordSamples.Controllers
         {
             var patchToInsert = mapper.Map<Data.Models.Patch>(patch);
             patchToInsert.DateCreated = DateTime.UtcNow;
-            patchToInsert.Tags = new List<NordSamples.Data.Models.Tag>();
+            patchToInsert.Tags = new List<Tag>();
             foreach (var tag in patch.Tags)
             {
                 patchToInsert.Tags.Add(new Data.Models.Tag { Name = tag.Name });
@@ -162,6 +148,31 @@ namespace NordSamples.Controllers
             await context.SaveChangesAsync();
 
             return CreatedAtAction("GetPatch", patchToInsert);
+        }
+
+        [HttpPost("rating/{id}")]
+        [Authorize(Roles = "Administrator,User")]
+        public async Task<ActionResult<Patch>> RatePatch([FromBody] int rating, [FromRoute] int id)
+        {
+            ClaimsPrincipal user = HttpContext.User;
+            string appUserId = user.Claims.Single(x => x.Type == ClaimTypes.Sid).Value;
+
+            bool exists = context.Ratings.Any(x => x.AppUserId == appUserId && x.PatchId == id);
+            if (exists)
+            {
+                Rating existingRating = context.Ratings.Single(x => x.AppUserId == appUserId && x.PatchId == id);
+                existingRating.Value = rating;
+
+            }
+            else
+            {
+                var newRating = new Rating { AppUserId = appUserId, PatchId = id, Value = rating };
+                context.Ratings.Add(newRating);
+            }
+
+            await context.SaveChangesAsync();
+
+            return Ok();
         }
 
         // PUT: api/Patches/5
@@ -173,83 +184,36 @@ namespace NordSamples.Controllers
             {
                 return NotFound();
             }
-            patch.DateUpdated = DateTime.UtcNow;
-            var exisitingPatch = context.Patches.Where(x => x.Id == id).Include(x => x.Tags).SingleOrDefault();
-            context.Entry(exisitingPatch).CurrentValues.SetValues(patch);
-            UpdateTags(id, patch, exisitingPatch);
 
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PatchExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            patch.DateUpdated = DateTime.UtcNow;
+            Data.Models.Patch existingPatch = context.Patches.Where(x => x.Id == id).Include(x => x.Tags).Single();
+            context.Entry(existingPatch).CurrentValues.SetValues(patch);
+            UpdateTags(id, patch, existingPatch);
+
+            await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private void UpdateTags(int id, Patch patch, Data.Models.Patch exisitingPatch)
+        private void UpdateTags(int id, Patch patch, Data.Models.Patch existingPatch)
         {
-            var tagsToRemove = new List<NordSamples.Data.Models.Tag>();
-            var tagsToAdd = new List<NordSamples.Data.Models.Tag>();
-            foreach (var tag in exisitingPatch.Tags)
-            {
-                if (!patch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id))
+            List<Tag> tagsToRemove = existingPatch.Tags.Where(tag => !patch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id)).ToList();
+            List<Tag> tagsToAdd = (
+                from tag in patch.Tags
+                where !existingPatch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id)
+                select new Tag
                 {
-                    tagsToRemove.Add(tag);
-                }
-            }
-            foreach (var tag in patch.Tags)
-            {
-                if (!exisitingPatch.Tags.Any(x => x.Name == tag.Name && x.PatchId == id))
-                {
-                    var newTag = new NordSamples.Data.Models.Tag { PatchId = id, Name = tag.Name };
-                    tagsToAdd.Add(newTag);
-                }
-            }
+                    PatchId = id,
+                    Name = tag.Name
+                }).ToList();
+
             context.Tags.AddRange(tagsToAdd);
             context.Tags.RemoveRange(tagsToRemove);
-        }
-
-        private void InsertTags(Patch patch, Data.Models.Patch patchToInsert)
-        {
-            var tagsToAdd = new List<NordSamples.Data.Models.Tag>();
-            foreach (var tag in patch.Tags)
-            {
-                var newTag = new NordSamples.Data.Models.Tag { Name = tag.Name, Patch = patchToInsert };
-                tagsToAdd.Add(newTag);
-            }
-            context.Tags.AddRange(tagsToAdd);
         }
 
         private bool PatchExists(int id)
         {
             return context.Patches.Any(e => e.Id == id);
         }
-
-        // DELETE: api/Patches/5
-        // [HttpDelete("{id}")]
-        // public async Task<ActionResult<Patch>> DeletePatch(int id)
-        // {
-        //     Patch patch = await context.Patches.FindAsync(id);
-        //     if (patch == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     context.Patches.Remove(patch);
-        //     await context.SaveChangesAsync();
-
-        //     return patch;
-        // }
     }
 }

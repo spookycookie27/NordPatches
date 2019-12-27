@@ -8,10 +8,13 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import Rating from '@material-ui/lab/Rating';
+import Tooltip from '@material-ui/core/Tooltip';
 import { categories, instruments, blobUrl } from '../../Constants';
 import Button from '@material-ui/core/Button';
 import { nufFileLink } from './Common';
 import FullPlayer from '../common/FullPlayer';
+import { useGlobalState } from '../../State';
 import moment from 'moment';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -35,23 +38,56 @@ const useStyles = makeStyles(theme => ({
   },
   audio: {
     width: '100%'
+  },
+  ratingBox: {
+    display: 'flex',
+    alignItems: 'center'
   }
 }));
+
+const labels = {
+  1: 'Useless',
+  2: 'Poor',
+  3: 'Ok',
+  4: 'Good',
+  5: 'Excellent'
+};
+
+function IconContainer(props) {
+  const { value, ...other } = props;
+  return (
+    <Tooltip title={labels[value] || ''}>
+      <span {...other} />
+    </Tooltip>
+  );
+}
 
 const PatchViewer = props => {
   const classes = useStyles();
   const [patch, setPatch] = useState(null);
+  const [userRating, setUserRating] = useState(null);
+  const [globalRating, setGlobalRating] = useState(null);
+  const [user] = useGlobalState('user');
+
+  const refreshData = async () => {
+    const url = `/api/patch/${props.patchId}`;
+    const res = await RestUtilities.get(url);
+    res.json().then(patch => {
+      const userRating = patch.ratings.find(r => r.appUserId === user.id);
+      const userRatingValue = userRating ? userRating.value : null;
+      const globalRating = patch.ratings.reduce((p, c) => p + c.value, 0) / patch.ratings.length;
+      setPatch(patch);
+      setUserRating(userRatingValue);
+      setGlobalRating(globalRating);
+    });
+  };
 
   useEffect(() => {
     const getData = async () => {
-      const url = `/api/patch/${props.patchId}`;
-      const res = await RestUtilities.get(url);
-      res.json().then(patch => {
-        setPatch(patch);
-      });
+      refreshData();
     };
     getData();
-  }, [props]);
+  }, []);
 
   const renderFile = file => {
     return (
@@ -76,17 +112,28 @@ const PatchViewer = props => {
     );
   };
 
-  function renderPatch(patch) {
+  const addRating = async newValue => {
+    setUserRating(newValue);
+    const url = `/api/patch/rating/${patch.id}`;
+    await RestUtilities.post(url, newValue);
+    refreshData();
+  };
+
+  const renderPatch = patch => {
     const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
     const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
     return (
       <Card className={classes.mainCard} key={patch.id}>
         <CardContent>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item sm={6}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
                 {patch.name}
               </Typography>
+              <Box className={classes.ratingBox}>
+                <strong>Overall Rating:</strong>
+                <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />
+              </Box>
               <Box>
                 <strong>User:</strong> {patch.user && patch.user.username}
               </Box>
@@ -114,8 +161,20 @@ const PatchViewer = props => {
                   Click
                 </a>
               </Box>
+              <Box className={classes.ratingBox}>
+                <strong>How would you rate this?</strong>
+                <Rating
+                  name='user-rating'
+                  value={userRating}
+                  precision={1}
+                  onChange={(event, newValue) => {
+                    addRating(newValue);
+                  }}
+                  IconContainerComponent={IconContainer}
+                />
+              </Box>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item sm={6}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
                 Files
               </Typography>
@@ -132,7 +191,7 @@ const PatchViewer = props => {
         </CardContent>
       </Card>
     );
-  }
+  };
 
   if (!patch) return null;
   var hasVariations = patch.parent || patch.children.length > 0;

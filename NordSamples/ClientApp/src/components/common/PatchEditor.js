@@ -234,7 +234,7 @@ const PatchViewer = props => {
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
-                    <Grid item xs={6}>
+                    <Grid item sm={6} xs={12}>
                       <TextField
                         autoFocus
                         maxLength={255}
@@ -251,7 +251,7 @@ const PatchViewer = props => {
                     </Grid>
                   </Grid>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <TextField
                     minLength={0}
                     maxLength={1000}
@@ -265,7 +265,7 @@ const PatchViewer = props => {
                     helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <TextField
                     multiline
                     rowsMax='2'
@@ -281,7 +281,7 @@ const PatchViewer = props => {
                     helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <InputLabel id='instrumentLabel' className={classes.label}>
                     Type
                   </InputLabel>
@@ -289,7 +289,7 @@ const PatchViewer = props => {
                     {renderOptions(instruments)}
                   </Select>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <InputLabel id='categoryLabel' className={classes.label}>
                     Category
                   </InputLabel>
@@ -318,7 +318,7 @@ const PatchViewer = props => {
                     />
                   </Grid>
                 ) : null}
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <TextField
                     value={parentPatchId}
                     fullWidth
@@ -329,12 +329,12 @@ const PatchViewer = props => {
                     onChange={event => setParentPatchId(event.target.value)}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <FormControlLabel
-                    value='start'
+                    value='end'
                     control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
-                    label='Remove (duplicate)'
-                    labelPlacement='start'
+                    label='Remove'
+                    labelPlacement='end'
                   />
                 </Grid>
               </Grid>
@@ -342,7 +342,7 @@ const PatchViewer = props => {
           </CardContent>
           <CardContent>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid item sm={6} xs={12}>
                 <Typography className={classes.title} color='textSecondary'>
                   Existing Files
                 </Typography>
@@ -357,7 +357,7 @@ const PatchViewer = props => {
                 })}
                 <Box mt={2}>{files.map(x => renderFile(x))}</Box>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item sm={6} xs={12}>
                 <Typography className={classes.title} color='textSecondary'>
                   Add Files
                 </Typography>
