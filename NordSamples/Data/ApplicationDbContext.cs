@@ -21,9 +21,14 @@ namespace NordSamples.Data
                 .HasDefaultValue(0);
             modelBuilder.Entity<Patch>().ToTable("Patch")
                 .HasMany(t => t.Tags);
+
             modelBuilder.Entity<File>().ToTable("File")
                 .Property(f => f.DateCreated)
                 .HasDefaultValueSql("getDate()");
+            modelBuilder.Entity<File>().ToTable("File")
+                .Property(p => p.Removed)
+                .HasDefaultValue(0);
+
             modelBuilder.Entity<Tag>().ToTable("Tag")
                 .HasKey(t => new { t.PatchId, t.Name });
 

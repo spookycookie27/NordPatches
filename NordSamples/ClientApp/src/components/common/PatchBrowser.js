@@ -70,6 +70,7 @@ const PatchBrowser = props => {
   }, [props]);
 
   const renderRating = patch => {
+    if (!patch.ratings) return null;
     const count = patch.ratings.length;
     const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
     return <Rating name='rating' value={average} precision={0.5} readOnly size='small' />;

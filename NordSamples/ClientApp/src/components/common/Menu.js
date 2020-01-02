@@ -82,12 +82,9 @@ function AppMenu(props) {
   return (
     <AppBar>
       <Toolbar className={classes.toolbar}>
-        <Box component='div' display={{ xs: 'none', sm: 'flex' }} ml={2}>
-          <img src='/Images/logo.png' alt='Nord' />
-        </Box>
-        <Box component='div' display={{ xs: 'none', sm: 'flex' }} mt={2.4}>
+        <Box component='div' display={{ xs: 'none', sm: 'flex' }} mt={2}>
           <Link variant='button' component={Link1} to='/'>
-            <img src='/Images/logo5.png' alt='user samples and patches' />
+            <img src='/Images/logo6.png' alt='nord user samples and patches' />
           </Link>
         </Box>
         <div className={classes.grow} />

@@ -90,6 +90,7 @@ const PatchViewer = props => {
   }, []);
 
   const renderFile = file => {
+    if (file.removed) return null;
     return (
       <Paper className={classes.fileContainer} key={file.id}>
         <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
@@ -119,7 +120,7 @@ const PatchViewer = props => {
     refreshData();
   };
 
-  const renderPatch = patch => {
+  const renderPatch = (patch, renderRating) => {
     const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
     const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
     return (
@@ -133,10 +134,12 @@ const PatchViewer = props => {
               <Box>
                 <strong>Patch ID:</strong> {patch.id}
               </Box>
-              <Box className={classes.ratingBox}>
-                <strong>Overall Rating:</strong>
-                <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />
-              </Box>
+              {renderRating && (
+                <Box className={classes.ratingBox}>
+                  <strong>Overall Rating:</strong>
+                  <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />
+                </Box>
+              )}
               <Box>
                 <strong>Category:</strong> {patch.categoryId && categories[patch.categoryId]}
               </Box>
@@ -161,18 +164,20 @@ const PatchViewer = props => {
                   Click
                 </a>
               </Box>
-              <Box className={classes.ratingBox}>
-                <strong>How would you rate this?</strong>
-                <Rating
-                  name='user-rating'
-                  value={userRating}
-                  precision={1}
-                  onChange={(event, newValue) => {
-                    addRating(newValue);
-                  }}
-                  IconContainerComponent={IconContainer}
-                />
-              </Box>
+              {renderRating && (
+                <Box className={classes.ratingBox}>
+                  <strong>How would you rate this?</strong>
+                  <Rating
+                    name='user-rating'
+                    value={userRating}
+                    precision={1}
+                    onChange={(event, newValue) => {
+                      addRating(newValue);
+                    }}
+                    IconContainerComponent={IconContainer}
+                  />
+                </Box>
+              )}
             </Grid>
             <Grid item md={6} xs={12}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
@@ -180,7 +185,7 @@ const PatchViewer = props => {
               </Typography>
               <Box my={3} mx={1}>
                 {mp3s.map(mp3 => {
-                  if (!mp3) return null;
+                  if (!mp3 || mp3.removed) return null;
                   const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
                   return <FullPlayer src={link} key={mp3.id} duration progress filename={mp3.name} />;
                 })}
@@ -198,14 +203,14 @@ const PatchViewer = props => {
   return (
     <>
       <DialogContent>
-        {renderPatch(patch)}
+        {renderPatch(patch, true)}
         {hasVariations && (
           <>
             <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
               Variations
             </Typography>
-            {patch.parent && renderPatch(patch.parent)}
-            {patch.children.length > 0 && patch.children.map(x => renderPatch(x))}
+            {patch.parent && renderPatch(patch.parent, false)}
+            {patch.children.length > 0 && patch.children.map(x => renderPatch(x, false))}
           </>
         )}
       </DialogContent>

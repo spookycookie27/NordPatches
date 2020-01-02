@@ -26,6 +26,9 @@ import { categories, instruments, blobUrl } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
 
 const useStyles = makeStyles(theme => ({
+  grow: {
+    flexGrow: 1
+  },
   root: {
     margin: theme.spacing(1)
   },
@@ -43,11 +46,18 @@ const useStyles = makeStyles(theme => ({
   file: {
     color: 'inherit',
     textDecoration: 'none'
-  }
+  },
+  trash: { textAlign: 'right' }
 }));
+
+function useForceUpdate() {
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value => ++value); // update the state to force render
+}
 
 const PatchViewer = props => {
   const classes = useStyles();
+
   const [user] = useGlobalState('user');
   const [patch, setPatch] = useState(null);
   const [name, setName] = useState('');
@@ -66,6 +76,8 @@ const PatchViewer = props => {
   const isNameInvalid = name.length < 1 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   const isLinkInvalid = link.length > 1000;
+
+  const forceUpdate = useForceUpdate();
 
   const getExtension = file => {
     const regex = /(?:\.([^.]+))?$/;
@@ -120,6 +132,17 @@ const PatchViewer = props => {
     } else {
       handleUpdate(patch);
     }
+  };
+
+  const toggleRemoveFile = file => {
+    file.removed = !file.removed;
+    forceUpdate();
+    putFile(file);
+  };
+
+  const putFile = async file => {
+    const url = `/api/file/${file.id}`;
+    var response = await RestUtilities.put(url, file);
   };
 
   const handleUpdate = async updatedPatch => {
@@ -197,6 +220,7 @@ const PatchViewer = props => {
     );
     return options;
   };
+
   const renderFile = file => {
     return (
       <Paper className={classes.fileContainer} key={file.id}>
@@ -211,11 +235,26 @@ const PatchViewer = props => {
             <Box>
               <strong>Size (bytes):</strong> {file.size}
             </Box>
-            <Box>
-              <strong>Version:</strong> {file.version + 1}
-            </Box>
           </Box>
         </a>
+        <Box display='flex' justifyContent='flex-end'>
+          <FormControlLabel
+            value='end'
+            control={
+              <Switch
+                color='primary'
+                checked={file.removed}
+                onChange={() => {
+                  toggleRemoveFile(file);
+                }}
+                size='small'
+              />
+            }
+            label='Hide'
+            labelPlacement='end'
+            size='small'
+          />
+        </Box>
       </Paper>
     );
   };
@@ -319,6 +358,14 @@ const PatchViewer = props => {
                   </Grid>
                 ) : null}
                 <Grid item sm={6} xs={12}>
+                  <Typography className={classes.title} color='textSecondary'>
+                    Add Files
+                  </Typography>
+                  <Box my={2}>
+                    <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} />
+                  </Box>
+                </Grid>
+                <Grid item sm={6} xs={12}>
                   <TextField
                     value={parentPatchId}
                     fullWidth
@@ -328,48 +375,68 @@ const PatchViewer = props => {
                     name='parentPatchId'
                     onChange={event => setParentPatchId(event.target.value)}
                   />
+                  <Box my={2}>
+                    <FormControlLabel
+                      value='end'
+                      control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
+                      label='Hide this patch'
+                      labelPlacement='end'
+                    />
+                  </Box>
+                  <Box display='flex' justifyContent='flex-end'>
+                    <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
+                      Update Details and add files
+                    </Button>
+                  </Box>
                 </Grid>
-                <Grid item sm={6} xs={12}>
-                  <FormControlLabel
-                    value='end'
-                    control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
-                    label='Remove'
-                    labelPlacement='end'
-                  />
+
+                <Grid item xs={12}>
+                  <Typography component='p'>{feedback}</Typography>
+                  <InlineError field='name' errors={errors} />
+                  <InlineError field='description' errors={errors} />
+                  <InlineError field='categoryId' errors={errors} />
                 </Grid>
               </Grid>
             </form>
-          </CardContent>
-          <CardContent>
+            <Typography className={classes.title} color='textSecondary'>
+              Existing MP3s and Nord files
+            </Typography>
             <Grid container spacing={2}>
               <Grid item sm={6} xs={12}>
-                <Typography className={classes.title} color='textSecondary'>
-                  Existing Files
-                </Typography>
                 {mp3s.map(mp3 => {
                   if (!mp3) return null;
                   const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
                   return (
-                    <Box m={3} key={mp3.id}>
-                      <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />
-                    </Box>
+                    <Paper className={classes.fileContainer} key={mp3.id}>
+                      <Box my={3} mx={1} key={mp3.id} display='flex'>
+                        <Box mx={1} className={classes.grow}>
+                          <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />
+                        </Box>
+                        <Box m={1} mx={2}>
+                          <FormControlLabel
+                            value='end'
+                            control={
+                              <Switch
+                                color='primary'
+                                checked={mp3.removed}
+                                onChange={() => {
+                                  toggleRemoveFile(mp3);
+                                }}
+                                size='small'
+                              />
+                            }
+                            label='Hide'
+                            labelPlacement='end'
+                            size='small'
+                          />
+                        </Box>
+                      </Box>
+                    </Paper>
                   );
                 })}
-                <Box mt={2}>{files.map(x => renderFile(x))}</Box>
               </Grid>
               <Grid item sm={6} xs={12}>
-                <Typography className={classes.title} color='textSecondary'>
-                  Add Files
-                </Typography>
-                <Box my={2}>
-                  <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} />
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography component='p'>{feedback}</Typography>
-                <InlineError field='name' errors={errors} />
-                <InlineError field='description' errors={errors} />
-                <InlineError field='categoryId' errors={errors} />
+                {files.map(x => renderFile(x))}
               </Grid>
             </Grid>
           </CardContent>
@@ -377,9 +444,6 @@ const PatchViewer = props => {
       </DialogContent>
 
       <DialogActions>
-        <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
-          Update
-        </Button>
         <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>
           Close
         </Button>

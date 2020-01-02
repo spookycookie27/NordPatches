@@ -18,6 +18,7 @@ namespace NordSamples.Data.Models
         public int? NufUserId { get; set; }
         public string AppUserId { get; set; }
         public int AttachId { get; set; }
+        public bool Removed { get; set; }
 
         public List<PatchFile> PatchFiles { get; set; }
         public NufUser NufUser { get; set; }

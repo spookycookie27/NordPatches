@@ -118,9 +118,13 @@ namespace NordSamples.Controllers
                 .Include(x => x.Children)
                     .ThenInclude(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
+                .Include(x => x.Children)
+                    .ThenInclude(x => x.NufUser)
                 .Include(x => x.Parent)
                     .ThenInclude(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
+                .Include(x => x.Parent)
+                    .ThenInclude(x => x.NufUser)
                 .Include(x => x.PatchFiles)
                     .ThenInclude(pf => pf.File)
                 .FirstOrDefaultAsync(x => x.Id == id);

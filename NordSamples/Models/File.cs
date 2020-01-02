@@ -16,5 +16,6 @@ namespace NordSamples.Models
         public int AttachId { get; set; }
         public string AppUserId { get; set; }
         public bool IsBlob { get; set; }
+        public bool Removed { get; set; }
     }
 }
