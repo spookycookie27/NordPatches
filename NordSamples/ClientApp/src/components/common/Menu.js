@@ -84,7 +84,7 @@ function AppMenu(props) {
       <Toolbar className={classes.toolbar}>
         <Box component='div' display={{ xs: 'none', sm: 'flex' }} mt={2}>
           <Link variant='button' component={Link1} to='/'>
-            <img src='/Images/logo6.png' alt='nord user samples and patches' />
+            <img src='/Images/logo7.png' alt='nord user samples and patches' />
           </Link>
         </Box>
         <div className={classes.grow} />

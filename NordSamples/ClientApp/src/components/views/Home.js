@@ -8,7 +8,7 @@ const Home = () => {
     <div className='Home'>
       <Container maxWidth='md'>
         <Typography variant='h2' gutterBottom>
-          Welcome To The (Unofficial) Nord Sample Library
+          Welcome To The (Unofficial) Nord User Samples Collection
         </Typography>
         <Typography variant='body1' gutterBottom>
           <i>
