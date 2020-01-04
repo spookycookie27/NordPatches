@@ -22,7 +22,7 @@ const PatchBrowser = props => {
   const [open, setOpen] = useState(false);
   const [patchId, setPatchId] = useState(null);
   const [action, setAction] = useState('view');
-
+  const [advancedFilters, setAdvancedFilters] = useState(false);
   const handleOpen = () => {
     setOpen(true);
   };
@@ -112,6 +112,14 @@ const PatchBrowser = props => {
           setPatchId(rowData.id);
           handleOpen();
         }
+      },
+      {
+        icon: 'filter_list',
+        onClick: () => {
+          setAdvancedFilters(!advancedFilters);
+        },
+        isFreeAction: true,
+        tooltip: 'Column Filters'
       }
     ];
     if (user.role === 'administrator' || props.myPatches) {
@@ -138,10 +146,14 @@ const PatchBrowser = props => {
         }}
         actions={getActionConfig()}
         options={{
-          pageSize: pageSize
+          pageSize: pageSize,
+          pageSizeOptions: [5, 10, 20, 50],
+          filtering: advancedFilters,
+          searchFieldAlignment: 'left',
+          padding: 'dense'
         }}
         columns={[
-          { title: 'Id', field: 'id' },
+          { title: 'Id', field: 'id', filtering: false },
           { title: 'Name', field: 'name' },
           {
             title: 'Description',
@@ -202,12 +214,14 @@ const PatchBrowser = props => {
           {
             title: 'Mp3',
             field: 'patchFiles',
-            render: rowData => renderMp3(rowData)
+            render: rowData => renderMp3(rowData),
+            filtering: false
           },
           {
             title: 'Rating',
             field: 'rating',
-            render: rowData => renderRating(rowData)
+            render: rowData => renderRating(rowData),
+            filtering: false
           }
         ]}
         data={props.myPatches ? myPatches : patches}

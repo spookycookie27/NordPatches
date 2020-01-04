@@ -44,9 +44,10 @@ const UploadDropZone = props => {
     onDrop
   });
   const { ref, ...rootProps } = getRootProps();
-  const files = acceptedFiles.map(file => (
+
+  const files = props.filesAdded.map(file => (
     <Box key={file.path}>
-      {file.path} - {file.size} bytes
+      {file.path} ({Math.round((file.size / 1000) * 10) / 10}KB)
     </Box>
   ));
 

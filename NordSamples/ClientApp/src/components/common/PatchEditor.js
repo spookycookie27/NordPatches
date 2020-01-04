@@ -52,6 +52,7 @@ const useStyles = makeStyles(theme => ({
 
 function useForceUpdate() {
   const [value, setValue] = useState(0); // integer state
+  console.log(value);
   return () => setValue(value => ++value); // update the state to force render
 }
 
@@ -87,7 +88,10 @@ const PatchViewer = props => {
   };
 
   const onAccept = files => {
-    setAcceptedFiles(files);
+    files.forEach(x => {
+      acceptedFiles.push(x);
+    });
+    forceUpdate();
   };
 
   const uploadFiles = async () => {
@@ -142,7 +146,7 @@ const PatchViewer = props => {
 
   const putFile = async file => {
     const url = `/api/file/${file.id}`;
-    var response = await RestUtilities.put(url, file);
+    await RestUtilities.put(url, file);
   };
 
   const handleUpdate = async updatedPatch => {
@@ -362,7 +366,7 @@ const PatchViewer = props => {
                     Add Files
                   </Typography>
                   <Box my={2}>
-                    <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} />
+                    <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} filesAdded={acceptedFiles} />
                   </Box>
                 </Grid>
                 <Grid item sm={6} xs={12}>

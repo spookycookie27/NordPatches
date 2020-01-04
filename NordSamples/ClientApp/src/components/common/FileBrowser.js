@@ -80,7 +80,7 @@ const FileBrowser = () => {
     <div className='FilesList'>
       <MaterialTable
         theme={theme}
-        options={{ pageSize }}
+        options={{ pageSize, padding: 'dense' }}
         columns={[
           { title: 'ID', field: 'id' },
           { title: 'Name', field: 'name' },
