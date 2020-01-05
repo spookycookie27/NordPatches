@@ -75,7 +75,7 @@ namespace NordSamples.Controllers
         [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> PutFile([FromRoute] int id, [FromBody] File file)
         {
-            var fileToUpdate = await context.Files.SingleAsync(x => x.Id == file.Id);
+            var fileToUpdate = await context.Files.SingleAsync(x => x.Id == id);
             fileToUpdate.Removed = file.Removed;
             await context.SaveChangesAsync();
             return Ok();

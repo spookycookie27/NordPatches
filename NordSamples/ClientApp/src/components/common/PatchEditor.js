@@ -52,7 +52,6 @@ const useStyles = makeStyles(theme => ({
 
 function useForceUpdate() {
   const [value, setValue] = useState(0); // integer state
-  console.log(value);
   return () => setValue(value => ++value); // update the state to force render
 }
 

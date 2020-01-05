@@ -2,7 +2,7 @@
 
 namespace NordSamples.Services
 {
-    public class UserRoleRequirement : IAuthorizationRequirement
+    public class UserPatchEditRequirement : IAuthorizationRequirement
     {
     }
 }

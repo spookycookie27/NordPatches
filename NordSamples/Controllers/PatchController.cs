@@ -24,14 +24,14 @@ namespace NordSamples.Controllers
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
         private readonly ILogger<PatchController> logger;
-        private readonly IAppCache cache;
+        //private readonly IAppCache cache;
 
-        public PatchController(ApplicationDbContext context, IMapper mapper, ILogger<PatchController> logger, IAppCache cache)
+        public PatchController(ApplicationDbContext context, IMapper mapper, ILogger<PatchController> logger)
         {
             this.context = context;
             this.mapper = mapper;
             this.logger = logger;
-            this.cache = cache;
+            //this.cache = cache;
         }
 
         // GET: api/Patches
@@ -108,6 +108,7 @@ namespace NordSamples.Controllers
 
         // GET: api/Patches/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
             var patch = await context.Patches
@@ -183,7 +184,7 @@ namespace NordSamples.Controllers
 
         // PUT: api/Patches/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "Administrator,User")]
+        [Authorize(Policy = "HasPatchEditAuthorization")]
         public async Task<IActionResult> PutPatch([FromRoute] int id, [FromBody] Patch patch)
         {
             if (!PatchExists(id))

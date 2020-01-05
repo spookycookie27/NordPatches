@@ -15,6 +15,7 @@ using NordSamples.Models;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
@@ -38,17 +39,21 @@ namespace NordSamples
             services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(Configuration["ConnectionString"]));
 
-            //services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(databaseName: "NordPatches"));
-
             services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddLazyCache();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<AuthMessageSenderOptions>(Configuration);
+            services.AddHttpClient();
 
-            var jwtOptionsSection = Configuration.GetSection("Jwt");
+
+            IConfigurationSection jwtOptionsSection = Configuration.GetSection("Jwt");
             services.Configure<JwtOptions>(jwtOptionsSection);
 
-            var key = Encoding.ASCII.GetBytes(jwtOptionsSection.Get<JwtOptions>().Key);
+            byte[] key = Encoding.ASCII.GetBytes(jwtOptionsSection.Get<JwtOptions>().Key);
 
             //https://www.blinkingcaret.com/2017/09/06/secure-web-api-in-asp-net-core/
             services.AddAuthentication(x =>
@@ -88,12 +93,6 @@ namespace NordSamples
                 options.User.RequireUniqueEmail = true;
             });
 
-            services.AddAuthorization(opt =>
-            {
-                opt.AddPolicy("HasAdminAccess", policy =>
-                    policy.Requirements.Add(new UserRoleRequirement()));
-            });
-
             services.AddMvc()
             .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt =>
@@ -105,15 +104,18 @@ namespace NordSamples
 
             services.AddRazorPages();
 
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("HasPatchEditAuthorization", policy =>
+                    policy.Requirements.Add(new UserPatchEditRequirement()));
+            });
+
+            services.AddScoped<IAuthorizationHandler, UserPatchEditHandler>();
+
             services.AddSpaStaticFiles(configuration =>
                 {
                     configuration.RootPath = "ClientApp/build";
                 });
-            services.AddLazyCache();
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.Configure<AuthMessageSenderOptions>(Configuration);
-            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -131,7 +133,9 @@ namespace NordSamples
                 app.UseHsts();
             }
             app.UseRewriter(new RewriteOptions().Add(new Redirector()));
-            //app.UseHttpsRedirection();
+
+            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
