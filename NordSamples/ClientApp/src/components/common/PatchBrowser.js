@@ -13,6 +13,15 @@ import theme from '../../theme';
 import { categories, instruments, blobUrl } from '../../Constants';
 import { Typography } from '@material-ui/core';
 
+const containsSearchTerms = (term, data) => {
+  var searchArr = term
+    .toLowerCase()
+    .trim()
+    .split(' ');
+  var lowerData = data.toLowerCase();
+  return searchArr.every(x => lowerData.includes(x));
+};
+
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
   const [myPatches] = useGlobalState('myPatches');
@@ -147,14 +156,27 @@ const PatchBrowser = props => {
         actions={getActionConfig()}
         options={{
           pageSize: pageSize,
-          pageSizeOptions: [5, 10, 20, 50],
+          pageSizeOptions: [5, 10, 20, 50, 100],
           filtering: advancedFilters,
           searchFieldAlignment: 'left',
           padding: 'dense'
         }}
         columns={[
-          { title: 'Id', field: 'id', filtering: false },
-          { title: 'Name', field: 'name' },
+          {
+            title: 'Id',
+            field: 'id',
+            filtering: false,
+            customFilterAndSearch: (term, rowData) => {
+              return rowData.id == term;
+            }
+          },
+          {
+            title: 'Name',
+            field: 'name',
+            customFilterAndSearch: (term, rowData) => {
+              return containsSearchTerms(term, rowData.name);
+            }
+          },
           {
             title: 'Description',
             field: 'description',
@@ -163,18 +185,22 @@ const PatchBrowser = props => {
               <Typography noWrap variant='body2'>
                 {rowData.description}
               </Typography>
-            )
+            ),
+            customFilterAndSearch: (term, rowData) => {
+              return containsSearchTerms(term, rowData.description);
+            }
           },
           {
             title: 'Tags',
             field: 'tags',
             render: rowData => getTags(rowData.tags),
             customFilterAndSearch: (term, rowData) => {
-              return rowData.tags
-                .map(t => t.name.toLowerCase())
-                .some(v => {
-                  return v.indexOf(term.toLowerCase()) >= 0;
-                });
+              const lowerTags = rowData.tags.map(t => t.name.toLowerCase());
+              const searchArr = term
+                .toLowerCase()
+                .trim()
+                .split(' ');
+              return searchArr.every(x => lowerTags.some(y => y.includes(x)));
             }
           },
           {
