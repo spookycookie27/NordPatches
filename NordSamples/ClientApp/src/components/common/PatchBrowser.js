@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Dialog from '@material-ui/core/Dialog';
+import Box from '@material-ui/core/Box';
 import PatchViewer from './PatchViewer';
 import PatchEditor from './PatchEditor';
 import { nufFileLink } from './Common';
@@ -82,7 +83,11 @@ const PatchBrowser = props => {
     if (!patch.ratings) return null;
     const count = patch.ratings.length;
     const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
-    return <Rating name='rating' value={average} precision={0.5} readOnly size='small' />;
+    return (
+      <Box display='flex' justifyContent='flex-end'>
+        <Rating name='rating' value={average} precision={0.5} readOnly size='small' />({count})
+      </Box>
+    );
   };
 
   const renderMp3 = patch => {

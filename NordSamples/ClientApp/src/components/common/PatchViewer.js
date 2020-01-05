@@ -137,7 +137,7 @@ const PatchViewer = props => {
               {renderRating && (
                 <Box className={classes.ratingBox}>
                   <strong>Overall Rating:</strong>
-                  <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />
+                  <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />({patch.ratings.length})
                 </Box>
               )}
               <Box>
