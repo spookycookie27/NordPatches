@@ -41,6 +41,11 @@ const getExtension = file => {
   return type.startsWith('audio') ? 'mp3' : actualExtension;
 };
 
+function useForceUpdate() {
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value => ++value); // update the state to force render
+}
+
 const PatchCreator = props => {
   const classes = useStyles();
   const [user] = useGlobalState('user');
@@ -63,6 +68,8 @@ const PatchCreator = props => {
   const isCategoryInvalid = categoryId < 1;
   const isInstrumentInvalid = instrumentId < 1;
   const isFormInvalid = isNameInvalid || isDescriptionInvalid || isLinkInvalid || isCategoryInvalid || isInstrumentInvalid;
+
+  const forceUpdate = useForceUpdate();
 
   const handleInsert = async () => {
     if (isFormInvalid) {
@@ -157,8 +164,11 @@ const PatchCreator = props => {
     return options;
   };
 
-  const onUploadFiles = files => {
-    setFiles(files);
+  const onUploadFiles = acceptedFiles => {
+    acceptedFiles.forEach(x => {
+      files.push(x);
+    });
+    forceUpdate();
   };
 
   return (
@@ -275,7 +285,7 @@ const PatchCreator = props => {
             <Typography className={classes.title} color='textSecondary' gutterBottom>
               Add Nord Files and Mp3s
             </Typography>
-            <UploadDropZone onAccept={onUploadFiles} auto showSpinner={showSpinner} />
+            <UploadDropZone onAccept={onUploadFiles} auto showSpinner={showSpinner} filesAdded={files} />
           </Grid>
           <Grid item xs={12}>
             <Typography component='p'>{feedback}</Typography>
