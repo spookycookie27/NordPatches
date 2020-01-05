@@ -9,7 +9,7 @@ namespace NordSamples.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(255, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 5)]
+        [StringLength(255, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
         public string Name { get; set; }
         public string Description { get; set; }
         public string Link { get; set; }

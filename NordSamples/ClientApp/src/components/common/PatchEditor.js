@@ -300,8 +300,9 @@ const PatchViewer = props => {
                     value={link}
                     fullWidth
                     id='link'
-                    label='Link'
+                    label='Web Link'
                     name='link'
+                    placeholder='https://www.'
                     onChange={event => setLink(event.target.value)}
                     error={isLinkInvalid && !!link}
                     helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}

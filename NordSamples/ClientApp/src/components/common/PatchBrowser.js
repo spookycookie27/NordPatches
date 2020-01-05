@@ -259,7 +259,7 @@ const PatchBrowser = props => {
         title={props.myPatches ? 'My Patches' : 'All Patches'}
         onChangeRowsPerPage={handlePageSizeChange}
       />
-      <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
+      <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth maxWidth='md'>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
         {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
       </Dialog>
