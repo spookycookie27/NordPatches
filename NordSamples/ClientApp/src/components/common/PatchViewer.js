@@ -90,7 +90,6 @@ const PatchViewer = props => {
   }, []);
 
   const renderFile = file => {
-    if (file.removed) return null;
     return (
       <Paper className={classes.fileContainer} key={file.id}>
         <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
@@ -120,47 +119,47 @@ const PatchViewer = props => {
     refreshData();
   };
 
-  const renderPatch = (patch, renderRating) => {
-    const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
-    const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
+  const renderPatch = (thisPatch, renderRating) => {
+    const mp3s = thisPatch.patchFiles.filter(x => x.file.extension === 'mp3' && !x.file.removed).map(x => x.file);
+    const files = thisPatch.patchFiles.filter(x => x.file.extension !== 'mp3' && !x.file.removed).map(x => x.file);
     return (
-      <Card className={classes.mainCard} key={patch.id}>
+      <Card className={classes.mainCard} key={thisPatch.id}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item md={6} xs={12}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
-                {patch.name}
+                {thisPatch.name}
               </Typography>
               <Box>
-                <strong>Patch ID:</strong> {patch.id}
+                <strong>Patch ID:</strong> {thisPatch.id}
               </Box>
               {renderRating && (
                 <Box className={classes.ratingBox}>
                   <strong>Overall Rating:</strong>
-                  <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />({patch.ratings.length})
+                  <Rating name='average-rating' value={globalRating} precision={0.25} readOnly />({thisPatch.ratings.length})
                 </Box>
               )}
               <Box>
-                <strong>Category:</strong> {patch.categoryId && categories[patch.categoryId]}
+                <strong>Category:</strong> {thisPatch.categoryId && categories[thisPatch.categoryId]}
               </Box>
               <Box>
-                <strong>Description:</strong> {patch.description || 'tbc'}
+                <strong>Description:</strong> {thisPatch.description || 'tbc'}
               </Box>
               <Box>
-                <strong>Instrument Type:</strong> {patch.instrumentId && instruments[patch.instrumentId]}
+                <strong>Instrument Type:</strong> {thisPatch.instrumentId && instruments[thisPatch.instrumentId]}
               </Box>
               <Box>
-                <strong>User:</strong> {patch.user && patch.user.username}
+                <strong>User:</strong> {thisPatch.user && thisPatch.user.username}
               </Box>
               <Box>
-                <strong>Date Created:</strong> {patch.dateCreated ? moment(patch.dateCreated).format('Do MMM YYYY') : 'unknown'}
+                <strong>Date Created:</strong> {thisPatch.dateCreated ? moment(thisPatch.dateCreated).format('Do MMM YYYY') : 'unknown'}
               </Box>
               <Box>
-                <strong>Parent ID:</strong> {patch.parentPatchId}
+                <strong>Parent ID:</strong> {thisPatch.parentPatchId}
               </Box>
               <Box>
                 <strong>Link:</strong>{' '}
-                <a href={patch.link} target='_blank' rel='noopener noreferrer'>
+                <a href={thisPatch.link} target='_blank' rel='noopener noreferrer'>
                   Click
                 </a>
               </Box>
@@ -185,7 +184,7 @@ const PatchViewer = props => {
               </Typography>
               <Box my={3} mx={1}>
                 {mp3s.map(mp3 => {
-                  if (!mp3 || mp3.removed) return null;
+                  if (!mp3) return null;
                   const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
                   return <FullPlayer src={link} key={mp3.id} duration progress filename={mp3.name} />;
                 })}
@@ -200,6 +199,7 @@ const PatchViewer = props => {
 
   if (!patch) return null;
   var hasVariations = patch.parent || patch.children.length > 0;
+
   return (
     <>
       <DialogContent>
