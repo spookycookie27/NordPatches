@@ -99,9 +99,11 @@ function AppMenu(props) {
           <Link variant='button' component={Link1} to='/patches' className={classes.link}>
             ALl Patches
           </Link>
-          <Link variant='button' component={Link1} to='/files' className={classes.link}>
-            Files
-          </Link>
+          {user && user.role === 'administrator' && (
+            <Link variant='button' component={Link1} to='/files' className={classes.link}>
+              Files
+            </Link>
+          )}
           {user && (
             <Button onClick={onSignoutClick} className={classes.link}>
               Logout

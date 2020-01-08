@@ -89,7 +89,7 @@ const FileBrowser = () => {
           { title: 'Extension', field: 'extension' }
         ]}
         data={files}
-        title='Files List'
+        title='Temporary Files List for admins only'
         onChangeRowsPerPage={handlePageSizeChange}
         detailPanel={file => {
           return (
