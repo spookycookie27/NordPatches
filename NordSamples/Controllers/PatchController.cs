@@ -79,9 +79,9 @@ namespace NordSamples.Controllers
                 string appUserId = user.Claims.Single(x => x.Type == ClaimTypes.Sid).Value;
                 string primarySid = user.Claims.Single(x => x.Type == ClaimTypes.PrimarySid).Value;
 
-                nufUserId = primarySid != null
-                    ? (int?)int.Parse(primarySid)
-                    : null;
+                nufUserId = string.IsNullOrEmpty(primarySid)
+                    ? null
+                    : (int?)int.Parse(primarySid);
 
                 async Task<List<Data.Models.Patch>> PatchGetter() =>
                     await context.Patches

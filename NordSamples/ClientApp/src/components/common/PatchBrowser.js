@@ -120,7 +120,7 @@ const PatchBrowser = props => {
   const getActionConfig = () => {
     const actionsConfig = [
       {
-        icon: 'chevron_right',
+        icon: 'launch',
         onClick: (event, rowData) => {
           setAction('view');
           setPatchId(rowData.id);
@@ -167,6 +167,9 @@ const PatchBrowser = props => {
           searchFieldAlignment: 'left',
           padding: 'dense'
         }}
+        data={props.myPatches ? myPatches : patches}
+        title={props.myPatches ? 'My Patches' : 'All Patches'}
+        onChangeRowsPerPage={handlePageSizeChange}
         //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
         columns={[
           {
@@ -184,7 +187,8 @@ const PatchBrowser = props => {
             field: 'name',
             customFilterAndSearch: (term, rowData) => {
               return containsSearchTerms(term, rowData.name);
-            }
+            },
+            filtering: false
           },
           {
             title: 'Description',
@@ -197,7 +201,8 @@ const PatchBrowser = props => {
             ),
             customFilterAndSearch: (term, rowData) => {
               return containsSearchTerms(term, rowData.description);
-            }
+            },
+            filtering: false
           },
           {
             title: 'Tags',
@@ -210,7 +215,8 @@ const PatchBrowser = props => {
                 .trim()
                 .split(' ');
               return searchArr.every(x => lowerTags.some(y => y.includes(x)));
-            }
+            },
+            filtering: false
           },
           {
             title: 'Category',
@@ -276,9 +282,6 @@ const PatchBrowser = props => {
             filtering: false
           }
         ]}
-        data={props.myPatches ? myPatches : patches}
-        title={props.myPatches ? 'My Patches' : 'All Patches'}
-        onChangeRowsPerPage={handlePageSizeChange}
       />
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth maxWidth='md'>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
