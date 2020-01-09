@@ -228,7 +228,8 @@ const PatchBrowser = props => {
               } else {
                 return categories[a.categoryId] < categories[b.categoryId] ? -1 : 1;
               }
-            }
+            },
+            searchable: false
           },
           {
             title: 'Type',
@@ -247,23 +248,25 @@ const PatchBrowser = props => {
               } else {
                 return instruments[a.instrumentId] < instruments[b.instrumentId] ? -1 : 1;
               }
-            }
+            },
+            searchable: false
           },
           {
             title: 'Mp3',
             field: 'patchFiles',
             render: rowData => renderMp3(rowData),
-            // lookup: { 1: 'Has MP3', 2: 'No Mp3' },
-            // customFilterAndSearch: (items, rowData) => {
-            //   if (items.length !== 1) return false;
-            //   const hasmp3 = rowData.patchFiles.some(x => x.file.extension === 'mp3');
-            //   if (items[0] === '1') {
-            //     return hasmp3;
-            //   } else {
-            //     return !hasmp3;
-            //   }
-            // },
-            filtering: false
+            lookup: { 1: 'Has MP3', 2: 'No Mp3' },
+            customFilterAndSearch: (items, rowData) => {
+              if (items.length !== 1) return true;
+              const hasmp3 = rowData.patchFiles.some(x => x.file.extension === 'mp3');
+              if (items[0] === '1') {
+                return hasmp3;
+              } else {
+                return !hasmp3;
+              }
+            },
+            filtering: true,
+            searchable: false
           },
           {
             title: 'Rating',
