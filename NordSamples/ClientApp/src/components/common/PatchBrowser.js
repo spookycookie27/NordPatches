@@ -148,6 +148,7 @@ const PatchBrowser = props => {
     }
     return actionsConfig;
   };
+
   return (
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
@@ -166,6 +167,7 @@ const PatchBrowser = props => {
           searchFieldAlignment: 'left',
           padding: 'dense'
         }}
+        //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
         columns={[
           {
             title: 'Id',
@@ -173,7 +175,8 @@ const PatchBrowser = props => {
             filtering: false,
             customFilterAndSearch: (term, rowData) => {
               return rowData.id == term;
-            }
+            },
+            hidden: user.role !== 'administrator'
           },
           {
             title: 'Name',
@@ -212,7 +215,9 @@ const PatchBrowser = props => {
             title: 'Category',
             field: 'categoryId',
             render: rowData => <span>{categories[rowData.categoryId]}</span>,
-            customFilterAndSearch: (term, rowData) => rowData.categoryId && categories[rowData.categoryId].toLowerCase().includes(term.toLowerCase()),
+            lookup: categories,
+            customFilterAndSearch: (items, rowData) => items.length === 0 || (rowData.categoryId ? items.includes(rowData.categoryId.toString()) : false),
+            filtering: true,
             customSort: (a, b) => {
               if (a.categoryId === b.categoryId) {
                 return 0;
@@ -229,7 +234,9 @@ const PatchBrowser = props => {
             title: 'Type',
             field: 'instrumentId',
             render: rowData => <span>{instruments[rowData.instrumentId]}</span>,
-            customFilterAndSearch: (term, rowData) => instruments[rowData.instrumentId].toLowerCase().includes(term.toLowerCase()),
+            customFilterAndSearch: (items, rowData) => items.length === 0 || items.includes(rowData.instrumentId.toString()),
+            lookup: instruments,
+            filtering: true,
             customSort: (a, b) => {
               if (a.instrumentId === b.instrumentId) {
                 return 0;
@@ -246,6 +253,16 @@ const PatchBrowser = props => {
             title: 'Mp3',
             field: 'patchFiles',
             render: rowData => renderMp3(rowData),
+            // lookup: { 1: 'Has MP3', 2: 'No Mp3' },
+            // customFilterAndSearch: (items, rowData) => {
+            //   if (items.length !== 1) return false;
+            //   const hasmp3 = rowData.patchFiles.some(x => x.file.extension === 'mp3');
+            //   if (items[0] === '1') {
+            //     return hasmp3;
+            //   } else {
+            //     return !hasmp3;
+            //   }
+            // },
             filtering: false
           },
           {
