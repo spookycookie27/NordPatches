@@ -172,11 +172,12 @@ const PatchBrowser = props => {
           {
             title: 'Id',
             field: 'id',
-            filtering: false,
+            filtering: true,
             customFilterAndSearch: (term, rowData) => {
               return rowData.id == term;
             },
-            hidden: user.role !== 'administrator'
+            hidden: user.role !== 'administrator',
+            searchable: false
           },
           {
             title: 'Name',
