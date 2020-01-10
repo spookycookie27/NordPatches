@@ -11,6 +11,8 @@ import { useGlobalState } from '../../State';
 import { dispatch } from '../../State';
 import Rating from '@material-ui/lab/Rating';
 import theme from '../../theme';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { categories, instruments, blobUrl } from '../../Constants';
 import { Typography } from '@material-ui/core';
 
@@ -25,7 +27,8 @@ const containsSearchTerms = (term, data) => {
 
 const PatchBrowser = props => {
   const [patches] = useGlobalState('patches');
-  const [myPatches] = useGlobalState('myPatches');
+  const [myPatches, setMyPatches] = useState(false);
+  const [userPatches, setUserPatches] = useState(false);
   const [user] = useGlobalState('user');
   const [pageSize] = useGlobalState('pageSize');
   const [error, setError] = useState(false);
@@ -52,39 +55,22 @@ const PatchBrowser = props => {
             type: 'setPatches',
             patches: res
           });
+          const userPatches = res.filter(x => (x.user && x.user.id === user.id) || (x.user && x.user.nufUserId === user.nufUserId));
+          setUserPatches(userPatches);
         })
         .catch(err => {
           setError(true);
         });
     };
-    const getMyData = async () => {
-      const url = '/api/patch/user';
-      const res = await RestUtilities.get(url);
-      res
-        .json()
-        .then(res => {
-          dispatch({
-            type: 'setMyPatches',
-            patches: res
-          });
-        })
-        .catch(err => {
-          setError(true);
-        });
-    };
-    if (props.myPatches) {
-      getMyData();
-    } else {
-      getAllData();
-    }
-  }, [props]);
+    getAllData();
+  }, [props, user]);
 
   const renderRating = patch => {
     if (!patch.ratings) return null;
     const count = patch.ratings.length;
     const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
     return (
-      <Box display='flex' justifyContent='flex-end'>
+      <Box display='flex'>
         <Rating name='rating' value={average} precision={0.5} readOnly size='small' />({count})
       </Box>
     );
@@ -117,37 +103,24 @@ const PatchBrowser = props => {
     });
   };
 
-  const getActionConfig = () => {
-    const actionsConfig = [
-      {
-        icon: 'launch',
-        onClick: (event, rowData) => {
-          setAction('view');
-          setPatchId(rowData.id);
-          handleOpen();
-        }
-      },
-      {
-        icon: 'filter_list',
-        onClick: () => {
-          setAdvancedFilters(!advancedFilters);
-        },
-        isFreeAction: true,
-        tooltip: 'Column Filters'
-      }
-    ];
-    if (user.role === 'administrator' || props.myPatches) {
-      actionsConfig.push({
-        icon: 'edit',
-        onClick: (event, rowData) => {
-          setAction('edit');
-          setPatchId(rowData.id);
-          handleOpen();
-        }
-      });
-    }
-    return actionsConfig;
+  const shouldShowEdit = rowData => {
+    return user.role === 'administrator' || (rowData.user && rowData.user.nufUserId === user.nufUserId) || (rowData.user && rowData.user.id === user.id);
   };
+
+  const myPatchesToggle = (
+    <FormControlLabel
+      control={
+        <Switch
+          color='primary'
+          checked={myPatches}
+          onChange={() => {
+            setMyPatches(!myPatches);
+          }}
+        />
+      }
+      label='My Sounds'
+    />
+  );
 
   return (
     <div className='Patchlist'>
@@ -159,7 +132,41 @@ const PatchBrowser = props => {
             actions: ''
           }
         }}
-        actions={getActionConfig()}
+        actions={[
+          rowData => ({
+            icon: 'edit',
+            onClick: (event, rowData) => {
+              setAction('edit');
+              setPatchId(rowData.id);
+              handleOpen();
+            },
+            hidden: !shouldShowEdit(rowData)
+          }),
+          {
+            icon: 'launch',
+            onClick: (event, rowData) => {
+              setAction('view');
+              setPatchId(rowData.id);
+              handleOpen();
+            }
+          },
+          {
+            icon: () => {
+              return myPatchesToggle;
+            },
+            onClick: event => {},
+            isFreeAction: true,
+            tooltip: 'Show My Sounds'
+          },
+          {
+            icon: 'filter_list',
+            onClick: () => {
+              setAdvancedFilters(!advancedFilters);
+            },
+            isFreeAction: true,
+            tooltip: 'Column Filters'
+          }
+        ]}
         options={{
           pageSize: pageSize,
           pageSizeOptions: [5, 10, 20, 50, 100],
@@ -167,8 +174,8 @@ const PatchBrowser = props => {
           searchFieldAlignment: 'left',
           padding: 'dense'
         }}
-        data={props.myPatches ? myPatches : patches}
-        title={props.myPatches ? 'My Patches' : 'All Patches'}
+        data={myPatches ? userPatches : patches}
+        title={myPatches ? 'My Sounds' : 'All Sounds'}
         onChangeRowsPerPage={handlePageSizeChange}
         //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
         columns={[
@@ -177,7 +184,7 @@ const PatchBrowser = props => {
             field: 'id',
             filtering: true,
             customFilterAndSearch: (term, rowData) => {
-              return rowData.id == term;
+              return rowData.id === term;
             },
             hidden: user.role !== 'administrator',
             searchable: false
@@ -217,6 +224,17 @@ const PatchBrowser = props => {
               return searchArr.every(x => lowerTags.some(y => y.includes(x)));
             },
             filtering: false
+          },
+          {
+            title: 'User',
+            field: 'user',
+            render: rowData => rowData.user && rowData.user.username,
+            filtering: true,
+            searchable: false,
+            customFilterAndSearch: (term, rowData) => {
+              if (!rowData.user || rowData.user.username.length === 0) return true;
+              return containsSearchTerms(term, rowData.user.username);
+            }
           },
           {
             title: 'Category',
@@ -283,7 +301,7 @@ const PatchBrowser = props => {
           }
         ]}
       />
-      <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth maxWidth='md'>
+      <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
         {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
       </Dialog>

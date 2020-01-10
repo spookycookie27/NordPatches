@@ -9,7 +9,6 @@ import Home from './components/views/Home';
 import About from './components/views/About';
 import AddPatch from './components/views/AddPatch';
 import AllPatches from './components/views/AllPatches';
-import MyPatches from './components/views/MyPatches';
 import Files from './components/views/Files';
 import { isSignedIn } from './services/Auth';
 import { GlobalStateProvider } from './State';
@@ -36,9 +35,8 @@ const App = () => {
             <Route path='/resetPassword' component={WithTracker(ResetPassword)} />
             <Layout>
               <Route exact path='/' component={WithTracker(Home)} />
-              <PrivateRoute exact path='/addpatch' component={WithTracker(AddPatch)} />
-              <PrivateRoute exact path='/patches' component={WithTracker(AllPatches)} />
-              <PrivateRoute exact path='/mypatches' component={WithTracker(MyPatches)} />
+              <PrivateRoute exact path='/addsound' component={WithTracker(AddPatch)} />
+              <PrivateRoute exact path='/sounds' component={WithTracker(AllPatches)} />
               <PrivateRoute exact path='/files' component={WithTracker(Files)} />
               <PrivateRoute exact path='/about' component={WithTracker(About)} />
             </Layout>

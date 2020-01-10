@@ -118,18 +118,18 @@ const PatchCreator = props => {
                   patch: insertedPatch
                 });
                 setShowSpinner(false);
-                setFeedback('Your patch was added successfully');
+                setFeedback('Your sound was added successfully');
                 setErrors(null);
-                props.history.push('/mypatches');
+                props.history.push('/sounds');
               }
             });
           }
         });
       } else {
         setShowSpinner(false);
-        setFeedback('Your patch was added successfully');
+        setFeedback('Your sound was added successfully');
         setErrors(null);
-        props.history.push('/mypatches');
+        props.history.push('/sounds');
       }
     } else if (response.status === 400) {
       response.json().then(res => {
@@ -178,7 +178,7 @@ const PatchCreator = props => {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
-                Create Patch
+                Create Sound
               </Typography>
             </Grid>
             <Grid item sm={6} xs={12}>

@@ -90,14 +90,11 @@ function AppMenu(props) {
         <div className={classes.grow} />
 
         <nav className={classes.sectionDesktop}>
-          <Link variant='button' component={Link1} to='/addpatch' className={classes.link}>
+          <Link variant='button' component={Link1} to='/addsound' className={classes.link}>
             Add New
           </Link>
-          <Link variant='button' component={Link1} to='/mypatches' className={classes.link}>
-            My Patches
-          </Link>
-          <Link variant='button' component={Link1} to='/patches' className={classes.link}>
-            ALl Patches
+          <Link variant='button' component={Link1} to='/sounds' className={classes.link}>
+            ALl Sounds
           </Link>
           {user && user.role === 'administrator' && (
             <Link variant='button' component={Link1} to='/files' className={classes.link}>
@@ -131,9 +128,8 @@ function AppMenu(props) {
           open={open}
           onClose={handleClose}
         >
-          <MenuItem onClick={() => handleNavigate('/addpatch')}>Add New</MenuItem>
-          <MenuItem onClick={() => handleNavigate('/mypatches')}>My Patches</MenuItem>
-          <MenuItem onClick={() => handleNavigate('/patches')}>All Patches</MenuItem>
+          <MenuItem onClick={() => handleNavigate('/addsound')}>Add New</MenuItem>
+          <MenuItem onClick={() => handleNavigate('/sounds')}>All Patches</MenuItem>
           <MenuItem onClick={() => handleNavigate('/files')}>Files</MenuItem>
           {user && <MenuItem onClick={onSignoutClick}>Logout</MenuItem>}
         </Menu>

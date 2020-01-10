@@ -47,47 +47,8 @@ namespace NordSamples.Controllers
                      .Where(x => !x.Removed)
                      .Include(x => x.Tags)
                      .Include(x => x.Ratings)
-                     .Include(x => x.PatchFiles)
-                        .ThenInclude(pf => pf.File)
-                     .AsNoTracking()
-                     .ToListAsync();
-
-                List<Data.Models.Patch> cachedPatches = await PatchGetter();
-                //List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync("PatchesController.GetPatches", PatchGetter);
-
-                model = mapper.Map<List<Patch>>(cachedPatches);
-
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "An error occurred creating the DB.");
-                model = null;
-            }
-            return model;
-        }
-
-        // GET: api/Patches
-        [HttpGet("user")]
-        [Authorize(Roles = "Administrator,User")]
-        public async Task<ActionResult<List<Patch>>> GetUserPatches()
-        {
-            List<Patch> model;
-            int? nufUserId;
-            try
-            {
-                ClaimsPrincipal user = HttpContext.User;
-                string appUserId = user.Claims.Single(x => x.Type == ClaimTypes.Sid).Value;
-                string primarySid = user.Claims.Single(x => x.Type == ClaimTypes.PrimarySid).Value;
-
-                nufUserId = string.IsNullOrEmpty(primarySid)
-                    ? null
-                    : (int?)int.Parse(primarySid);
-
-                async Task<List<Data.Models.Patch>> PatchGetter() =>
-                    await context.Patches
-                     .Where(x => x.AppUserId == appUserId || (nufUserId != null && x.NufUserId == nufUserId))
-                     .Include(x => x.Tags)
-                     .Include(x => x.Ratings)
+                     .Include(x => x.AppUser)
+                     .Include(x => x.NufUser)
                      .Include(x => x.PatchFiles)
                         .ThenInclude(pf => pf.File)
                      .AsNoTracking()
@@ -96,7 +57,6 @@ namespace NordSamples.Controllers
                 List<Data.Models.Patch> cachedPatches = await PatchGetter();
 
                 model = mapper.Map<List<Patch>>(cachedPatches);
-
             }
             catch (Exception e)
             {

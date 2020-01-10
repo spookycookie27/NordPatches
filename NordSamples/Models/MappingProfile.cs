@@ -10,7 +10,7 @@ namespace NordSamples.Models
             CreateMap<AppUser, UserViewModel>();
 
             CreateMap<Data.Models.Patch, Patch>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.NufUser));
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => GetUser(src)));
             CreateMap<Patch, Data.Models.Patch>()
                 .ForMember(dest => dest.AppUserId, opt => opt.MapFrom(src => src.User.Id))
                 .ForMember(dest => dest.NufUserId, opt => opt.MapFrom(src => src.User.NufUserId));
@@ -26,6 +26,29 @@ namespace NordSamples.Models
             CreateMap<Tag, Data.Models.Tag>();
             CreateMap<Data.Models.Comment, Comment>()
             .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.AppUser));
+        }
+
+        private static User GetUser(Data.Models.Patch src)
+        {
+            var user = new User();
+
+            if (src.AppUser != null)
+            {
+                user.Id = src.AppUser.Id;
+                user.NufUserId = src.AppUser.NufUserId.ToString();
+                user.Username = src.AppUser.UserName;
+            }
+            else if (src.NufUser != null)
+            {
+                user.NufUserId = src.NufUser.Id.ToString();
+                user.Username = src.NufUser.Username;
+            }
+            else
+            {
+                user = null;
+            }
+
+            return user;
         }
     }
 }

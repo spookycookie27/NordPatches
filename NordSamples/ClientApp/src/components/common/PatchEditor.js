@@ -271,7 +271,7 @@ const PatchViewer = props => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <Typography className={classes.title} color='textSecondary' gutterBottom>
-                    Edit Patch ID: {patch.id}
+                    Edit Sound ID: {patch.id}
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -375,7 +375,7 @@ const PatchViewer = props => {
                     fullWidth
                     type='number'
                     id='parentPatchId'
-                    label='Parent PatchID'
+                    label='Parent Sound ID'
                     name='parentPatchId'
                     onChange={event => setParentPatchId(event.target.value)}
                   />
@@ -383,7 +383,7 @@ const PatchViewer = props => {
                     <FormControlLabel
                       value='end'
                       control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
-                      label='Hide this patch'
+                      label='Hide this sound'
                       labelPlacement='end'
                     />
                   </Box>
