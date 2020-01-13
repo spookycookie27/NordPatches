@@ -40,10 +40,10 @@ const containsSearchTerms = (term, data) => {
 
 const PatchBrowser = props => {
   const { state, dispatch } = React.useContext(Store);
-  const patches = state.patches;
   const mySounds = state.mySounds;
   const user = state.user;
   const pageSize = state.pageSize;
+
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [patchId, setPatchId] = useState(null);
@@ -56,8 +56,6 @@ const PatchBrowser = props => {
     setOpen(false);
   };
 
-  const userPatches = patches ? patches.filter(x => (x.user && x.user.id === user.id) || (x.user && x.user.nufUserId === user.nufUserId)) : [];
-
   useEffect(() => {
     const getAllData = async () => {
       const url = '/api/patch';
@@ -65,9 +63,16 @@ const PatchBrowser = props => {
       res
         .json()
         .then(res => {
+          console.log('setPatches');
+          const userPatches = res ? res.filter(x => (x.user && x.user.id === user.id) || (x.user && x.user.nufUserId === user.nufUserId)) : [];
+          const publicPatches = res ? res.filter(x => !x.removed) : [];
           dispatch({
             type: 'setPatches',
-            patches: res
+            patches: publicPatches
+          });
+          dispatch({
+            type: 'setMyPatches',
+            patches: userPatches
           });
         })
         .catch(err => {
@@ -310,7 +315,7 @@ const PatchBrowser = props => {
       onClick: event => {},
       isFreeAction: true,
       tooltip: 'Show My Sounds',
-      hidden: userPatches.length === 0
+      hidden: state.myPatches.length === 0
     },
     {
       icon: 'filter_list',
@@ -351,7 +356,7 @@ const PatchBrowser = props => {
           padding: 'dense',
           filterCellStyle: { padding: '4px', paddingTop: 0, paddingBottom: '16px' }
         }}
-        data={mySounds ? userPatches : patches}
+        data={mySounds ? state.myPatches : state.patches}
         title={mySounds ? 'My Sounds' : 'All Sounds'}
         onChangeRowsPerPage={handlePageSizeChange}
         //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}

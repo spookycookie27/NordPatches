@@ -124,7 +124,6 @@ const FileBrowser = () => {
             title: 'Assigned to Patch ID',
             field: 'patchFiles',
             render: rowData => {
-              console.log(rowData);
               if (rowData.patchFiles && rowData.patchFiles.length > 0) {
                 return <span>{rowData.patchFiles[0].patchId}</span>;
               }

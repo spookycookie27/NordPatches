@@ -11,6 +11,7 @@ const parseState = str => {
 const defaultState = {
   user: null,
   patches: [],
+  myPatches: [],
   files: [],
   pageSize: 10,
   mySounds: false,
@@ -42,6 +43,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         patches: action.patches
       };
+    case 'setMyPatches':
+      return {
+        ...state,
+        myPatches: action.patches
+      };
     case 'setFiles':
       return {
         ...state,
@@ -55,10 +61,13 @@ const reducer = (state = initialState, action) => {
     case 'updatePatch': {
       let foundIndex = state.patches.findIndex(x => x.id === action.patch.id);
       state.patches[foundIndex] = action.patch;
+      foundIndex = state.myPatches.findIndex(x => x.id === action.patch.id);
+      state.myPatches[foundIndex] = action.patch;
       return { ...state };
     }
     case 'insertPatch': {
       state.patches.push(action.patch);
+      state.myPatches.push(action.patch);
       return { ...state };
     }
     default:

@@ -55,7 +55,6 @@ namespace NordSamples.Controllers
 
         private async Task<List<Data.Models.Patch>> PatchGetter() =>
             await context.Patches
-                .Where(x => !x.Removed)
                 .Include(x => x.Tags)
                 .Include(x => x.Ratings)
                 .Include(x => x.AppUser)

@@ -183,13 +183,17 @@ const PatchViewer = props => {
               <Typography className={classes.title} color='textSecondary' gutterBottom>
                 Click to download Files
               </Typography>
-              <Box my={3} mx={1}>
-                {mp3s.map(mp3 => {
-                  if (!mp3) return null;
-                  const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
-                  return <FullPlayer src={link} key={mp3.id} duration progress filename={mp3.name} />;
-                })}
-              </Box>
+
+              {mp3s.map(mp3 => {
+                if (!mp3) return null;
+                const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
+                return (
+                  <Box my={3} mx={1} key={mp3.id}>
+                    <FullPlayer src={link} duration progress filename={mp3.name} />
+                  </Box>
+                );
+              })}
+
               <Box mt={2}>{files.map(x => renderFile(x))}</Box>
             </Grid>
           </Grid>
