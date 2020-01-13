@@ -10,10 +10,11 @@ import RestUtilities from '../../services/RestUtilities';
 import LoginLayout from '../common/LoginLayout';
 import InlineError from '../common/InlineError';
 import { loginStyles } from '../common/Common';
-import { dispatch } from '../../State';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import { Store } from '../../state/Store';
 
 function SignInSide(props) {
+  const { dispatch } = React.useContext(Store);
   const classes = loginStyles();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -44,7 +45,9 @@ function SignInSide(props) {
           setFeedback('There were errors:');
           setDisabled(false);
         } else if (response.status === 401) {
-          setFeedback('The username and password combination was not recognised.');
+          setFeedback(
+            'The username and password combination was not recognised.'
+          );
           setDisabled(false);
           setErrors(null);
         }
@@ -79,7 +82,11 @@ function SignInSide(props) {
               }}
               disabled={disabled}
               error={isUsernameInvalid && !!username}
-              helperText={isUsernameInvalid && !!username && 'Must be minimum 5 characters and maximum of 16'}
+              helperText={
+                isUsernameInvalid &&
+                !!username &&
+                'Must be minimum 5 characters and maximum of 16'
+              }
             />
           </Grid>
 
@@ -102,12 +109,23 @@ function SignInSide(props) {
                 setFeedback(null);
               }}
               error={!!password && isPasswordInvalid}
-              helperText={!!password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
+              helperText={
+                !!password &&
+                isPasswordInvalid &&
+                'Must be minimum 5 characters and maximum of 30'
+              }
               disabled={disabled}
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled || hasErrors}>
+        <Button
+          fullWidth
+          variant='contained'
+          color='secondary'
+          className={classes.submit}
+          onClick={() => handleLoginClick()}
+          disabled={disabled || hasErrors}
+        >
           Sign In
         </Button>
         {disabled && (

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace NordSamples.Models
 {
@@ -17,5 +19,7 @@ namespace NordSamples.Models
         public string AppUserId { get; set; }
         public bool IsBlob { get; set; }
         public bool Removed { get; set; }
+
+        public ICollection<PatchFile> PatchFiles { get; set; }
     }
 }

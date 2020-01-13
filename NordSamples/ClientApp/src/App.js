@@ -11,14 +11,24 @@ import AddPatch from './components/views/AddPatch';
 import AllPatches from './components/views/AllPatches';
 import Files from './components/views/Files';
 import { isSignedIn } from './services/Auth';
-import { GlobalStateProvider } from './State';
 import ReactGA from 'react-ga';
 import WithTracker from './components/common/WithTracker';
 import 'typeface-roboto';
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   return (
-    <Route {...rest} render={props => (isSignedIn() ? <Component {...props} /> : <Redirect to={{ pathname: '/login', state: { from: props.location } }} />)} />
+    <Route
+      {...rest}
+      render={props =>
+        isSignedIn() ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{ pathname: '/login', state: { from: props.location } }}
+          />
+        )
+      }
+    />
   );
 };
 
@@ -26,23 +36,32 @@ const App = () => {
   ReactGA.initialize('UA-155257266-1');
   return (
     <div className='App'>
-      <GlobalStateProvider>
-        <BrowserRouter>
-          <Switch>
-            <Route path='/login' component={WithTracker(Login)} />
-            <Route path='/register' component={WithTracker(Register)} />
-            <Route path='/forgotPassword' component={WithTracker(ForgotPassword)} />
-            <Route path='/resetPassword' component={WithTracker(ResetPassword)} />
-            <Layout>
-              <Route exact path='/' component={WithTracker(Home)} />
-              <PrivateRoute exact path='/addsound' component={WithTracker(AddPatch)} />
-              <PrivateRoute exact path='/sounds' component={WithTracker(AllPatches)} />
-              <PrivateRoute exact path='/files' component={WithTracker(Files)} />
-              <PrivateRoute exact path='/about' component={WithTracker(About)} />
-            </Layout>
-          </Switch>
-        </BrowserRouter>
-      </GlobalStateProvider>
+      <BrowserRouter>
+        <Switch>
+          <Route path='/login' component={WithTracker(Login)} />
+          <Route path='/register' component={WithTracker(Register)} />
+          <Route
+            path='/forgotPassword'
+            component={WithTracker(ForgotPassword)}
+          />
+          <Route path='/resetPassword' component={WithTracker(ResetPassword)} />
+          <Layout>
+            <Route exact path='/' component={WithTracker(Home)} />
+            <PrivateRoute
+              exact
+              path='/addsound'
+              component={WithTracker(AddPatch)}
+            />
+            <PrivateRoute
+              exact
+              path='/sounds'
+              component={WithTracker(AllPatches)}
+            />
+            <PrivateRoute exact path='/files' component={WithTracker(Files)} />
+            <PrivateRoute exact path='/about' component={WithTracker(About)} />
+          </Layout>
+        </Switch>
+      </BrowserRouter>
     </div>
   );
 };

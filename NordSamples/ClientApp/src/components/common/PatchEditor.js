@@ -21,9 +21,9 @@ import { nufFileLink } from './Common';
 import Box from '@material-ui/core/Box';
 import FullPlayer from '../common/FullPlayer';
 import { makeStyles } from '@material-ui/core/styles';
-import { dispatch, useGlobalState } from '../../State';
 import { categories, instruments, blobUrl } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
+import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -51,14 +51,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function useForceUpdate() {
+  // eslint-disable-next-line no-unused-vars
   const [value, setValue] = useState(0); // integer state
   return () => setValue(value => ++value); // update the state to force render
 }
 
 const PatchViewer = props => {
+  const { state, dispatch } = React.useContext(Store);
   const classes = useStyles();
-
-  const [user] = useGlobalState('user');
   const [patch, setPatch] = useState(null);
   const [name, setName] = useState('');
   const [link, setLink] = useState('');
@@ -70,7 +70,7 @@ const PatchViewer = props => {
   const [parentPatchId, setParentPatchId] = useState('');
   const [showSpinner, setShowSpinner] = useState(false);
   const [disableUpdate, setDisableUpdate] = useState(false);
-  const [acceptedFiles, setAcceptedFiles] = useState([]);
+  const [acceptedFiles] = useState([]);
   const [feedback, setFeedback] = useState('');
   const [errors, setErrors] = useState(null);
   const isNameInvalid = name.length < 1 || name.length > 255;
@@ -99,13 +99,17 @@ const PatchViewer = props => {
       const formData = new FormData();
       formData.append('File', file);
       formData.append('PatchId', props.patchId);
-      formData.append('AppUserId', user.id);
-      formData.append('NufUserId', user.nufUserId);
+      formData.append('AppUserId', state.user.id);
+      formData.append('NufUserId', state.user.nufUserId);
       formData.append('Extension', getExtension(file));
       RestUtilities.postFormData(url, formData).then(response => {
         if (response.ok) {
           response.json().then(file => {
-            patch.patchFiles.push({ file, patchId: props.patchId, fileId: file.id });
+            patch.patchFiles.push({
+              file,
+              patchId: props.patchId,
+              fileId: file.id
+            });
             if (i === acceptedFiles.length - 1) {
               handleUpdate(patch);
               setShowSpinner(false);
@@ -274,24 +278,20 @@ const PatchViewer = props => {
                     Edit Sound ID: {patch.id}
                   </Typography>
                 </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item sm={6} xs={12}>
-                      <TextField
-                        autoFocus
-                        maxLength={255}
-                        value={name}
-                        required
-                        fullWidth
-                        id='name'
-                        label='Name'
-                        name='name'
-                        onChange={event => setName(event.target.value)}
-                        error={isNameInvalid && !!name}
-                        helperText={isNameInvalid && !!name && 'Must be less than 255 characters'}
-                      />
-                    </Grid>
-                  </Grid>
+                <Grid item sm={6} xs={12}>
+                  <TextField
+                    autoFocus
+                    maxLength={255}
+                    value={name}
+                    required
+                    fullWidth
+                    id='name'
+                    label='Name'
+                    name='name'
+                    onChange={event => setName(event.target.value)}
+                    error={isNameInvalid && !!name}
+                    helperText={isNameInvalid && !!name && 'Must be less than 255 characters'}
+                  />
                 </Grid>
                 <Grid item sm={6} xs={12}>
                   <TextField
@@ -309,22 +309,6 @@ const PatchViewer = props => {
                   />
                 </Grid>
                 <Grid item sm={6} xs={12}>
-                  <TextField
-                    multiline
-                    rowsMax='2'
-                    minLength={0}
-                    maxLength={1000}
-                    value={description}
-                    fullWidth
-                    id='description'
-                    label='Description'
-                    name='description'
-                    onChange={event => setDescription(event.target.value)}
-                    error={isDescriptionInvalid && !!description}
-                    helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
-                  />
-                </Grid>
-                <Grid item sm={6} xs={12}>
                   <InputLabel id='instrumentLabel' className={classes.label}>
                     Type
                   </InputLabel>
@@ -339,6 +323,22 @@ const PatchViewer = props => {
                   <Select fullWidth id='categoryId' value={categoryId ? categoryId : ''} onChange={event => setCategoryId(event.target.value)}>
                     {renderOptions(categories)}
                   </Select>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    multiline
+                    rowsMax='2'
+                    minLength={0}
+                    maxLength={1000}
+                    value={description}
+                    fullWidth
+                    id='description'
+                    label='Description'
+                    name='description'
+                    onChange={event => setDescription(event.target.value)}
+                    error={isDescriptionInvalid && !!description}
+                    helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
+                  />
                 </Grid>
                 {tags ? (
                   <Grid item xs={12}>

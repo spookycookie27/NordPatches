@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
+// ReSharper disable UnusedMember.Local
+// ReSharper disable InvalidXmlDocComment
 
 namespace NordSamples.Data
 {
@@ -26,7 +28,7 @@ namespace NordSamples.Data
         /// <param name="password">Plaintext password.</param>
         /// <param name="hash">Hash from a SQL database</param>
         /// <returns>True if the password is correct, False otherwise.</returns>
-        public bool PhpBbCheckHash(string password, string hash)
+        private static bool PhpBbCheckHash(string password, string hash)
         {
             if (hash.Length == 34)
             {
@@ -46,7 +48,7 @@ namespace NordSamples.Data
         /// support for older passwords, so they will not work with this class unless
         /// I or someone else updates it.
         /// </remarks>
-        public string PhpBbHash(string password)
+        private static string PhpBbHash(string password)
         {
             // Generate a random string from a random number with the length of 6.
             // You could use a static string instead, doesn't matter. E.g.
@@ -57,6 +59,7 @@ namespace NordSamples.Data
 
             return hash.Length == 34 ? hash : Smd5(password);
         }
+
 
         /// <summary>
         /// The workhorse that encrypts your hash.
@@ -70,10 +73,13 @@ namespace NordSamples.Data
         /// genSalt:   Returns from hashGensaltPrivate(random, itoa64);
         /// return:    Compare with phpbbCheckHash(password, hash)
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<Pending>")]
         private static string HashCryptPrivate(byte[] password, string genSalt, string encryptionStringBase)
         {
             var output = "*";
+#pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
             using var md5 = new MD5CryptoServiceProvider();
+#pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
             if (!genSalt.StartsWith("$H$"))
             {
                 return output;
@@ -185,12 +191,14 @@ namespace NordSamples.Data
             return output;
         }
 
+
         /// <summary>
         /// Returns a hexadecimal string representation for the encrypted MD5 parameter.
         /// </summary>
         /// <param name="password">String to be encrypted.</param>
         /// <param name="raw">Whether or not to produce a raw string.</param>
         /// <returns>String</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "<Pending>")]
         private static string Smd5(string password, bool raw = false)
         {
             using var md5 = new MD5CryptoServiceProvider();

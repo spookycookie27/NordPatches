@@ -14,9 +14,9 @@ import { categories, instruments, blobUrl } from '../../Constants';
 import Button from '@material-ui/core/Button';
 import { nufFileLink } from './Common';
 import FullPlayer from '../common/FullPlayer';
-import { useGlobalState } from '../../State';
 import moment from 'moment';
 import { makeStyles } from '@material-ui/core/styles';
+import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
   fileContainer: {
@@ -67,13 +67,13 @@ const PatchViewer = props => {
   const [patch, setPatch] = useState(null);
   const [userRating, setUserRating] = useState(null);
   const [globalRating, setGlobalRating] = useState(null);
-  const [user] = useGlobalState('user');
+  const { state } = React.useContext(Store);
 
   const refreshData = async () => {
     const url = `/api/patch/${props.patchId}`;
     const res = await RestUtilities.get(url);
     res.json().then(patch => {
-      const userRating = patch.ratings.find(r => r.appUserId === user.id);
+      const userRating = patch.ratings.find(r => r.appUserId === state.user.id);
       const userRatingValue = userRating ? userRating.value : null;
       const globalRating = patch.ratings.reduce((p, c) => p + c.value, 0) / patch.ratings.length;
       setPatch(patch);
@@ -87,6 +87,7 @@ const PatchViewer = props => {
       refreshData();
     };
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderFile = file => {
@@ -180,7 +181,7 @@ const PatchViewer = props => {
             </Grid>
             <Grid item md={6} xs={12}>
               <Typography className={classes.title} color='textSecondary' gutterBottom>
-                Files
+                Click to download Files
               </Typography>
               <Box my={3} mx={1}>
                 {mp3s.map(mp3 => {

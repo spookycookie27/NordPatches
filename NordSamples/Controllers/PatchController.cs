@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NordSamples.Data;
-using NordSamples.Data.Constants;
 using NordSamples.Data.Models;
 using Patch = NordSamples.Models.Patch;
 using Tag = NordSamples.Data.Models.Tag;
@@ -24,14 +23,14 @@ namespace NordSamples.Controllers
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
         private readonly ILogger<PatchController> logger;
-        //private readonly IAppCache cache;
+        private readonly IAppCache cache;
 
-        public PatchController(ApplicationDbContext context, IMapper mapper, ILogger<PatchController> logger)
+        public PatchController(ApplicationDbContext context, IMapper mapper, ILogger<PatchController> logger, IAppCache cache)
         {
             this.context = context;
             this.mapper = mapper;
             this.logger = logger;
-            //this.cache = cache;
+            this.cache = cache;
         }
 
         // GET: api/Patches
@@ -40,38 +39,40 @@ namespace NordSamples.Controllers
         public async Task<ActionResult<List<Patch>>> GetPatches()
         {
             List<Patch> model;
+
             try
             {
-                async Task<List<Data.Models.Patch>> PatchGetter() =>
-                    await context.Patches
-                     .Where(x => !x.Removed)
-                     .Include(x => x.Tags)
-                     .Include(x => x.Ratings)
-                     .Include(x => x.AppUser)
-                     .Include(x => x.NufUser)
-                     .Include(x => x.PatchFiles)
-                        .ThenInclude(pf => pf.File)
-                     .AsNoTracking()
-                     .ToListAsync();
-
-                List<Data.Models.Patch> cachedPatches = await PatchGetter();
-
+                List<Data.Models.Patch> cachedPatches = await cache.GetOrAddAsync(Constants.PatchCacheKey, PatchGetter);
                 model = mapper.Map<List<Patch>>(cachedPatches);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "An error occurred creating the DB.");
+                logger.LogError(e, "An error occurred creating the DB connection.");
                 model = null;
             }
             return model;
         }
+
+        private async Task<List<Data.Models.Patch>> PatchGetter() =>
+            await context.Patches
+                .Where(x => !x.Removed)
+                .Include(x => x.Tags)
+                .Include(x => x.Ratings)
+                .Include(x => x.AppUser)
+                .Include(x => x.NufUser)
+                .Include(x => x.PatchFiles)
+                .ThenInclude(pf => pf.File)
+                .OrderByDescending(x => x.DateCreated)
+                .AsNoTracking()
+                .ToListAsync();
+
 
         // GET: api/Patches/5
         [HttpGet("{id}")]
         [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
-            var patch = await context.Patches
+            Data.Models.Patch patch = await context.Patches
                 .Include(x => x.NufUser)
                 .Include(x => x.Tags)
                 .Include(x => x.Ratings)
@@ -107,12 +108,14 @@ namespace NordSamples.Controllers
             var patchToInsert = mapper.Map<Data.Models.Patch>(patch);
             patchToInsert.DateCreated = DateTime.UtcNow;
             patchToInsert.Tags = new List<Tag>();
-            foreach (var tag in patch.Tags)
+            foreach (Models.Tag tag in patch.Tags)
             {
-                patchToInsert.Tags.Add(new Data.Models.Tag { Name = tag.Name });
+                patchToInsert.Tags.Add(new Tag { Name = tag.Name });
             }
             context.Patches.Add(patchToInsert);
             await context.SaveChangesAsync();
+
+            cache.Remove(Constants.PatchCacheKey);
 
             return CreatedAtAction("GetPatch", patchToInsert);
         }
@@ -139,6 +142,8 @@ namespace NordSamples.Controllers
 
             await context.SaveChangesAsync();
 
+            cache.Remove(Constants.PatchCacheKey);
+
             return Ok();
         }
 
@@ -158,6 +163,8 @@ namespace NordSamples.Controllers
             UpdateTags(id, patch, existingPatch);
 
             await context.SaveChangesAsync();
+
+            cache.Remove(Constants.PatchCacheKey);
 
             return NoContent();
         }

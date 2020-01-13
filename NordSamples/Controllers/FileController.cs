@@ -26,7 +26,7 @@ namespace NordSamples.Controllers
         private readonly IAppCache cache;
         private readonly string storageConnectionString;
 
-        private const int maxLength = 20000000;  //20mb set in from end
+        private const int MaxLength = 20000000;  //20mb set in from end
 
         public FileController(ApplicationDbContext context, IMapper mapper, ILogger<FileController> logger, IAppCache cache, IConfiguration configuration)
         {
@@ -42,12 +42,16 @@ namespace NordSamples.Controllers
         [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> PostFile([FromRoute] int id, IFormCollection collection)
         {
-            var file = collection.Files[0];
-            var comment = collection["Comment"].ToString();
-            var appUserId = collection["AppUserId"].ToString();
-            var nufUserId = int.Parse(collection["NufUserId"].ToString());
-            var extension = collection["Extension"].ToString();
-            if (file.Length > maxLength) return BadRequest("file size too big");
+            IFormFile file = collection.Files[0];
+            string comment = collection["Comment"].ToString();
+            string appUserId = collection["AppUserId"].ToString();
+            int nufUserId = int.Parse(collection["NufUserId"].ToString());
+            string extension = collection["Extension"].ToString();
+            if (file.Length > MaxLength)
+            {
+                return BadRequest("file size too big");
+            }
+
             CloudBlockBlob blob = await SaveFileToBlob(file, "mp3s", id);
             var newFile = new Data.Models.File
             {
@@ -66,6 +70,9 @@ namespace NordSamples.Controllers
 
             context.Files.Add(newFile);
             await context.SaveChangesAsync();
+
+            cache.Remove(Constants.PatchCacheKey);
+
             var returnFile = mapper.Map<File>(newFile);
             return CreatedAtAction("PostFile", returnFile);
         }
@@ -75,9 +82,12 @@ namespace NordSamples.Controllers
         [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> PutFile([FromRoute] int id, [FromBody] File file)
         {
-            var fileToUpdate = await context.Files.SingleAsync(x => x.Id == id);
+            Data.Models.File fileToUpdate = await context.Files.SingleAsync(x => x.Id == id);
             fileToUpdate.Removed = file.Removed;
             await context.SaveChangesAsync();
+
+            cache.Remove(Constants.PatchCacheKey);
+
             return Ok();
         }
 
@@ -92,17 +102,18 @@ namespace NordSamples.Controllers
                 async Task<List<Data.Models.File>> FileGetter() =>
                     await context.Files
                         .Include(x => x.NufUser)
+                        .Include(pf => pf.PatchFiles)
                      .AsNoTracking()
                      .ToListAsync();
 
-                List<Data.Models.File> cachedFiles = await cache.GetOrAddAsync("FileController.GetFiles", FileGetter);
+                List<Data.Models.File> cachedFiles = await cache.GetOrAddAsync(Constants.FileCacheKey, FileGetter);
 
                 model = mapper.Map<List<File>>(cachedFiles);
 
             }
             catch (Exception e)
             {
-                logger.LogError(e, "An error occurred creating the DB.");
+                logger.LogError(e, "An error occurred connecting to the DB.");
                 model = null;
             }
             return model;
@@ -110,8 +121,12 @@ namespace NordSamples.Controllers
 
         private async Task<CloudBlockBlob> SaveFileToBlob(IFormFile file, string containerName, int patchId)
         {
-            if (string.IsNullOrEmpty(file.FileName)) return null;
-            var name = $"patch_{patchId}_{file.FileName}";
+            if (string.IsNullOrEmpty(file.FileName))
+            {
+                return null;
+            }
+
+            string name = $"patch_{patchId}_{file.FileName}";
             try
             {
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);

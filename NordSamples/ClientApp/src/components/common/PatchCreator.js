@@ -17,9 +17,9 @@ import InlineError from '../common/InlineError';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import { categories, instruments } from '../../Constants';
-import { dispatch, useGlobalState } from '../../State';
 import UploadDropZone from './UploadDropZone';
 import { CardActions } from '@material-ui/core';
+import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -42,20 +42,22 @@ const getExtension = file => {
 };
 
 function useForceUpdate() {
+  // eslint-disable-next-line no-unused-vars
   const [value, setValue] = useState(0); // integer state
   return () => setValue(value => ++value); // update the state to force render
 }
 
 const PatchCreator = props => {
   const classes = useStyles();
-  const [user] = useGlobalState('user');
+  const { state, dispatch } = React.useContext(Store);
+  const user = state.user;
   const [name, setName] = useState('');
   const [link, setLink] = useState('');
   const [description, setDescription] = useState('');
   const [instrumentId, setInstrumentId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [tags, setTags] = useState([]);
-  const [files, setFiles] = useState([]);
+  const [files] = useState([]);
   const [parentPatchId, setParentPatchId] = useState('');
   const [showSpinner, setShowSpinner] = useState(false);
   const [disable, setDisable] = useState(false);
@@ -109,7 +111,11 @@ const PatchCreator = props => {
           var response = await RestUtilities.postFormData(url, formData);
           if (response.ok) {
             response.json().then(file => {
-              insertedPatch.patchFiles.push({ file, patchId: insertedPatch.id, fileId: file.id });
+              insertedPatch.patchFiles.push({
+                file,
+                patchId: insertedPatch.id,
+                fileId: file.id
+              });
               if (i === files.length - 1) {
                 const url = `/api/patch/${insertedPatch.id}`;
                 RestUtilities.put(url, insertedPatch);
@@ -198,6 +204,40 @@ const PatchCreator = props => {
             </Grid>
             <Grid item sm={6} xs={12}>
               <TextField
+                minLength={0}
+                maxLength={1000}
+                value={link}
+                fullWidth
+                id='link'
+                label='Web Link'
+                name='link'
+                placeholder='https://www.'
+                onChange={event => setLink(event.target.value)}
+                error={isLinkInvalid && !!link}
+                helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}
+              />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <FormControl fullWidth error={instrumentId !== '' && isInstrumentInvalid} required>
+                <InputLabel id='typeLabel'>Type</InputLabel>
+                <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
+                  {renderOptions(instruments, false)}
+                </Select>
+                <FormHelperText>{instrumentId !== '' && isInstrumentInvalid ? 'Please choose the type of sound' : ''}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <FormControl error={categoryId !== '' && isCategoryInvalid} fullWidth required>
+                <InputLabel id='categoryLabel'>Category</InputLabel>
+                <Select fullWidth id='categoryId' value={categoryId} onChange={event => setCategoryId(event.target.value)} required>
+                  {renderOptions(categories, false)}
+                </Select>
+                <FormHelperText>{categoryId !== '' && isCategoryInvalid ? 'Please choose a primary category' : ''}</FormHelperText>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
                 multiline
                 rowsMax='2'
                 minLength={0}
@@ -212,24 +252,7 @@ const PatchCreator = props => {
                 helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
               />
             </Grid>
-            <Grid item sm={6} xs={12}>
-              <FormControl fullWidth error={instrumentId !== '' && isInstrumentInvalid} required>
-                <InputLabel id='typeLabel'>Type</InputLabel>
-                <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
-                  {renderOptions(instruments, false)}
-                </Select>
-                <FormHelperText>{instrumentId !== '' && isInstrumentInvalid ? 'Please choose the type of patch' : ''}</FormHelperText>
-              </FormControl>
-            </Grid>
-            <Grid item sm={6} xs={12}>
-              <FormControl error={categoryId !== '' && isCategoryInvalid} fullWidth required>
-                <InputLabel id='categoryLabel'>Category</InputLabel>
-                <Select fullWidth id='categoryId' value={categoryId} onChange={event => setCategoryId(event.target.value)} required>
-                  {renderOptions(categories, false)}
-                </Select>
-                <FormHelperText>{categoryId !== '' && isCategoryInvalid ? 'Please choose a primary category' : ''}</FormHelperText>
-              </FormControl>
-            </Grid>
+
             <Grid item xs={12}>
               <InputLabel id='categoryLabel' className={classes.tagLabel}>
                 Tags
@@ -249,33 +272,20 @@ const PatchCreator = props => {
                 }}
               />
             </Grid>
-            <Grid item sm={6} xs={12}>
-              <TextField
-                value={parentPatchId}
-                fullWidth
-                type='number'
-                id='parentPatchId'
-                label='Variation ?'
-                name='parentPatchId'
-                placeholder='Original Patch ID'
-                onChange={event => setParentPatchId(event.target.value)}
-              />
-            </Grid>
-            <Grid item sm={6} xs={12}>
-              <TextField
-                minLength={0}
-                maxLength={1000}
-                value={link}
-                fullWidth
-                id='link'
-                label='Web Link'
-                name='link'
-                placeholder='https://www.'
-                onChange={event => setLink(event.target.value)}
-                error={isLinkInvalid && !!link}
-                helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}
-              />
-            </Grid>
+            {user.role === 'administrator' && (
+              <Grid item sm={6} xs={12}>
+                <TextField
+                  value={parentPatchId}
+                  fullWidth
+                  type='number'
+                  id='parentPatchId'
+                  label='Variation ?'
+                  name='parentPatchId'
+                  placeholder='Parent Sound ID'
+                  onChange={event => setParentPatchId(event.target.value)}
+                />
+              </Grid>
+            )}
           </Grid>
         </form>
       </CardContent>

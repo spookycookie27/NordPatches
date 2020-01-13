@@ -59,9 +59,19 @@ const FullPlayer = props => {
             onDuration={duration => setDuration(duration)}
           />
           {playing ? (
-            <PauseCircleFilledIcon color={props.inverse ? 'primary' : 'inherit'} fontSize='large' onClick={() => setPlaying(!playing)} />
+            <PauseCircleFilledIcon
+              color={props.inverse ? 'primary' : 'inherit'}
+              fontSize='large'
+              onClick={() => setPlaying(!playing)}
+              className='react-player'
+            />
           ) : (
-            <PlayCircleFilledIcon color={props.inverse ? 'primary' : 'inherit'} fontSize='large' onClick={() => setPlaying(!playing)} />
+            <PlayCircleFilledIcon
+              color={props.inverse ? 'primary' : 'inherit'}
+              fontSize='large'
+              onClick={() => setPlaying(!playing)}
+              className='react-player'
+            />
           )}
         </Box>
       </Grid>

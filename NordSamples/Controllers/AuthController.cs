@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication;
 using AutoMapper;
-using NordSamples.Data.Constants;
 using NordSamples.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
@@ -31,13 +30,12 @@ namespace NordSamples.Controllers
         private readonly UserManager<AppUser> userManager;
         private readonly JwtOptions jwtOptions;
         private readonly SignInManager<AppUser> signInManager;
-        private readonly RoleManager<IdentityRole> roleManager;
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
         private readonly ApplicationDbContext context;
         private readonly ILogger<AuthController> logger;
 
-        public AuthController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context, ILogger<AuthController> logger)
+        public AuthController(UserManager<AppUser> userManager, IOptions<JwtOptions> jwtOptions, SignInManager<AppUser> signInManager, IMapper mapper, IEmailSender emailSender, ApplicationDbContext context, ILogger<AuthController> logger)
         {
             this.userManager = userManager;
             this.jwtOptions = jwtOptions.Value;
@@ -45,7 +43,6 @@ namespace NordSamples.Controllers
             this.mapper = mapper;
             this.emailSender = emailSender;
             this.context = context;
-            this.roleManager = roleManager;
             this.logger = logger;
         }
 
@@ -54,9 +51,7 @@ namespace NordSamples.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            int? nufUserId = null;
-
-            nufUserId = await CheckActivationCode(model);
+            int? nufUserId = await CheckActivationCode(model);
 
             AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Username.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
             if (existingUser != null)
@@ -258,7 +253,11 @@ namespace NordSamples.Controllers
 
         private async Task<int?> CheckActivationCode(RegisterModel model)
         {
-            if (string.IsNullOrEmpty(model.ActivationCode)) return null;
+            if (string.IsNullOrEmpty(model.ActivationCode))
+            {
+                return null;
+            }
+
             int? nufUserId = null;
             NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper() == model.ActivationCode.ToUpperInvariant());
             if (nufUser != null)

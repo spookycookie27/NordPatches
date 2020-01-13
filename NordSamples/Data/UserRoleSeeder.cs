@@ -17,11 +17,11 @@ namespace NordSamples.Data
             context.Database.EnsureCreated();
 
             string adminId = await EnsureUser(serviceProvider, testUserPw,"testAdmin", "admin@nordsamples.com");
-            await EnsureRole(serviceProvider, adminId, Constants.Constants.AdministratorRole);
+            await EnsureRole(serviceProvider, adminId, Constants.AdministratorRole);
 
             // allowed user can create and edit contacts that they create
             string managerId = await EnsureUser(serviceProvider, testUserPw, "testUser", "user@nordsamples.com");
-            IdentityResult role = await EnsureRole(serviceProvider, managerId, Constants.Constants.UserRole);
+            IdentityResult role = await EnsureRole(serviceProvider, managerId, Constants.UserRole);
         }
 
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,

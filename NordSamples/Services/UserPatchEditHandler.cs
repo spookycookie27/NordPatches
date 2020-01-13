@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using NordSamples.Data;
-using NordSamples.Data.Constants;
 using NordSamples.Data.Models;
 
 namespace NordSamples.Services

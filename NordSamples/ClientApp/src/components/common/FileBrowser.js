@@ -5,9 +5,17 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { nufFileLink } from './Common';
 import moment from 'moment';
-import { useGlobalState } from '../../State';
 import theme from '../../theme';
-import { dispatch } from '../../State';
+import { Store } from '../../state/Store';
+
+const containsSearchTerms = (term, data) => {
+  var searchArr = term
+    .toLowerCase()
+    .trim()
+    .split(' ');
+  var lowerData = data.toLowerCase();
+  return searchArr.every(x => lowerData.includes(x));
+};
 
 function getFileMetaData(file) {
   return (
@@ -48,8 +56,8 @@ function getFileData(file) {
 }
 
 const FileBrowser = () => {
-  const [files] = useGlobalState('files');
-  const [pageSize] = useGlobalState('pageSize');
+  const { state, dispatch } = React.useContext(Store);
+  const pageSize = state.pageSize;
   useEffect(() => {
     const getData = async () => {
       const url = '/api/file';
@@ -67,7 +75,7 @@ const FileBrowser = () => {
         });
     };
     getData();
-  }, []);
+  }, [dispatch]);
 
   const handlePageSizeChange = size => {
     dispatch({
@@ -78,18 +86,78 @@ const FileBrowser = () => {
 
   return (
     <div className='FilesList'>
+      <p>TODO - Will add some functionality to assign unsed MP3s to the correct sound. Watch this space! (Eventually this page will be deleted completely.)</p>
       <MaterialTable
         theme={theme}
-        options={{ pageSize, padding: 'dense' }}
+        options={{
+          pageSize: pageSize,
+          pageSizeOptions: [5, 10, 20, 50, 100],
+          filtering: true,
+          searchFieldAlignment: 'left',
+          padding: 'dense',
+          filterCellStyle: { paddingTop: '16px' }
+        }}
         columns={[
-          { title: 'ID', field: 'id' },
-          { title: 'Name', field: 'name' },
-          { title: 'Comment', field: 'comment' },
-          { title: 'Size', field: 'size' },
-          { title: 'Extension', field: 'extension' }
+          { title: 'File ID', field: 'id', cellStyle: { width: '120px' } },
+          {
+            title: 'Name',
+            field: 'name',
+            customSort: (a, b) => {
+              if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+              if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+              return 0;
+            },
+            cellStyle: { width: '240px' },
+            customFilterAndSearch: (term, rowData) => {
+              return containsSearchTerms(term, rowData.name);
+            }
+          },
+          {
+            title: 'Comment',
+            field: 'comment',
+            cellStyle: { width: '240px' },
+            customFilterAndSearch: (term, rowData) => {
+              return containsSearchTerms(term, rowData.name);
+            }
+          },
+          {
+            title: 'Assigned to Patch ID',
+            field: 'patchFiles',
+            render: rowData => {
+              console.log(rowData);
+              if (rowData.patchFiles && rowData.patchFiles.length > 0) {
+                return <span>{rowData.patchFiles[0].patchId}</span>;
+              }
+              return null;
+            },
+            cellStyle: { width: '80px' },
+            lookup: { 0: 'Unassigned', 1: 'Assigned' },
+            filterCellStyle: { padding: '4px', paddingTop: 0, paddingBottom: '16px' },
+            customFilterAndSearch: (items, rowData) => {
+              if (items.length !== 1) return true;
+              const hasPatch = rowData.patchFiles.length > 0;
+              if (items[0] === '1') {
+                return hasPatch;
+              } else {
+                return !hasPatch;
+              }
+            }
+          },
+          { title: 'Size', field: 'size', cellStyle: { width: '80px' } },
+          {
+            title: 'Extension',
+            field: 'extension',
+            cellStyle: { width: '80px' },
+            lookup: { mp3: 'mp3', nsmp: 'nsmp', nspg: 'nspg', ns2p: 'ns2p', ns2pb: 'ns2pb', jpg: 'jpg', nss: 'nss', gif: 'gif', png: 'png' },
+            filterCellStyle: { padding: '4px', paddingTop: 0, paddingBottom: '16px' },
+            render: rowData => <span>{rowData.extension}</span>,
+            customFilterAndSearch: (items, rowData) => {
+              return items.length === 0 || items.includes(rowData.extension);
+            }
+          }
         ]}
-        data={files}
-        title='Temporary Files List for admins only'
+        data={state.files}
+        title='Admins only File list'
         onChangeRowsPerPage={handlePageSizeChange}
         detailPanel={file => {
           return (

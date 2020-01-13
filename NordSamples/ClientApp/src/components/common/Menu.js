@@ -10,9 +10,8 @@ import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import { useGlobalState } from '../../State';
 import { signOut } from '../../services/Auth';
-import { dispatch } from '../../State';
+import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -50,7 +49,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function AppMenu(props) {
-  const [user] = useGlobalState('user');
+  const { state, dispatch } = React.useContext(Store);
+  const user = state.user;
   const classes = useStyles();
   const Link1 = React.forwardRef((props, ref) => <RouterLink innerRef={ref} {...props} />);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -63,6 +63,10 @@ function AppMenu(props) {
       type: 'setUser',
       user: null
     });
+    props.history.push('/login');
+  };
+
+  const onLoginClick = () => {
     props.history.push('/login');
   };
 
@@ -101,9 +105,13 @@ function AppMenu(props) {
               Files
             </Link>
           )}
-          {user && (
+          {user ? (
             <Button onClick={onSignoutClick} className={classes.link}>
               Logout
+            </Button>
+          ) : (
+            <Button onClick={onLoginClick} className={classes.link}>
+              Login
             </Button>
           )}
         </nav>
@@ -131,7 +139,7 @@ function AppMenu(props) {
           <MenuItem onClick={() => handleNavigate('/addsound')}>Add New</MenuItem>
           <MenuItem onClick={() => handleNavigate('/sounds')}>All Patches</MenuItem>
           <MenuItem onClick={() => handleNavigate('/files')}>Files</MenuItem>
-          {user && <MenuItem onClick={onSignoutClick}>Logout</MenuItem>}
+          {user ? <MenuItem onClick={onSignoutClick}>Logout</MenuItem> : <MenuItem onClick={onLoginClick}>Login</MenuItem>}
         </Menu>
       </Toolbar>
     </AppBar>
