@@ -220,15 +220,12 @@ const containsSearchTerms = (term, data) => {
 
 const PatchBrowser = props => {
   const { state, dispatch } = React.useContext(Store);
-  const mySounds = state.mySounds;
-  const user = state.user;
-  const pageSize = state.pageSize;
-
-  const [columns, setColumns] = useState(getInitialColumns(user));
+  const [columns, setColumns] = useState(getInitialColumns(state.user));
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [patchId, setPatchId] = useState(null);
   const [action, setAction] = useState('view');
+
   const handleOpen = () => {
     setOpen(true);
   };
@@ -244,7 +241,7 @@ const PatchBrowser = props => {
       res
         .json()
         .then(res => {
-          const userPatches = res ? res.filter(x => (x.user && x.user.id === user.id) || (x.user && x.user.nufUserId === user.nufUserId)) : [];
+          const userPatches = res ? res.filter(x => (x.user && x.user.id === state.user.id) || (x.user && x.user.nufUserId === state.user.nufUserId)) : [];
           const publicPatches = res ? res.filter(x => !x.removed) : [];
           dispatch({
             type: 'setPatches',
@@ -260,7 +257,7 @@ const PatchBrowser = props => {
         });
     };
     getAllData();
-  }, [props, user, dispatch]);
+  }, [props, state.user, dispatch]);
 
   const handlePageSizeChange = size => {
     dispatch({
@@ -270,7 +267,11 @@ const PatchBrowser = props => {
   };
 
   const shouldShowEdit = rowData => {
-    return user.role === 'administrator' || (rowData.user && rowData.user.nufUserId === user.nufUserId) || (rowData.user && rowData.user.id === user.id);
+    return (
+      state.user.role === 'administrator' ||
+      (rowData.user && rowData.user.nufUserId === state.user.nufUserId) ||
+      (rowData.user && rowData.user.id === state.user.id)
+    );
   };
 
   const mySoundsToggle = (
@@ -278,11 +279,11 @@ const PatchBrowser = props => {
       control={
         <Switch
           color='primary'
-          checked={mySounds}
+          checked={state.mySounds}
           onChange={() => {
             dispatch({
               type: 'setMySounds',
-              mySounds: !mySounds
+              mySounds: !state.mySounds
             });
           }}
         />
@@ -332,7 +333,7 @@ const PatchBrowser = props => {
     {
       icon: 'clear_all',
       onClick: () => {
-        setColumns(getInitialColumns(user));
+        setColumns(getInitialColumns(state.user));
       },
       isFreeAction: true,
       tooltip: 'Clear Filters'
@@ -358,7 +359,7 @@ const PatchBrowser = props => {
         theme={tableTheme}
         actions={actions}
         options={{
-          pageSize: pageSize,
+          pageSize: state.pageSize,
           pageSizeOptions: [5, 10, 20, 50, 100],
           filtering: state.columnFilters,
           searchFieldAlignment: 'left',
@@ -366,8 +367,8 @@ const PatchBrowser = props => {
           filterCellStyle: { padding: '8px', paddingTop: '4px' }
         }}
         components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
-        data={mySounds ? state.myPatches : state.patches}
-        title={mySounds ? 'My Sounds' : 'All Sounds'}
+        data={state.mySounds ? state.myPatches : state.patches}
+        title={state.mySounds ? 'My Sounds' : 'All Sounds'}
         onChangeRowsPerPage={handlePageSizeChange}
         //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
         columns={columns}

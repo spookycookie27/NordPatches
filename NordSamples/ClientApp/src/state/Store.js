@@ -59,10 +59,8 @@ const reducer = (state = initialState, action) => {
         pageSize: action.pageSize
       };
     case 'updatePatch': {
-      let foundIndex = state.patches.findIndex(x => x.id === action.patch.id);
-      state.patches[foundIndex] = action.patch;
-      foundIndex = state.myPatches.findIndex(x => x.id === action.patch.id);
-      state.myPatches[foundIndex] = action.patch;
+      state.patches = updateObjectInArray(state.patches, action.patch);
+      state.myPatches = updateObjectInArray(state.myPatches, action.patch);
       return { ...state };
     }
     case 'insertPatch': {
@@ -74,6 +72,18 @@ const reducer = (state = initialState, action) => {
       return state;
   }
 };
+
+function updateObjectInArray(array, updatedItem) {
+  return array.map(item => {
+    if (item.id !== updatedItem.id) {
+      return item;
+    }
+    return {
+      ...item,
+      ...updatedItem
+    };
+  });
+}
 
 export function StoreProvider(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
