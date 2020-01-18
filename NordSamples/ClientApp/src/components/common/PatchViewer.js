@@ -91,6 +91,7 @@ const PatchViewer = props => {
   }, []);
 
   const renderFile = file => {
+    if (file.removed) return null;
     return (
       <Paper className={classes.fileContainer} key={file.id}>
         <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
@@ -121,6 +122,7 @@ const PatchViewer = props => {
   };
 
   const renderPatch = (thisPatch, renderRating) => {
+    if (thisPatch.removed) return null;
     const mp3s = thisPatch.patchFiles.filter(x => x.file.extension === 'mp3' && !x.file.removed).map(x => x.file);
     const files = thisPatch.patchFiles.filter(x => x.file.extension !== 'mp3' && !x.file.removed).map(x => x.file);
     return (
@@ -203,7 +205,7 @@ const PatchViewer = props => {
   };
 
   if (!patch) return null;
-  var hasVariations = patch.parent || patch.children.length > 0;
+  var hasVariations = (patch.parent && patch.parent.removed) || patch.children.some(x => !x.removed);
 
   return (
     <>
