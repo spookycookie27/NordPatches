@@ -27,4 +27,12 @@ export const categories = {
   14: 'Wind'
 };
 
-export const instruments = { 1: 'User Sample', 2: 'Lead', 3: 'Electro', 4: 'Stage 1', 5: 'Stage 2', 6: 'Stage 3' };
+export const instruments = { 1: 'User Sample', 5: 'Stage 2', 6: 'Stage 3', 4: 'Stage 1', 3: 'Electro', 2: 'Lead' };
+export const instrumentsLu = [
+  { key: 1, value: 'User Sample' },
+  { key: 5, value: 'Stage 2' },
+  { key: 6, value: 'Stage 3' },
+  { key: 4, value: 'Stage 1' },
+  { key: 3, value: 'Electro' },
+  { key: 2, value: 'Lead' }
+];

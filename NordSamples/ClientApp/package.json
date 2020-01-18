@@ -7,7 +7,7 @@
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.35",
     "classnames": "^2.2.6",
-    "material-table": "^1.54.1",
+    "material-table": "^1.55.0",
     "moment": "^2.24.0",
     "node-sass": "^4.13.0",
     "query-string": "^6.9.0",

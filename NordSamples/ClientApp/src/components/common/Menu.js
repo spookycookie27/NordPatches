@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import { signOut } from '../../services/Auth';
+import { signOut, isSignedIn } from '../../services/Auth';
 import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
@@ -94,18 +94,18 @@ function AppMenu(props) {
         <div className={classes.grow} />
 
         <nav className={classes.sectionDesktop}>
-          <Link variant='button' component={Link1} to='/addsound' className={classes.link}>
-            Add New
-          </Link>
           <Link variant='button' component={Link1} to='/sounds' className={classes.link}>
             ALl Sounds
+          </Link>
+          <Link variant='button' component={Link1} to='/addsound' className={classes.link}>
+            Add New
           </Link>
           {user && user.role === 'administrator' && (
             <Link variant='button' component={Link1} to='/files' className={classes.link}>
               Files
             </Link>
           )}
-          {user ? (
+          {isSignedIn() ? (
             <Button onClick={onSignoutClick} className={classes.link}>
               Logout
             </Button>
@@ -136,10 +136,10 @@ function AppMenu(props) {
           open={open}
           onClose={handleClose}
         >
-          <MenuItem onClick={() => handleNavigate('/addsound')}>Add New</MenuItem>
           <MenuItem onClick={() => handleNavigate('/sounds')}>All Patches</MenuItem>
-          <MenuItem onClick={() => handleNavigate('/files')}>Files</MenuItem>
-          {user ? <MenuItem onClick={onSignoutClick}>Logout</MenuItem> : <MenuItem onClick={onLoginClick}>Login</MenuItem>}
+          <MenuItem onClick={() => handleNavigate('/addsound')}>Add New</MenuItem>
+          {user && user.role === 'administrator' && <MenuItem onClick={() => handleNavigate('/files')}>Files</MenuItem>}
+          {isSignedIn() ? <MenuItem onClick={onSignoutClick}>Logout</MenuItem> : <MenuItem onClick={onLoginClick}>Login</MenuItem>}
         </Menu>
       </Toolbar>
     </AppBar>
