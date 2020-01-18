@@ -7,6 +7,7 @@ import { nufFileLink } from './Common';
 import moment from 'moment';
 import theme from '../../theme';
 import { Store } from '../../state/Store';
+import MTableFilterRow from './MTableFilterRow';
 
 const containsSearchTerms = (term, data) => {
   var searchArr = term
@@ -94,9 +95,9 @@ const FileBrowser = () => {
           pageSizeOptions: [5, 10, 20, 50, 100],
           filtering: true,
           searchFieldAlignment: 'left',
-          padding: 'dense',
-          filterCellStyle: { paddingTop: '16px' }
+          padding: 'dense'
         }}
+        components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
         columns={[
           { title: 'File ID', field: 'id', cellStyle: { width: '120px' } },
           {
@@ -131,7 +132,6 @@ const FileBrowser = () => {
             },
             cellStyle: { width: '80px' },
             lookup: { 0: 'Unassigned', 1: 'Assigned' },
-            filterCellStyle: { padding: '4px', paddingTop: 0, paddingBottom: '16px' },
             customFilterAndSearch: (items, rowData) => {
               if (items.length !== 1) return true;
               const hasPatch = rowData.patchFiles.length > 0;
@@ -148,7 +148,6 @@ const FileBrowser = () => {
             field: 'extension',
             cellStyle: { width: '80px' },
             lookup: { mp3: 'mp3', nsmp: 'nsmp', nspg: 'nspg', ns2p: 'ns2p', ns2pb: 'ns2pb', jpg: 'jpg', nss: 'nss', gif: 'gif', png: 'png' },
-            filterCellStyle: { padding: '4px', paddingTop: 0, paddingBottom: '16px' },
             render: rowData => <span>{rowData.extension}</span>,
             customFilterAndSearch: (items, rowData) => {
               return items.length === 0 || items.includes(rowData.extension);

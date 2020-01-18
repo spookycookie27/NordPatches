@@ -10,7 +10,7 @@ import FullPlayer from './FullPlayer';
 import Rating from '@material-ui/lab/Rating';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { categories, instruments, instrumentsLu, blobUrl } from '../../Constants';
+import { categories, categoriesLu, instruments, instrumentsLu, blobUrl } from '../../Constants';
 import { Typography } from '@material-ui/core';
 import { Store } from '../../state/Store';
 import { createMuiTheme } from '@material-ui/core/styles';
@@ -114,8 +114,8 @@ const getInitialColumns = user => [
     title: 'Category',
     field: 'categoryId',
     render: rowData => <span>{categories[rowData.categoryId]}</span>,
-    lookup: categories,
-    customFilterAndSearch: (items, rowData) => items.length === 0 || (rowData.categoryId ? items.includes(rowData.categoryId.toString()) : false),
+    lookupArr: categoriesLu,
+    customFilterAndSearch: (items, rowData) => items.length === 0 || (rowData.categoryId ? items.includes(rowData.categoryId) : false),
     filtering: true,
     customSort: (a, b) => {
       if (a.categoryId === b.categoryId) {
@@ -224,7 +224,7 @@ const PatchBrowser = props => {
   const user = state.user;
   const pageSize = state.pageSize;
 
-  const [columns] = useState(getInitialColumns(user));
+  const [columns, setColumns] = useState(getInitialColumns(user));
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [patchId, setPatchId] = useState(null);
@@ -327,7 +327,15 @@ const PatchBrowser = props => {
         });
       },
       isFreeAction: true,
-      tooltip: 'Column Filters'
+      tooltip: 'Toggle Column Filters'
+    },
+    {
+      icon: 'clear_all',
+      onClick: () => {
+        setColumns(getInitialColumns(user));
+      },
+      isFreeAction: true,
+      tooltip: 'Clear Filters'
     }
   ];
 

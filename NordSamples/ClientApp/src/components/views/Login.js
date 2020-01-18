@@ -39,15 +39,13 @@ function SignInSide(props) {
             type: 'setUser',
             user: res.user
           });
-          props.history.push('/');
+          props.history.push('/sounds');
         } else if (response.status === 400) {
           setErrors(res.errors ? res.errors : res);
           setFeedback('There were errors:');
           setDisabled(false);
         } else if (response.status === 401) {
-          setFeedback(
-            'The username and password combination was not recognised.'
-          );
+          setFeedback('The username and password combination was not recognised.');
           setDisabled(false);
           setErrors(null);
         }
@@ -82,11 +80,7 @@ function SignInSide(props) {
               }}
               disabled={disabled}
               error={isUsernameInvalid && !!username}
-              helperText={
-                isUsernameInvalid &&
-                !!username &&
-                'Must be minimum 5 characters and maximum of 16'
-              }
+              helperText={isUsernameInvalid && !!username && 'Must be minimum 5 characters and maximum of 16'}
             />
           </Grid>
 
@@ -109,23 +103,12 @@ function SignInSide(props) {
                 setFeedback(null);
               }}
               error={!!password && isPasswordInvalid}
-              helperText={
-                !!password &&
-                isPasswordInvalid &&
-                'Must be minimum 5 characters and maximum of 30'
-              }
+              helperText={!!password && isPasswordInvalid && 'Must be minimum 5 characters and maximum of 30'}
               disabled={disabled}
             />
           </Grid>
         </Grid>
-        <Button
-          fullWidth
-          variant='contained'
-          color='secondary'
-          className={classes.submit}
-          onClick={() => handleLoginClick()}
-          disabled={disabled || hasErrors}
-        >
+        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled || hasErrors}>
           Sign In
         </Button>
         {disabled && (
