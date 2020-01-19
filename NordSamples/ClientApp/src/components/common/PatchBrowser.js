@@ -13,7 +13,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { categories, categoriesLu, instruments, instrumentsLu, blobUrl } from '../../Constants';
 import { Typography } from '@material-ui/core';
 import { Store } from '../../state/Store';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import MTableFilterRow from './MTableFilterRow';
 
 const tableTheme = createMuiTheme({
@@ -26,6 +26,16 @@ const tableTheme = createMuiTheme({
     },
     secondary: {
       main: '#26725d'
+    }
+  },
+  overrides: {
+    MuiTableCell: {
+      root: {
+        height: 50
+      },
+      body: {
+        fontSize: '.875rem'
+      }
     }
   }
 });
@@ -75,7 +85,7 @@ const getInitialColumns = user => [
       if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
       return 0;
     },
-    cellStyle: { minWidth: '140px' }
+    cellStyle: { width: '200px' }
   },
   {
     title: 'Description',
@@ -129,7 +139,7 @@ const getInitialColumns = user => [
       }
     },
     searchable: false,
-    cellStyle: { minWidth: '140px' }
+    cellStyle: { maxWidth: '130px', width: '130px' }
   },
   {
     title: 'Type',
@@ -151,7 +161,8 @@ const getInitialColumns = user => [
     },
     searchable: false,
     cellStyle: {
-      minWidth: '140px'
+      maxWidth: '80px',
+      width: '80px'
     }
   },
   {
@@ -183,16 +194,14 @@ const getInitialColumns = user => [
       if (!rowData.user || rowData.user.username.length === 0) return true;
       return containsSearchTerms(term, rowData.user.username);
     },
-    //filterCellStyle: { paddingTop: '16px' },
-    cellStyle: {
-      width: '140px'
-    }
+    cellStyle: { width: '140px' }
   },
   {
     title: 'Rating',
     field: 'rating',
     render: rowData => renderRating(rowData),
-    filtering: false
+    filtering: false,
+    cellStyle: { width: '110px', padding: 0 }
   },
   {
     title: 'Id',
@@ -204,8 +213,7 @@ const getInitialColumns = user => [
     },
     hidden: user.role !== 'administrator',
     searchable: false,
-    //filterCellStyle: { paddingTop: '16px' },
-    cellStyle: { width: '120px' }
+    cellStyle: { width: '100px' }
   }
 ];
 
@@ -359,28 +367,29 @@ const PatchBrowser = props => {
   return (
     <div className='Patchlist'>
       {error && <p>There was an error getting data</p>}
-      <MaterialTable
-        localization={{
-          header: { actions: '' }
-        }}
-        onRowClick={handleRowClick}
-        theme={tableTheme}
-        actions={actions}
-        options={{
-          pageSize: state.pageSize,
-          pageSizeOptions: [5, 10, 20, 50, 100],
-          filtering: state.columnFilters,
-          searchFieldAlignment: 'left',
-          padding: 'dense',
-          filterCellStyle: { padding: '8px', paddingTop: '4px' }
-        }}
-        components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
-        data={state.mySounds ? state.myPatches : state.patches}
-        title={state.mySounds ? 'My Sounds' : 'All Sounds'}
-        onChangeRowsPerPage={handlePageSizeChange}
-        //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
-        columns={columns}
-      />
+      <MuiThemeProvider theme={tableTheme}>
+        <MaterialTable
+          localization={{
+            header: { actions: '' }
+          }}
+          onRowClick={handleRowClick}
+          actions={actions}
+          options={{
+            pageSize: state.pageSize,
+            pageSizeOptions: [5, 10, 20, 50, 100],
+            filtering: state.columnFilters,
+            searchFieldAlignment: 'left',
+            padding: 'dense',
+            filterCellStyle: { padding: '8px', paddingTop: '4px' }
+          }}
+          components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
+          data={state.mySounds ? state.myPatches : state.patches}
+          title={state.mySounds ? 'My Sounds' : 'All Sounds'}
+          onChangeRowsPerPage={handlePageSizeChange}
+          //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
+          columns={columns}
+        />
+      </MuiThemeProvider>
       <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
         {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
         {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}

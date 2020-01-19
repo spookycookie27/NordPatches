@@ -50,9 +50,9 @@ export const categoriesLu = [
   { key: 14, value: 'Wind' }
 ];
 
-export const instruments = { 1: 'User Sample', 5: 'Stage 2', 6: 'Stage 3', 4: 'Stage 1', 3: 'Electro', 2: 'Lead' };
+export const instruments = { 1: 'Sample', 5: 'Stage 2', 6: 'Stage 3', 4: 'Stage 1', 3: 'Electro', 2: 'Lead' };
 export const instrumentsLu = [
-  { key: 1, value: 'User Sample' },
+  { key: 1, value: 'Sample' },
   { key: 4, value: 'Stage 1' },
   { key: 5, value: 'Stage 2' },
   { key: 6, value: 'Stage 3' },
