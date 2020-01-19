@@ -91,7 +91,7 @@ const PatchViewer = props => {
   }, []);
 
   const renderFile = file => {
-    if (file.removed) return null;
+    if (file.removed || file.isNord) return null;
     return (
       <Paper className={classes.fileContainer} key={file.id}>
         <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>

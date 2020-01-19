@@ -137,7 +137,7 @@ namespace NordSamples.Controllers
             bool isAdmin = roles.Contains(Constants.AdministratorRole);
             string roleToUse = isAdmin ? Constants.AdministratorRole : Constants.UserRole;
 
-            DateTime tokenExpiry = DateTime.UtcNow.AddMinutes(60);
+            DateTime tokenExpiry = DateTime.UtcNow.AddMinutes(240);
 
             var claims = new[] {
                     new Claim(ClaimTypes.Name, appUser.UserName),
