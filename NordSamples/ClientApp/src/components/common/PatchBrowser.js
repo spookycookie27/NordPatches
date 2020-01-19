@@ -47,7 +47,7 @@ const renderMp3 = patch => {
   return mp3s.map(mp3 => {
     if (mp3.removed) return null;
     const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
-    return <FullPlayer src={link} key={mp3.id} inverse />;
+    return <FullPlayer src={link} key={mp3.id} inverse id={mp3.id} context='patchBrowser' />;
   });
 };
 
@@ -296,6 +296,10 @@ const PatchBrowser = props => {
     {
       icon: 'launch',
       onClick: (event, rowData) => {
+        dispatch({
+          type: 'setPlayMp3Id',
+          id: null
+        });
         setAction('view');
         setPatchId(rowData.id);
         handleOpen();
@@ -304,6 +308,10 @@ const PatchBrowser = props => {
     rowData => ({
       icon: 'edit',
       onClick: (event, rowData) => {
+        dispatch({
+          type: 'setPlayMp3Id',
+          id: null
+        });
         setAction('edit');
         setPatchId(rowData.id);
         handleOpen();

@@ -3,7 +3,6 @@ import RestUtilities from '../../services/RestUtilities';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -21,7 +20,7 @@ import { nufFileLink } from './Common';
 import Box from '@material-ui/core/Box';
 import FullPlayer from '../common/FullPlayer';
 import { makeStyles } from '@material-ui/core/styles';
-import { categories, instruments, blobUrl } from '../../Constants';
+import { categoriesLu, instrumentsLu, blobUrl, renderOptions } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
 import { Store } from '../../state/Store';
 
@@ -209,25 +208,6 @@ const PatchViewer = props => {
   const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
 
-  const renderOptions = (entity, includeNone) => {
-    const options = [];
-    if (includeNone) {
-      options.push(
-        <MenuItem value='0'>
-          <em>None</em>
-        </MenuItem>
-      );
-    }
-    Object.entries(entity).map(([key, value]) =>
-      options.push(
-        <MenuItem key={key} value={key}>
-          {value}
-        </MenuItem>
-      )
-    );
-    return options;
-  };
-
   const renderFile = file => {
     return (
       <Paper className={classes.fileContainer} key={file.id}>
@@ -313,7 +293,7 @@ const PatchViewer = props => {
                     Type
                   </InputLabel>
                   <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)}>
-                    {renderOptions(instruments)}
+                    {renderOptions(instrumentsLu)}
                   </Select>
                 </Grid>
                 <Grid item sm={6} xs={12}>
@@ -321,7 +301,7 @@ const PatchViewer = props => {
                     Category
                   </InputLabel>
                   <Select fullWidth id='categoryId' value={categoryId ? categoryId : ''} onChange={event => setCategoryId(event.target.value)}>
-                    {renderOptions(categories)}
+                    {renderOptions(categoriesLu)}
                   </Select>
                 </Grid>
                 <Grid item xs={12}>
@@ -414,7 +394,7 @@ const PatchViewer = props => {
                     <Paper className={classes.fileContainer} key={mp3.id}>
                       <Box my={3} mx={1} key={mp3.id} display='flex'>
                         <Box mx={1} className={classes.grow}>
-                          <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress />
+                          <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress id={mp3.id} context='patchEditor' />
                         </Box>
                         <Box m={1} mx={2}>
                           <FormControlLabel

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactPlayer from 'react-player';
 import Duration from '../../services/Duration';
 import Grid from '@material-ui/core/Grid';
@@ -6,6 +6,7 @@ import Box from '@material-ui/core/Box';
 import PlayCircleFilledIcon from '@material-ui/icons/PlayCircleFilled';
 import PauseCircleFilledIcon from '@material-ui/icons/PauseCircleFilled';
 import { makeStyles } from '@material-ui/core/styles';
+import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
   mp3Player: {
@@ -31,12 +32,43 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const getFilename = filename => {
+  if (filename.startsWith('patch_')) {
+    return filename.substring(filename.indexOf('_', 6) + 1);
+  }
+  return filename;
+};
+
 const FullPlayer = props => {
+  const { state, dispatch } = React.useContext(Store);
   const [playing, setPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
   const [duration, setDuration] = useState(0);
   const player = React.createRef();
   const classes = useStyles();
+
+  useEffect(() => {
+    if (state.activeMp3Context && props.id === state.activeMp3Context.fileId && props.context === state.activeMp3Context.context && !playing) {
+      setPlaying(true);
+    } else {
+      setPlaying(false);
+    }
+  }, [state.activeMp3Context]);
+
+  const handlePause = () => {
+    dispatch({
+      type: 'setPlayMp3Id',
+      id: null
+    });
+  };
+
+  const handlePlay = () => {
+    dispatch({
+      type: 'setPlayMp3Id',
+      activeMp3Context: { fileId: props.id, context: props.context }
+    });
+  };
+
   return (
     <Grid container spacing={2} className={props.inverse ? classes.mp3PlayerInverse : classes.mp3Player}>
       <Grid item xs={2}>
@@ -53,25 +85,13 @@ const FullPlayer = props => {
             loop={false}
             playbackRate={1.0}
             volume={0.8}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
             onProgress={state => setPlayed(state.played)}
             onDuration={duration => setDuration(duration)}
           />
           {playing ? (
-            <PauseCircleFilledIcon
-              color={props.inverse ? 'primary' : 'inherit'}
-              fontSize='large'
-              onClick={() => setPlaying(!playing)}
-              className='react-player'
-            />
+            <PauseCircleFilledIcon color={props.inverse ? 'primary' : 'inherit'} fontSize='large' onClick={handlePause} className='react-player' />
           ) : (
-            <PlayCircleFilledIcon
-              color={props.inverse ? 'primary' : 'inherit'}
-              fontSize='large'
-              onClick={() => setPlaying(!playing)}
-              className='react-player'
-            />
+            <PlayCircleFilledIcon color={props.inverse ? 'primary' : 'inherit'} fontSize='large' onClick={handlePlay} className='react-player' />
           )}
         </Box>
       </Grid>
@@ -79,7 +99,7 @@ const FullPlayer = props => {
         <Grid item xs={8}>
           {props.filename && (
             <Grid item xs={12} className={classes.title}>
-              {props.filename}
+              {getFilename(props.filename)}
             </Grid>
           )}
           <progress max={1} value={played} style={{ width: '100%' }} />

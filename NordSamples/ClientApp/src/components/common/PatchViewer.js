@@ -191,7 +191,7 @@ const PatchViewer = props => {
                 const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
                 return (
                   <Box my={3} mx={1} key={mp3.id}>
-                    <FullPlayer src={link} duration progress filename={mp3.name} />
+                    <FullPlayer src={link} duration progress filename={mp3.name} id={mp3.id} context='patchViewer' />
                   </Box>
                 );
               })}

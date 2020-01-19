@@ -4,7 +4,6 @@ import { withRouter } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -16,7 +15,7 @@ import CardContent from '@material-ui/core/CardContent';
 import InlineError from '../common/InlineError';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
-import { categories, instruments } from '../../Constants';
+import { categoriesLu, instrumentsLu, renderOptions } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
 import { CardActions } from '@material-ui/core';
 import { Store } from '../../state/Store';
@@ -151,25 +150,6 @@ const PatchCreator = props => {
     }
   };
 
-  const renderOptions = (entity, includeNone) => {
-    const options = [];
-    if (includeNone) {
-      options.push(
-        <MenuItem value='0'>
-          <em>None</em>
-        </MenuItem>
-      );
-    }
-    Object.entries(entity).map(([key, value]) =>
-      options.push(
-        <MenuItem key={key} value={key}>
-          {value}
-        </MenuItem>
-      )
-    );
-    return options;
-  };
-
   const onUploadFiles = acceptedFiles => {
     acceptedFiles.forEach(x => {
       files.push(x);
@@ -221,7 +201,7 @@ const PatchCreator = props => {
               <FormControl fullWidth error={instrumentId !== '' && isInstrumentInvalid} required>
                 <InputLabel id='typeLabel'>Type</InputLabel>
                 <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
-                  {renderOptions(instruments, false)}
+                  {renderOptions(instrumentsLu, false)}
                 </Select>
                 <FormHelperText>{instrumentId !== '' && isInstrumentInvalid ? 'Please choose the type of sound' : ''}</FormHelperText>
               </FormControl>
@@ -230,7 +210,7 @@ const PatchCreator = props => {
               <FormControl error={categoryId !== '' && isCategoryInvalid} fullWidth required>
                 <InputLabel id='categoryLabel'>Category</InputLabel>
                 <Select fullWidth id='categoryId' value={categoryId} onChange={event => setCategoryId(event.target.value)} required>
-                  {renderOptions(categories, false)}
+                  {renderOptions(categoriesLu, false)}
                 </Select>
                 <FormHelperText>{categoryId !== '' && isCategoryInvalid ? 'Please choose a primary category' : ''}</FormHelperText>
               </FormControl>

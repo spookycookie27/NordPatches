@@ -15,7 +15,8 @@ const defaultState = {
   files: [],
   pageSize: 10,
   mySounds: false,
-  columnFilters: false
+  columnFilters: false,
+  activeMp3Context: null
 };
 
 const localState = parseState(localStorage.getItem(LOCAL_STORAGE_KEY));
@@ -68,6 +69,11 @@ const reducer = (state = initialState, action) => {
       state.myPatches.push(action.patch);
       return { ...state };
     }
+    case 'setPlayMp3Id':
+      return {
+        ...state,
+        activeMp3Context: action.activeMp3Context
+      };
     default:
       return state;
   }
