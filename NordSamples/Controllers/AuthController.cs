@@ -12,6 +12,7 @@ using NordSamples.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Encodings.Web;
@@ -259,7 +260,7 @@ namespace NordSamples.Controllers
             }
 
             int? nufUserId = null;
-            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper() == model.ActivationCode.ToUpperInvariant());
+            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper(CultureInfo.InvariantCulture) == model.ActivationCode.ToUpperInvariant());
             if (nufUser != null)
             {
                 nufUserId = nufUser.Id;
@@ -269,8 +270,7 @@ namespace NordSamples.Controllers
         }
         private async Task<AppUser> CheckCredentials(LoginModel loginModel)
         {
-            AppUser appUser;
-            appUser = await CheckIdentityLogin(loginModel);
+            AppUser appUser = await CheckIdentityLogin(loginModel);
             return appUser;
         }
 

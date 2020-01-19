@@ -31,7 +31,7 @@ const tableTheme = createMuiTheme({
   overrides: {
     MuiTableCell: {
       root: {
-        height: 50
+        height: 54
       },
       body: {
         fontSize: '.875rem'

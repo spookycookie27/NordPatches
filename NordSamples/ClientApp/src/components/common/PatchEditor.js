@@ -65,6 +65,7 @@ const PatchViewer = props => {
   const [instrumentId, setInstrumentId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [tags, setTags] = useState(null);
+  const [tagOptions, setTagOptions] = useState([]);
   const [removed, setRemoved] = useState(false);
   const [parentPatchId, setParentPatchId] = useState('');
   const [showSpinner, setShowSpinner] = useState(false);
@@ -184,6 +185,17 @@ const PatchViewer = props => {
       setShowSpinner(false);
     }
   };
+
+  useEffect(() => {
+    if (tagOptions.length === 0) {
+      const tagUrl = '/api/tag';
+      RestUtilities.get(tagUrl).then(resTags => {
+        resTags.json().then(t => {
+          setTagOptions(t);
+        });
+      });
+    }
+  }, [tagOptions]);
 
   useEffect(() => {
     const getData = async () => {
@@ -326,15 +338,16 @@ const PatchViewer = props => {
                       Tags
                     </InputLabel>
                     <Autocomplete
-                      autoHighlight={false}
-                      autoComplete={true}
                       multiple
                       id='tags-standard'
                       size='medium'
                       value={tags}
                       freeSolo
-                      renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant='outlined' label={option} {...getTagProps({ index })} />)}
-                      renderInput={params => <TextField {...params} placeholder='Type tag and press return' fullWidth />}
+                      options={tagOptions.map(option => option.name)}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => <Chip variant='default' size='small' label={option} color='secondary' {...getTagProps({ index })} />)
+                      }
+                      renderInput={params => <TextField {...params} placeholder='Start typing tag select from list or press enter' fullWidth />}
                       onChange={(_event, value) => {
                         setTags(value);
                       }}
