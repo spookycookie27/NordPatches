@@ -7,10 +7,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InlineError from '../common/InlineError';
 import Paper from '@material-ui/core/Paper';
@@ -28,11 +24,9 @@ const useStyles = makeStyles(theme => ({
   grow: {
     flexGrow: 1
   },
-  root: {
-    margin: theme.spacing(1)
-  },
   title: {
-    fontSize: '16px'
+    fontSize: '20px',
+    marginTop: theme.spacing(1)
   },
   label: { fontSize: '12px' },
   submit: {
@@ -171,7 +165,6 @@ const PatchViewer = props => {
         type: 'updatePatch',
         patch: updatedPatch
       });
-      props.onClose();
     } else if (response.status === 400) {
       response.json().then(res => {
         setErrors(res.errors ? res.errors : res);
@@ -222,9 +215,9 @@ const PatchViewer = props => {
 
   const renderFile = file => {
     return (
-      <Paper className={classes.fileContainer} key={file.id}>
+      <Paper className={classes.fileContainer} key={file.id} elevation={1}>
         <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
-          <Box>
+          <Box m={1}>
             <Box>
               <strong>Name:</strong> {file.name}
             </Box>
@@ -249,7 +242,7 @@ const PatchViewer = props => {
                 size='small'
               />
             }
-            label='Hide'
+            label='Hide this file'
             labelPlacement='end'
             size='small'
           />
@@ -259,193 +252,186 @@ const PatchViewer = props => {
   };
 
   return (
-    <>
-      <DialogContent dividers>
-        <Card className={classes.mainCard}>
-          <CardContent>
-            <form className={classes.root} noValidate autoComplete='off'>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography className={classes.title} color='textSecondary' gutterBottom>
-                    Edit Sound ID: {patch.id}
-                  </Typography>
-                </Grid>
-                <Grid item sm={6} xs={12}>
-                  <TextField
-                    autoFocus
-                    maxLength={255}
-                    value={name}
-                    required
-                    fullWidth
-                    id='name'
-                    label='Name'
-                    name='name'
-                    onChange={event => setName(event.target.value)}
-                    error={isNameInvalid && !!name}
-                    helperText={isNameInvalid && !!name && 'Must be less than 255 characters'}
-                  />
-                </Grid>
-                <Grid item sm={6} xs={12}>
-                  <TextField
-                    minLength={0}
-                    maxLength={1000}
-                    value={link}
-                    fullWidth
-                    id='link'
-                    label='Web Link'
-                    name='link'
-                    placeholder='https://www.'
-                    onChange={event => setLink(event.target.value)}
-                    error={isLinkInvalid && !!link}
-                    helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}
-                  />
-                </Grid>
-                <Grid item sm={6} xs={12}>
-                  <InputLabel id='instrumentLabel' className={classes.label}>
-                    Type
-                  </InputLabel>
-                  <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)}>
-                    {renderOptions(instrumentsLu)}
-                  </Select>
-                </Grid>
-                <Grid item sm={6} xs={12}>
-                  <InputLabel id='categoryLabel' className={classes.label}>
-                    Category
-                  </InputLabel>
-                  <Select fullWidth id='categoryId' value={categoryId ? categoryId : ''} onChange={event => setCategoryId(event.target.value)}>
-                    {renderOptions(categoriesLu)}
-                  </Select>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    multiline
-                    rowsMax='2'
-                    minLength={0}
-                    maxLength={1000}
-                    value={description}
-                    fullWidth
-                    id='description'
-                    label='Description'
-                    name='description'
-                    onChange={event => setDescription(event.target.value)}
-                    error={isDescriptionInvalid && !!description}
-                    helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
-                  />
-                </Grid>
-                {tags ? (
-                  <Grid item xs={12}>
-                    <InputLabel id='categoryLabel' className={classes.label}>
-                      Tags
-                    </InputLabel>
-                    <Autocomplete
-                      multiple
-                      id='tags-standard'
-                      size='medium'
-                      value={tags}
-                      freeSolo
-                      options={tagOptions.map(option => option.name)}
-                      renderTags={(value, getTagProps) =>
-                        value.map((option, index) => <Chip variant='default' size='small' label={option} color='secondary' {...getTagProps({ index })} />)
-                      }
-                      renderInput={params => <TextField {...params} placeholder='Start typing tag select from list or press enter' fullWidth />}
-                      onChange={(_event, value) => {
-                        setTags(value);
-                      }}
-                    />
-                  </Grid>
-                ) : null}
-                <Grid item sm={6} xs={12}>
-                  <Typography className={classes.title} color='textSecondary'>
-                    Add Files
-                  </Typography>
-                  <Box my={2}>
-                    <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} filesAdded={acceptedFiles} />
+    <form noValidate autoComplete='off'>
+      <Grid container spacing={2} direction='row'>
+        <Grid container item lg={8} md={12} spacing={2} alignItems='flex-start' alignContent='flex-start'>
+          <Grid container item md={6} spacing={2} direction='row' alignItems='flex-start' alignContent='flex-start'>
+            <Grid item xs={12}>
+              <Typography className={classes.title} color='textSecondary' gutterBottom>
+                Details
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                autoFocus
+                maxLength={255}
+                value={name}
+                required
+                fullWidth
+                id='name'
+                label='Name'
+                name='name'
+                onChange={event => setName(event.target.value)}
+                error={isNameInvalid && !!name}
+                helperText={isNameInvalid && !!name && 'Must be less than 255 characters'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                minLength={0}
+                maxLength={1000}
+                value={link}
+                fullWidth
+                id='link'
+                label='Web Link'
+                name='link'
+                placeholder='https://www.'
+                onChange={event => setLink(event.target.value)}
+                error={isLinkInvalid && !!link}
+                helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <InputLabel id='instrumentLabel' className={classes.label}>
+                Type
+              </InputLabel>
+              <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)}>
+                {renderOptions(instrumentsLu)}
+              </Select>
+            </Grid>
+            <Grid item xs={12}>
+              <InputLabel id='categoryLabel' className={classes.label}>
+                Category
+              </InputLabel>
+              <Select fullWidth id='categoryId' value={categoryId ? categoryId : ''} onChange={event => setCategoryId(event.target.value)}>
+                {renderOptions(categoriesLu)}
+              </Select>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                rowsMax='2'
+                minLength={0}
+                maxLength={1000}
+                value={description}
+                fullWidth
+                id='description'
+                label='Description'
+                name='description'
+                onChange={event => setDescription(event.target.value)}
+                error={isDescriptionInvalid && !!description}
+                helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
+              />
+            </Grid>
+            {tags ? (
+              <Grid item xs={12}>
+                <InputLabel id='categoryLabel' className={classes.label}>
+                  Tags
+                </InputLabel>
+                <Autocomplete
+                  multiple
+                  id='tags-standard'
+                  size='medium'
+                  value={tags}
+                  freeSolo
+                  options={tagOptions.map(option => option.name)}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => <Chip variant='default' size='small' label={option} color='secondary' {...getTagProps({ index })} />)
+                  }
+                  renderInput={params => <TextField {...params} placeholder='Start typing tag select from list or press enter' fullWidth />}
+                  onChange={(_event, value) => {
+                    setTags(value);
+                  }}
+                />
+              </Grid>
+            ) : null}
+            <Grid item xs={12}>
+              <TextField
+                value={parentPatchId}
+                fullWidth
+                type='number'
+                id='parentPatchId'
+                label='Parent Sound ID'
+                name='parentPatchId'
+                onChange={event => setParentPatchId(event.target.value)}
+              />
+            </Grid>
+          </Grid>
+          <Grid container item md={6} spacing={2} direction='row' alignItems='flex-start' alignContent='flex-start'>
+            <Grid item xs={12}>
+              <Typography className={classes.title} color='textSecondary'>
+                Add new files
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Box>
+                <UploadDropZone patchId={patch.id} onAccept={onAccept} showSpinner={showSpinner} filesAdded={acceptedFiles} />
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display='flex' justifyContent='flex-end'>
+                <FormControlLabel
+                  value='end'
+                  control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
+                  label='Hide this sound'
+                  labelPlacement='end'
+                />
+                <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
+                  Update Details and add files
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography component='p'>{feedback}</Typography>
+              <InlineError field='name' errors={errors} />
+              <InlineError field='description' errors={errors} />
+              <InlineError field='categoryId' errors={errors} />
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid container item lg={4} md={12} spacing={2} alignItems='flex-start' alignContent='flex-start'>
+          <Grid item xs={12}>
+            <Typography className={classes.title} color='textSecondary'>
+              Existing Files
+            </Typography>
+          </Grid>
+          <Grid item lg={12} md={6} sm={12}>
+            {files.map(x => renderFile(x))}
+          </Grid>
+          <Grid item lg={12} md={6} sm={12}>
+            {mp3s.map(mp3 => {
+              if (!mp3) return null;
+              const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
+              return (
+                <Paper className={classes.fileContainer} key={mp3.id} elevation={1}>
+                  <Box m={2}>
+                    <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress id={mp3.id} context='patchEditor' />
                   </Box>
-                </Grid>
-                <Grid item sm={6} xs={12}>
-                  <TextField
-                    value={parentPatchId}
-                    fullWidth
-                    type='number'
-                    id='parentPatchId'
-                    label='Parent Sound ID'
-                    name='parentPatchId'
-                    onChange={event => setParentPatchId(event.target.value)}
-                  />
-                  <Box my={2}>
+                  <Box mt={3} display='flex' justifyContent='flex-end'>
                     <FormControlLabel
                       value='end'
-                      control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
-                      label='Hide this sound'
+                      control={
+                        <Switch
+                          color='primary'
+                          checked={mp3.removed}
+                          onChange={() => {
+                            toggleRemoveFile(mp3);
+                          }}
+                          size='small'
+                        />
+                      }
+                      label='Hide this file'
                       labelPlacement='end'
+                      size='small'
                     />
                   </Box>
-                  <Box display='flex' justifyContent='flex-end'>
-                    <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
-                      Update Details and add files
-                    </Button>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Typography component='p'>{feedback}</Typography>
-                  <InlineError field='name' errors={errors} />
-                  <InlineError field='description' errors={errors} />
-                  <InlineError field='categoryId' errors={errors} />
-                </Grid>
-              </Grid>
-            </form>
-            <Typography className={classes.title} color='textSecondary'>
-              Existing MP3s and Nord files
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item sm={6} xs={12}>
-                {mp3s.map(mp3 => {
-                  if (!mp3) return null;
-                  const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
-                  return (
-                    <Paper className={classes.fileContainer} key={mp3.id}>
-                      <Box my={3} mx={1} key={mp3.id} display='flex'>
-                        <Box mx={1} className={classes.grow}>
-                          <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress id={mp3.id} context='patchEditor' />
-                        </Box>
-                        <Box m={1} mx={2}>
-                          <FormControlLabel
-                            value='end'
-                            control={
-                              <Switch
-                                color='primary'
-                                checked={mp3.removed}
-                                onChange={() => {
-                                  toggleRemoveFile(mp3);
-                                }}
-                                size='small'
-                              />
-                            }
-                            label='Hide'
-                            labelPlacement='end'
-                            size='small'
-                          />
-                        </Box>
-                      </Box>
-                    </Paper>
-                  );
-                })}
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                {files.map(x => renderFile(x))}
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </DialogContent>
-
-      <DialogActions>
-        <Button size='small' onClick={props.onClose} color='secondary' variant='contained'>
-          Close
-        </Button>
-      </DialogActions>
-    </>
+                </Paper>
+              );
+            })}
+          </Grid>
+        </Grid>
+      </Grid>
+    </form>
   );
 };
 

@@ -45,7 +45,7 @@ namespace NordSamples.Controllers
             IFormFile file = collection.Files[0];
             string comment = collection["Comment"].ToString();
             string appUserId = collection["AppUserId"].ToString();
-            int nufUserId = int.Parse(collection["NufUserId"].ToString());
+            int.TryParse(collection["NufUserId"].ToString(), out int nufUserId);
             string extension = collection["Extension"].ToString();
             if (file.Length > MaxLength)
             {

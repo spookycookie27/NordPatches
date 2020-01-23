@@ -15,6 +15,15 @@ import { Typography } from '@material-ui/core';
 import { Store } from '../../state/Store';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import MTableFilterRow from './MTableFilterRow';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  details: {
+    margin: 0,
+    width: '90vw',
+    padding: theme.spacing(3, 4)
+  }
+}));
 
 const tableTheme = createMuiTheme({
   link: {
@@ -227,20 +236,11 @@ const containsSearchTerms = (term, data) => {
 };
 
 const PatchBrowser = props => {
+  const classes = useStyles();
   const { state, dispatch } = React.useContext(Store);
   const [columns, setColumns] = useState(getInitialColumns(state.user));
   const [error, setError] = useState(false);
-  const [open, setOpen] = useState(false);
   const [patchId, setPatchId] = useState(null);
-  const [action, setAction] = useState('view');
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   useEffect(() => {
     const getAllData = async () => {
@@ -274,14 +274,6 @@ const PatchBrowser = props => {
     });
   };
 
-  const shouldShowEdit = rowData => {
-    return (
-      state.user.role === 'administrator' ||
-      (rowData.user && rowData.user.nufUserId === state.user.nufUserId) ||
-      (rowData.user && rowData.user.id === state.user.id)
-    );
-  };
-
   const mySoundsToggle = (
     <FormControlLabel
       control={
@@ -301,31 +293,6 @@ const PatchBrowser = props => {
   );
 
   const actions = [
-    {
-      icon: 'launch',
-      onClick: (event, rowData) => {
-        dispatch({
-          type: 'setPlayMp3Id',
-          id: null
-        });
-        setAction('view');
-        setPatchId(rowData.id);
-        handleOpen();
-      }
-    },
-    rowData => ({
-      icon: 'edit',
-      onClick: (event, rowData) => {
-        dispatch({
-          type: 'setPlayMp3Id',
-          id: null
-        });
-        setAction('edit');
-        setPatchId(rowData.id);
-        handleOpen();
-      },
-      hidden: !shouldShowEdit(rowData)
-    }),
     {
       icon: () => {
         return mySoundsToggle;
@@ -356,11 +323,42 @@ const PatchBrowser = props => {
     }
   ];
 
-  const handleRowClick = (event, rowData) => {
+  const viewDetailPanel = {
+    tooltip: 'View Sound',
+    render: rowData => {
+      return (
+        <Box className={classes.details}>
+          <PatchViewer patchId={rowData.id} />
+        </Box>
+      );
+    }
+  };
+
+  const editDetailPanel = {
+    icon: 'edit',
+    openIcon: 'editOutlined',
+    tooltip: 'Edit Sound',
+    render: rowData => {
+      return (
+        <Box className={classes.details}>
+          <PatchEditor patchId={rowData.id} />
+        </Box>
+      );
+    }
+  };
+
+  const getDetailPanels = () => {
+    if (state.user.role === 'administrator' || state.mySounds) {
+      return [viewDetailPanel, editDetailPanel];
+    }
+    return [viewDetailPanel];
+  };
+
+  const handleRowClick = (event, rowData, togglePanel) => {
     if (!['svg', 'path'].includes(event.target.nodeName)) {
-      setAction('view');
       setPatchId(rowData.id);
-      handleOpen();
+      dispatch({ type: 'setPlayMp3Id', id: null });
+      togglePanel();
     }
   };
 
@@ -388,12 +386,9 @@ const PatchBrowser = props => {
           onChangeRowsPerPage={handlePageSizeChange}
           //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
           columns={columns}
+          detailPanel={getDetailPanels()}
         />
       </MuiThemeProvider>
-      <Dialog maxWidth='md' open={open} onClose={handleClose} aria-labelledby='patch details' fullWidth>
-        {action === 'view' && <PatchViewer patchId={patchId} onClose={handleClose} />}
-        {action === 'edit' && <PatchEditor patchId={patchId} onClose={handleClose} />}
-      </Dialog>
     </div>
   );
 };
