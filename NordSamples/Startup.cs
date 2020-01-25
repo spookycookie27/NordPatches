@@ -91,6 +91,9 @@ namespace NordSamples
 
                 // User settings.
                 options.User.RequireUniqueEmail = true;
+
+                // Sign in settings.
+                options.SignIn.RequireConfirmedEmail = false;
             });
 
             services.AddMvc()

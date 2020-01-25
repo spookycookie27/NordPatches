@@ -3,11 +3,11 @@ import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import { nufFileLink } from './Common';
 import moment from 'moment';
 import theme from '../../theme';
 import { Store } from '../../state/Store';
 import MTableFilterRow from './MTableFilterRow';
+import { nufFileLink } from '../../Constants';
 
 const containsSearchTerms = (term, data) => {
   var searchArr = term
@@ -87,7 +87,9 @@ const FileBrowser = () => {
 
   return (
     <div className='FilesList'>
-      <p>TODO - Will add some functionality to assign unsed MP3s to the correct sound. Watch this space! (Eventually this page will be deleted completely.)</p>
+      <p style={{ color: 'white' }}>
+        TODO - Will add some functionality to assign unsed MP3s to the correct sound. Watch this space! (Eventually this page will be deleted completely.)
+      </p>
       <MaterialTable
         theme={theme}
         options={{

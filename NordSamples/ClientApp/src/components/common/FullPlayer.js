@@ -11,7 +11,7 @@ import { Store } from '../../state/Store';
 const useStyles = makeStyles(theme => ({
   mp3Player: {
     borderRadius: '10px',
-    backgroundColor: '#cc0930',
+    backgroundColor: theme.palette.primary.main,
     color: 'white',
     display: 'flex',
     alignItems: 'center',

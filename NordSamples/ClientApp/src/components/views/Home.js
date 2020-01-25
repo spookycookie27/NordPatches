@@ -2,10 +2,19 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  home: {
+    backgroundColor: '#FFFFFF',
+    padding: theme.spacing(4, 2)
+  }
+}));
 
 const Home = () => {
+  const classes = useStyles();
   return (
-    <div className='Home'>
+    <div className={classes.home}>
       <Container maxWidth='md'>
         <Typography variant='h2' gutterBottom>
           Welcome To The (Unofficial) Nord User Sounds Collection

@@ -1,30 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import Rating from '@material-ui/lab/Rating';
 import Tooltip from '@material-ui/core/Tooltip';
-import { categories, instruments, blobUrl } from '../../Constants';
-import { nufFileLink } from './Common';
+import { categories, instruments, blobUrl, nufFileLink } from '../../Constants';
 import FullPlayer from '../common/FullPlayer';
 import moment from 'moment';
 import { makeStyles } from '@material-ui/core/styles';
 import { Store } from '../../state/Store';
+import File from './File';
 
 const useStyles = makeStyles(theme => ({
-  fileContainer: {
-    padding: theme.spacing(1),
-    marginBottom: theme.spacing(2)
-  },
-  file: {
-    color: 'inherit',
-    textDecoration: 'none'
-  },
   title: {
     fontSize: '16px'
   },
@@ -84,30 +72,6 @@ const PatchViewer = props => {
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const renderFile = file => {
-    if (file.removed || file.isNord) return null;
-    return (
-      <Paper className={classes.fileContainer} key={file.id}>
-        <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
-          <Box>
-            <Box>
-              <strong>Name:</strong> {file.name}
-            </Box>
-            <Box>
-              <strong>File ID:</strong> {file.id}
-            </Box>
-            <Box>
-              <strong>Size (bytes):</strong> {file.size}
-            </Box>
-            <Box>
-              <strong>Version:</strong> {file.version + 1}
-            </Box>
-          </Box>
-        </a>
-      </Paper>
-    );
-  };
 
   const addRating = async newValue => {
     setUserRating(newValue);
@@ -169,13 +133,17 @@ const PatchViewer = props => {
             if (!mp3) return null;
             const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
             return (
-              <Box my={3} mx={1} key={mp3.id}>
+              <Box my={3} mx={1} key={mp3.id} className={classes.file}>
                 <FullPlayer src={link} duration progress filename={mp3.name} id={mp3.id} context='patchViewer' />
               </Box>
             );
           })}
 
-          <Box mt={2}>{files.map(x => renderFile(x))}</Box>
+          <Box mt={2}>
+            {files.map(x => (
+              <File file={x} />
+            ))}
+          </Box>
 
           {renderRating && (
             <Box className={classes.ratingBox}>

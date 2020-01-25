@@ -10,7 +10,7 @@ import queryString from 'query-string';
 import isEmail from 'validator/lib/isEmail';
 import LoginLayout from '../common/LoginLayout';
 import InlineError from '../common/InlineError';
-import { loginStyles, regexEx } from '../common/Common';
+import { loginStyles } from '../common/Common';
 
 export default function ResetPassword(props) {
   const classes = loginStyles();
@@ -27,7 +27,7 @@ export default function ResetPassword(props) {
     setCode(parsed.code);
   }
   const isEmailInvalid = !isEmail(email);
-  const isPasswordInvalid = !!(password && !regexEx.test(password));
+  const isPasswordInvalid = !!(password.length < 5 || password.length > 30);
   const hasErrors = isEmailInvalid || isPasswordInvalid;
   async function handleResetPasswordClick() {
     setDisabled(true);

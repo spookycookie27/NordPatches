@@ -12,13 +12,13 @@ import InlineError from '../common/InlineError';
 import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
-import { nufFileLink } from './Common';
 import Box from '@material-ui/core/Box';
 import FullPlayer from '../common/FullPlayer';
 import { makeStyles } from '@material-ui/core/styles';
-import { categoriesLu, instrumentsLu, blobUrl, renderOptions } from '../../Constants';
+import { categoriesLu, instrumentsLu, blobUrl, renderOptions, nufFileLink } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
 import { Store } from '../../state/Store';
+import File from './File';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -34,7 +34,8 @@ const useStyles = makeStyles(theme => ({
   },
   fileContainer: {
     padding: theme.spacing(1),
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
+    backgroundColor: '#f2f2f2'
   },
   file: {
     color: 'inherit',
@@ -70,7 +71,6 @@ const PatchViewer = props => {
   const isNameInvalid = name.length < 1 || name.length > 255;
   const isDescriptionInvalid = description.length > 1000;
   const isLinkInvalid = link.length > 1000;
-
   const forceUpdate = useForceUpdate();
 
   const getExtension = file => {
@@ -213,44 +213,6 @@ const PatchViewer = props => {
   const mp3s = patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
   const files = patch.patchFiles.filter(x => x.file.extension !== 'mp3').map(x => x.file);
 
-  const renderFile = file => {
-    return (
-      <Paper className={classes.fileContainer} key={file.id} elevation={1}>
-        <a href={`${nufFileLink}${file.attachId}`} className={classes.file}>
-          <Box m={1}>
-            <Box>
-              <strong>Name:</strong> {file.name}
-            </Box>
-            <Box>
-              <strong>File ID:</strong> {file.id}
-            </Box>
-            <Box>
-              <strong>Size (bytes):</strong> {file.size}
-            </Box>
-          </Box>
-        </a>
-        <Box display='flex' justifyContent='flex-end'>
-          <FormControlLabel
-            value='end'
-            control={
-              <Switch
-                color='primary'
-                checked={file.removed}
-                onChange={() => {
-                  toggleRemoveFile(file);
-                }}
-                size='small'
-              />
-            }
-            label='Hide this file'
-            labelPlacement='end'
-            size='small'
-          />
-        </Box>
-      </Paper>
-    );
-  };
-
   return (
     <form noValidate autoComplete='off'>
       <Grid container spacing={2} direction='row'>
@@ -372,12 +334,12 @@ const PatchViewer = props => {
               <Box display='flex' justifyContent='flex-end'>
                 <FormControlLabel
                   value='end'
-                  control={<Switch color='primary' checked={removed} onChange={() => setRemoved(!removed)} />}
+                  control={<Switch color='secondary' checked={removed} onChange={() => setRemoved(!removed)} />}
                   label='Hide this sound'
                   labelPlacement='end'
                 />
                 <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
-                  Update Details and add files
+                  Update Sound
                 </Button>
               </Box>
             </Grid>
@@ -396,7 +358,9 @@ const PatchViewer = props => {
             </Typography>
           </Grid>
           <Grid item lg={12} md={6} sm={12}>
-            {files.map(x => renderFile(x))}
+            {files.map(x => (
+              <File file={x} toggleRemoveFile={toggleRemoveFile} key={x.id} />
+            ))}
           </Grid>
           <Grid item lg={12} md={6} sm={12}>
             {mp3s.map(mp3 => {

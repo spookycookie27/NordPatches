@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
-import Dialog from '@material-ui/core/Dialog';
 import Box from '@material-ui/core/Box';
 import PatchViewer from './PatchViewer';
 import PatchEditor from './PatchEditor';
-import { nufFileLink } from './Common';
 import FullPlayer from './FullPlayer';
 import Rating from '@material-ui/lab/Rating';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { categories, categoriesLu, instruments, instrumentsLu, blobUrl } from '../../Constants';
+import { categories, categoriesLu, instruments, instrumentsLu, blobUrl, nufFileLink } from '../../Constants';
 import { Typography } from '@material-ui/core';
 import { Store } from '../../state/Store';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -18,10 +16,14 @@ import MTableFilterRow from './MTableFilterRow';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
+  detailsContainer: {
+    backgroundColor: '#f9f9f9',
+    padding: theme.spacing(2)
+  },
   details: {
-    margin: 0,
-    width: '90vw',
-    padding: theme.spacing(3, 4)
+    width: '89vw',
+    padding: theme.spacing(2),
+    backgroundColor: '#FFF'
   }
 }));
 
@@ -55,7 +57,7 @@ const renderRating = patch => {
   const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
   return (
     <Box display='flex'>
-      <Rating name='rating' value={average} precision={0.5} readOnly size='small' />({count})
+      <Rating name='rating' value={average} precision={0.5} readOnly size='small' />
     </Box>
   );
 };
@@ -94,12 +96,13 @@ const getInitialColumns = user => [
       if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
       return 0;
     },
-    cellStyle: { width: '200px' }
+    cellStyle: { maxWidth: '300px', minWidth: '100px' }
   },
   {
     title: 'Description',
     field: 'description',
-    cellStyle: { maxWidth: '320px', minWidth: '100px' },
+    hidden: false,
+    cellStyle: { maxWidth: '100px', minWidth: '100px' },
     render: rowData => (
       <Typography noWrap variant='body2'>
         {rowData.description}
@@ -118,6 +121,7 @@ const getInitialColumns = user => [
   {
     title: 'Tags',
     field: 'tags',
+    cellStyle: { maxWidth: '300px', minWidth: '150px' },
     render: rowData => getTags(rowData.tags),
     customFilterAndSearch: (term, rowData) => {
       const lowerTags = rowData.tags.map(t => t.name.toLowerCase());
@@ -148,7 +152,7 @@ const getInitialColumns = user => [
       }
     },
     searchable: false,
-    cellStyle: { maxWidth: '130px', width: '130px' }
+    cellStyle: { width: '90px' }
   },
   {
     title: 'Type',
@@ -170,8 +174,7 @@ const getInitialColumns = user => [
     },
     searchable: false,
     cellStyle: {
-      maxWidth: '80px',
-      width: '80px'
+      width: '75px'
     }
   },
   {
@@ -189,7 +192,7 @@ const getInitialColumns = user => [
     filtering: true,
     searchable: false,
     cellStyle: {
-      width: '80px'
+      width: '60px'
     },
     type: 'boolean'
   },
@@ -203,14 +206,14 @@ const getInitialColumns = user => [
       if (!rowData.user || rowData.user.username.length === 0) return true;
       return containsSearchTerms(term, rowData.user.username);
     },
-    cellStyle: { width: '140px' }
+    cellStyle: { width: '100px' }
   },
   {
     title: 'Rating',
     field: 'rating',
     render: rowData => renderRating(rowData),
     filtering: false,
-    cellStyle: { width: '110px', padding: 0 }
+    cellStyle: { maxWidth: '90px', padding: 0 }
   },
   {
     title: 'Id',
@@ -222,7 +225,7 @@ const getInitialColumns = user => [
     },
     hidden: user.role !== 'administrator',
     searchable: false,
-    cellStyle: { width: '100px' }
+    cellStyle: { width: '80px' }
   }
 ];
 
@@ -240,7 +243,6 @@ const PatchBrowser = props => {
   const { state, dispatch } = React.useContext(Store);
   const [columns, setColumns] = useState(getInitialColumns(state.user));
   const [error, setError] = useState(false);
-  const [patchId, setPatchId] = useState(null);
 
   useEffect(() => {
     const getAllData = async () => {
@@ -327,8 +329,10 @@ const PatchBrowser = props => {
     tooltip: 'View Sound',
     render: rowData => {
       return (
-        <Box className={classes.details}>
-          <PatchViewer patchId={rowData.id} />
+        <Box className={classes.detailsContainer}>
+          <Box className={classes.details}>
+            <PatchViewer patchId={rowData.id} />
+          </Box>
         </Box>
       );
     }
@@ -336,12 +340,14 @@ const PatchBrowser = props => {
 
   const editDetailPanel = {
     icon: 'edit',
-    openIcon: 'editOutlined',
+    openIcon: 'cancel',
     tooltip: 'Edit Sound',
     render: rowData => {
       return (
-        <Box className={classes.details}>
-          <PatchEditor patchId={rowData.id} />
+        <Box className={classes.detailsContainer}>
+          <Box className={classes.details}>
+            <PatchEditor patchId={rowData.id} />
+          </Box>
         </Box>
       );
     }
@@ -356,7 +362,6 @@ const PatchBrowser = props => {
 
   const handleRowClick = (event, rowData, togglePanel) => {
     if (!['svg', 'path'].includes(event.target.nodeName)) {
-      setPatchId(rowData.id);
       dispatch({ type: 'setPlayMp3Id', id: null });
       togglePanel();
     }

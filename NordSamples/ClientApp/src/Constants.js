@@ -1,8 +1,11 @@
 import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
-
+export const nufFileLink = 'https://www.norduserforum.com/download/file.php?id=';
 export const blobUrl = 'https://nordsounds.blob.core.windows.net';
 export const siteName = 'Nord User Sounds';
+//export const regexEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,}$/;
+export const regexEx = /^.{6,}$/;
+
 export const categories = {
   23: 'Acoustic',
   22: 'Arpeggio',

@@ -9,7 +9,7 @@ import RootRef from '@material-ui/core/RootRef';
 const useStyles = makeStyles(theme => ({
   baseStyle: {
     flex: 1,
-    minHeight: '100px',
+    minHeight: '116px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
