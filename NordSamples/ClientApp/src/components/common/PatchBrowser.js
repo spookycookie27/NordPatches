@@ -57,7 +57,7 @@ const renderRating = patch => {
   const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
   return (
     <Box display='flex'>
-      <Rating name='rating' value={average} precision={0.5} readOnly size='small' />
+      <Rating name='rating' value={average} precision={0.5} readOnly size='small' />({count})
     </Box>
   );
 };
@@ -102,7 +102,7 @@ const getInitialColumns = user => [
     title: 'Description',
     field: 'description',
     hidden: false,
-    cellStyle: { maxWidth: '100px', minWidth: '100px' },
+    cellStyle: { maxWidth: '200px', minWidth: '100px' },
     render: rowData => (
       <Typography noWrap variant='body2'>
         {rowData.description}
@@ -152,7 +152,7 @@ const getInitialColumns = user => [
       }
     },
     searchable: false,
-    cellStyle: { width: '90px' }
+    cellStyle: { width: '80px' }
   },
   {
     title: 'Type',
@@ -174,7 +174,7 @@ const getInitialColumns = user => [
     },
     searchable: false,
     cellStyle: {
-      width: '75px'
+      width: '80px'
     }
   },
   {
@@ -209,13 +209,6 @@ const getInitialColumns = user => [
     cellStyle: { width: '100px' }
   },
   {
-    title: 'Rating',
-    field: 'rating',
-    render: rowData => renderRating(rowData),
-    filtering: false,
-    cellStyle: { maxWidth: '90px', padding: 0 }
-  },
-  {
     title: 'Id',
     field: 'id',
     type: 'numeric',
@@ -225,7 +218,14 @@ const getInitialColumns = user => [
     },
     hidden: user.role !== 'administrator',
     searchable: false,
-    cellStyle: { width: '80px' }
+    cellStyle: { width: '90px' }
+  },
+  {
+    title: 'Rating',
+    field: 'rating',
+    render: rowData => renderRating(rowData),
+    filtering: false,
+    cellStyle: { maxWidth: '115px', padding: 0, paddingRight: 5 }
   }
 ];
 
