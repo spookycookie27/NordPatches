@@ -14,7 +14,7 @@ import File from './File';
 
 const useStyles = makeStyles(theme => ({
   title: {
-    fontSize: '16px'
+    fontSize: '18px'
   },
   mainCard: {
     marginBottom: theme.spacing(2)
@@ -141,7 +141,7 @@ const PatchViewer = props => {
 
           <Box mt={2}>
             {files.map(x => (
-              <File file={x} />
+              <File file={x} key={x.id} />
             ))}
           </Box>
 
@@ -165,19 +165,19 @@ const PatchViewer = props => {
   };
 
   if (!patch) return null;
-  var hasVariations = (patch.parent && patch.parent.removed) || patch.children.some(x => !x.removed);
+  var hasVariations = (patch.parent && !patch.parent.removed) || patch.children.some(x => !x.removed);
 
   return (
     <>
       {renderPatch(patch, true)}
       {hasVariations && (
-        <>
+        <Box mt={2}>
           <Typography variant='h6' className={classes.title} color='textSecondary' gutterBottom>
             Variations
           </Typography>
           {patch.parent && renderPatch(patch.parent, false)}
           {patch.children.length > 0 && patch.children.map(x => renderPatch(x, false))}
-        </>
+        </Box>
       )}
     </>
   );

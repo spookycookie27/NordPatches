@@ -31,8 +31,8 @@ const File = props => {
   return (
     <Paper className={classes.fileContainer} key={file.id}>
       <a href={link} className={classes.file}>
-        <Box item xs={2} sm={1} lg={2} className={classes.icon}>
-          <InsertDriveFileRoundedIcon color='primnary' fontSize='large' />
+        <Box xs={2} sm={1} lg={2} className={classes.icon}>
+          <InsertDriveFileRoundedIcon fontSize='large' />
         </Box>
         <Box>
           <Box>
