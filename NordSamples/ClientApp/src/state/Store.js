@@ -16,7 +16,9 @@ const defaultState = {
   pageSize: 10,
   mySounds: false,
   columnFilters: false,
-  activeMp3Context: null
+  activeMp3Context: null,
+  showTagsColumn: true,
+  showDescriptionColumn: true
 };
 
 const localState = parseState(localStorage.getItem(LOCAL_STORAGE_KEY));
@@ -33,6 +35,16 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         mySounds: action.mySounds
+      };
+    case 'setShowDescriptionColumn':
+      return {
+        ...state,
+        showDescriptionColumn: action.showDescriptionColumn
+      };
+    case 'setShowTagsColumn':
+      return {
+        ...state,
+        showTagsColumn: action.showTagsColumn
       };
     case 'setColumnFilters':
       return {

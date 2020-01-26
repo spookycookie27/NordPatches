@@ -83,7 +83,16 @@ const getTags = tags => {
     : null;
 };
 
-const getInitialColumns = user => [
+const containsSearchTerms = (term, data) => {
+  var searchArr = term
+    .toLowerCase()
+    .trim()
+    .split(' ');
+  var lowerData = data.toLowerCase();
+  return searchArr.every(x => lowerData.includes(x));
+};
+
+const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
   {
     title: 'Name',
     field: 'name',
@@ -96,13 +105,13 @@ const getInitialColumns = user => [
       if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
       return 0;
     },
-    cellStyle: { maxWidth: '300px', minWidth: '100px' }
+    cellStyle: { minWidth: '100px' }
   },
   {
     title: 'Description',
     field: 'description',
     hidden: false,
-    cellStyle: { maxWidth: '200px', minWidth: '100px' },
+    cellStyle: { maxWidth: '400px', minWidth: '100px' },
     render: rowData => (
       <Typography noWrap variant='body2'>
         {rowData.description}
@@ -116,12 +125,13 @@ const getInitialColumns = user => [
       if (a.description.toLowerCase() < b.description.toLowerCase()) return -1;
       if (a.description.toLowerCase() > b.description.toLowerCase()) return 1;
       return 0;
-    }
+    },
+    hidden: !showDescriptionColumn
   },
   {
     title: 'Tags',
     field: 'tags',
-    cellStyle: { maxWidth: '300px', minWidth: '150px' },
+    cellStyle: { maxWidth: '200px' },
     render: rowData => getTags(rowData.tags),
     customFilterAndSearch: (term, rowData) => {
       const lowerTags = rowData.tags.map(t => t.name.toLowerCase());
@@ -131,7 +141,8 @@ const getInitialColumns = user => [
         .split(' ');
       return searchArr.every(x => lowerTags.some(y => y.includes(x)));
     },
-    filtering: false
+    filtering: false,
+    hidden: !showTagsColumn
   },
   {
     title: 'Category',
@@ -152,7 +163,7 @@ const getInitialColumns = user => [
       }
     },
     searchable: false,
-    cellStyle: { width: '80px' }
+    cellStyle: { width: '140px', minWidth: '80px' }
   },
   {
     title: 'Type',
@@ -229,19 +240,46 @@ const getInitialColumns = user => [
   }
 ];
 
-const containsSearchTerms = (term, data) => {
-  var searchArr = term
-    .toLowerCase()
-    .trim()
-    .split(' ');
-  var lowerData = data.toLowerCase();
-  return searchArr.every(x => lowerData.includes(x));
+const editDetailPanel = classes => ({
+  icon: 'edit',
+  openIcon: 'cancel',
+  tooltip: 'Edit Sound',
+  render: rowData => {
+    return (
+      <Box className={classes.detailsContainer}>
+        <Box className={classes.details}>
+          <PatchEditor patchId={rowData.id} />
+        </Box>
+      </Box>
+    );
+  }
+});
+
+const viewDetailPanel = classes => ({
+  tooltip: 'View Sound',
+  render: rowData => {
+    return (
+      <Box className={classes.detailsContainer}>
+        <Box className={classes.details}>
+          <PatchViewer patchId={rowData.id} />
+        </Box>
+      </Box>
+    );
+  }
+});
+
+const getDetailPanels = (state, classes) => {
+  if (state.user.role === 'administrator' || state.mySounds) {
+    return [viewDetailPanel(classes), editDetailPanel(classes)];
+  }
+  return [viewDetailPanel(classes)];
 };
 
 const PatchBrowser = props => {
   const classes = useStyles();
   const { state, dispatch } = React.useContext(Store);
-  const [columns, setColumns] = useState(getInitialColumns(state.user));
+  const { showTagsColumn, showDescriptionColumn } = state;
+  const [columns, setColumns] = useState(getInitialColumns(state.user, showTagsColumn, showDescriptionColumn));
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -268,6 +306,10 @@ const PatchBrowser = props => {
     };
     getAllData();
   }, [props, state.user, dispatch]);
+
+  useEffect(() => {
+    setColumns(getInitialColumns(state.user, state.showTagsColumn, state.showDescriptionColumn));
+  }, [state.showTagsColumn, state.showDescriptionColumn]);
 
   const handlePageSizeChange = size => {
     dispatch({
@@ -305,6 +347,28 @@ const PatchBrowser = props => {
       hidden: state.myPatches.length === 0
     },
     {
+      icon: showDescriptionColumn ? 'speaker_notes_off' : 'speaker_notes',
+      onClick: () => {
+        dispatch({
+          type: 'setShowDescriptionColumn',
+          showDescriptionColumn: !state.showDescriptionColumn
+        });
+      },
+      isFreeAction: true,
+      tooltip: `${showDescriptionColumn ? 'Hide' : 'Show'} Description (affects search results)`
+    },
+    {
+      icon: showTagsColumn ? 'label_off' : 'label',
+      onClick: () => {
+        dispatch({
+          type: 'setShowTagsColumn',
+          showTagsColumn: !state.showTagsColumn
+        });
+      },
+      isFreeAction: true,
+      tooltip: `${showTagsColumn ? 'Hide' : 'Show'} Tags (affects search results)`
+    },
+    {
       icon: 'filter_list',
       onClick: () => {
         dispatch({
@@ -324,41 +388,6 @@ const PatchBrowser = props => {
       tooltip: 'Clear Filters'
     }
   ];
-
-  const viewDetailPanel = {
-    tooltip: 'View Sound',
-    render: rowData => {
-      return (
-        <Box className={classes.detailsContainer}>
-          <Box className={classes.details}>
-            <PatchViewer patchId={rowData.id} />
-          </Box>
-        </Box>
-      );
-    }
-  };
-
-  const editDetailPanel = {
-    icon: 'edit',
-    openIcon: 'cancel',
-    tooltip: 'Edit Sound',
-    render: rowData => {
-      return (
-        <Box className={classes.detailsContainer}>
-          <Box className={classes.details}>
-            <PatchEditor patchId={rowData.id} />
-          </Box>
-        </Box>
-      );
-    }
-  };
-
-  const getDetailPanels = () => {
-    if (state.user.role === 'administrator' || state.mySounds) {
-      return [viewDetailPanel, editDetailPanel];
-    }
-    return [viewDetailPanel];
-  };
 
   const handleRowClick = (event, rowData, togglePanel) => {
     if (!['svg', 'path'].includes(event.target.nodeName)) {
@@ -391,7 +420,7 @@ const PatchBrowser = props => {
           onChangeRowsPerPage={handlePageSizeChange}
           //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
           columns={columns}
-          detailPanel={getDetailPanels()}
+          detailPanel={getDetailPanels(state, classes)}
         />
       </MuiThemeProvider>
     </div>
