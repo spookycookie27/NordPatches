@@ -56,6 +56,12 @@ function AppMenu(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
+  const onResetClick = () => {
+    dispatch({ type: 'resetState' });
+    window.localStorage.clear();
+    onSignoutClick();
+  };
+
   const onSignoutClick = () => {
     handleClose();
     signOut();
@@ -140,6 +146,7 @@ function AppMenu(props) {
           <MenuItem onClick={() => handleNavigate('/addsound')}>Add New</MenuItem>
           {user && user.role === 'administrator' && <MenuItem onClick={() => handleNavigate('/files')}>Files</MenuItem>}
           {isSignedIn() ? <MenuItem onClick={onSignoutClick}>Logout</MenuItem> : <MenuItem onClick={onLoginClick}>Login</MenuItem>}
+          {isSignedIn() && <MenuItem onClick={onResetClick}>Reset App</MenuItem>}
         </Menu>
       </Toolbar>
     </AppBar>

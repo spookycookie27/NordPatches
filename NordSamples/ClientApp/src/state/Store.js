@@ -61,11 +61,6 @@ const reducer = (state = initialState, action) => {
         ...state,
         myPatches: action.patches
       };
-    case 'setFiles':
-      return {
-        ...state,
-        files: action.files
-      };
     case 'setPageSize':
       return {
         ...state,
@@ -86,6 +81,9 @@ const reducer = (state = initialState, action) => {
         ...state,
         activeMp3Context: action.activeMp3Context
       };
+    case 'resetState':
+      state = defaultState;
+      return { ...state };
     default:
       return state;
   }

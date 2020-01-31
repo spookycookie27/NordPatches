@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import RestUtilities from '../../services/RestUtilities';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
@@ -58,7 +58,9 @@ function getFileData(file) {
 
 const FileBrowser = () => {
   const { state, dispatch } = React.useContext(Store);
+  const [data, setData] = useState([]);
   const pageSize = state.pageSize;
+
   useEffect(() => {
     const getData = async () => {
       const url = '/api/file';
@@ -68,8 +70,9 @@ const FileBrowser = () => {
         .then(res => {
           dispatch({
             type: 'setFiles',
-            files: res
+            files: []
           });
+          setData(res);
         })
         .catch(err => {
           console.log(err);
@@ -87,9 +90,6 @@ const FileBrowser = () => {
 
   return (
     <div className='FilesList'>
-      <p style={{ color: 'white' }}>
-        TODO - Will add some functionality to assign unsed MP3s to the correct sound. Watch this space! (Eventually this page will be deleted completely.)
-      </p>
       <MaterialTable
         theme={theme}
         options={{
@@ -156,7 +156,7 @@ const FileBrowser = () => {
             }
           }
         ]}
-        data={state.files}
+        data={data}
         title='Admins only File list'
         onChangeRowsPerPage={handlePageSizeChange}
         detailPanel={file => {

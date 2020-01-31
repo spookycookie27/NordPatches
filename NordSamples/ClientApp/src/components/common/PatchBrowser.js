@@ -110,7 +110,6 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
   {
     title: 'Description',
     field: 'description',
-    hidden: false,
     cellStyle: { maxWidth: '400px', minWidth: '100px' },
     render: rowData => (
       <Typography noWrap variant='body2'>
@@ -309,7 +308,7 @@ const PatchBrowser = props => {
 
   useEffect(() => {
     setColumns(getInitialColumns(state.user, state.showTagsColumn, state.showDescriptionColumn));
-  }, [state.showTagsColumn, state.showDescriptionColumn]);
+  }, [state.showTagsColumn, state.showDescriptionColumn, state.user]);
 
   const handlePageSizeChange = size => {
     dispatch({

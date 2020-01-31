@@ -54,14 +54,14 @@ namespace NordSamples.Controllers
         {
             int? nufUserId = await CheckActivationCode(model);
 
-            AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Username.ToUpperInvariant() || x.NormalizedEmail == model.Email.ToUpperInvariant());
+            AppUser existingUser = await context.AppUsers.FirstOrDefaultAsync(x => x.NormalizedUserName == model.Username.ToUpper() || x.NormalizedEmail == model.Email.ToUpper());
             if (existingUser != null)
             {
-                if (existingUser.NormalizedEmail == model.Email.ToUpperInvariant())
+                if (existingUser.NormalizedEmail == model.Email.ToUpper())
                 {
                     ModelState.AddModelError("email", "You already have an account using this email address.");
                 }
-                else if (existingUser.NormalizedUserName == model.Username.ToUpperInvariant())
+                else if (existingUser.NormalizedUserName == model.Username.ToUpper())
                 {
                     ModelState.AddModelError("username", "This username is already in use. Please choose another.");
                 }
@@ -260,7 +260,7 @@ namespace NordSamples.Controllers
             }
 
             int? nufUserId = null;
-            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper(CultureInfo.InvariantCulture) == model.ActivationCode.ToUpperInvariant());
+            NufUser nufUser = await context.NufUsers.FirstOrDefaultAsync(x => x.ActivationCode.ToUpper() == model.ActivationCode.ToUpper());
             if (nufUser != null)
             {
                 nufUserId = nufUser.Id;

@@ -48,12 +48,14 @@ const FullPlayer = props => {
   const classes = useStyles();
 
   useEffect(() => {
-    if (state.activeMp3Context && props.id === state.activeMp3Context.fileId && props.context === state.activeMp3Context.context && !playing) {
-      setPlaying(true);
+    if (state.activeMp3Context && props.id === state.activeMp3Context.fileId && props.context === state.activeMp3Context.context) {
+      if (!playing) {
+        setPlaying(true);
+      }
     } else {
       setPlaying(false);
     }
-  }, [state.activeMp3Context]);
+  }, [state.activeMp3Context, props, playing]);
 
   const handlePause = () => {
     dispatch({
