@@ -23,7 +23,7 @@ export default function SignUp(props) {
   const [disabled, setDisabled] = useState(false);
   const [errors, setErrors] = useState(null);
   const isPasswordInvalid = !!(password.length < 5 || password.length > 30);
-  const isUsernameInvalid = !!(username.length < 5 || username.length > 16);
+  const isUsernameInvalid = !!(username.length < 5 || username.length > 16) || /\s/g.test(username);
   const isConfirmPasswordInvalid = !!(confirmPassword !== password);
   const isEmailInvalid = !isEmail(email);
   const isActivationCodeInvalid = !!(activationCode && activationCode.length !== 6);
@@ -104,7 +104,7 @@ export default function SignUp(props) {
               }}
               disabled={disabled}
               error={!!username && isUsernameInvalid}
-              helperText={!!username && isUsernameInvalid && 'Must be minimum 5 characters and maximum of 16'}
+              helperText={!!username && isUsernameInvalid && 'Must not contain a space and  be minimum 5 characters and maximum of 16.'}
             />
           </Grid>
           <Grid item xs={12}>

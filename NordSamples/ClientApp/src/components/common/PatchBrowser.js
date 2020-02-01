@@ -141,7 +141,8 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       return searchArr.every(x => lowerTags.some(y => y.includes(x)));
     },
     filtering: false,
-    hidden: !showTagsColumn
+    hidden: !showTagsColumn,
+    sorting: false
   },
   {
     title: 'Category',
@@ -216,6 +217,11 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       if (!rowData.user || rowData.user.username.length === 0) return true;
       return containsSearchTerms(term, rowData.user.username);
     },
+    customSort: (a, b) => {
+      if (a.user.username.toLowerCase() < b.user.username.toLowerCase()) return -1;
+      if (a.user.username.toLowerCase() > b.user.username.toLowerCase()) return 1;
+      return 0;
+    },
     cellStyle: { width: '100px' }
   },
   {
@@ -235,7 +241,8 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
     field: 'rating',
     render: rowData => renderRating(rowData),
     filtering: false,
-    cellStyle: { maxWidth: '115px', padding: 0, paddingRight: 5 }
+    cellStyle: { maxWidth: '115px', padding: 0, paddingRight: 5 },
+    sorting: false
   }
 ];
 
