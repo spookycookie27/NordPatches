@@ -17,9 +17,11 @@ namespace NordSamples.Models
         public int? NufUserId { get; set; }
         public int AttachId { get; set; }
         public string AppUserId { get; set; }
+        public User User { get; set; }
         public bool IsBlob { get; set; }
         public bool IsNord { get; set; }
         public bool Removed { get; set; }
+        public string Link { get; set; }
 
         public ICollection<PatchFile> PatchFiles { get; set; }
     }

@@ -20,8 +20,10 @@ namespace NordSamples.Data.Models
         public int AttachId { get; set; }
         public bool Removed { get; set; }
         public bool IsNord { get; set; }
+        [MaxLength(100)] public string Link { get; set; }
 
         public List<PatchFile> PatchFiles { get; set; }
         public NufUser NufUser { get; set; }
+        public AppUser AppUser { get; set; }
     }
 }

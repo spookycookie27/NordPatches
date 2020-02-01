@@ -11,6 +11,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InlineError from '../common/InlineError';
 import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
+import DeleteIcon from '@material-ui/icons/Delete';
+import SaveIcon from '@material-ui/icons/Save';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import FullPlayer from '../common/FullPlayer';
@@ -135,15 +137,18 @@ const PatchViewer = props => {
     }
   };
 
-  const toggleRemoveFile = file => {
-    file.removed = !file.removed;
-    forceUpdate();
-    putFile(file);
-  };
-
-  const putFile = async file => {
-    const url = `/api/file/${file.id}`;
-    await RestUtilities.put(url, file);
+  const deleteFile = async file => {
+    setShowSpinner(true);
+    const url = `/api/patchfile/${file.id}/${patch.id}`;
+    const response = await RestUtilities.delete(url);
+    if (response.ok) {
+      response.json().then(res => {
+        setPatch(res);
+        setShowSpinner(false);
+      });
+    } else {
+      setShowSpinner(false);
+    }
   };
 
   const handleUpdate = async updatedPatch => {
@@ -338,8 +343,8 @@ const PatchViewer = props => {
                   label='Hide this sound'
                   labelPlacement='end'
                 />
-                <Button size='small' color='primary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate}>
-                  Update Sound
+                <Button size='small' color='secondary' variant='contained' onClick={handleUpdateClick} disabled={disableUpdate} startIcon={<SaveIcon />}>
+                  Save
                 </Button>
               </Box>
             </Grid>
@@ -359,7 +364,7 @@ const PatchViewer = props => {
           </Grid>
           <Grid item lg={12} md={6} sm={12}>
             {files.map(x => (
-              <File file={x} toggleRemoveFile={toggleRemoveFile} key={x.id} />
+              <File file={x} key={x.id} deleteFile={() => deleteFile(x)} />
             ))}
           </Grid>
           <Grid item lg={12} md={6} sm={12}>
@@ -372,22 +377,16 @@ const PatchViewer = props => {
                     <FullPlayer src={link} filename={mp3.name} key={mp3.id} duration progress id={mp3.id} context='patchEditor' />
                   </Box>
                   <Box mt={3} display='flex' justifyContent='flex-end'>
-                    <FormControlLabel
-                      value='end'
-                      control={
-                        <Switch
-                          color='primary'
-                          checked={mp3.removed}
-                          onChange={() => {
-                            toggleRemoveFile(mp3);
-                          }}
-                          size='small'
-                        />
-                      }
-                      label='Hide this file'
-                      labelPlacement='end'
+                    <Button
+                      variant='contained'
+                      color='secondary'
+                      className={classes.button}
+                      startIcon={<DeleteIcon />}
+                      onClick={() => deleteFile(mp3)}
                       size='small'
-                    />
+                    >
+                      Delete
+                    </Button>
                   </Box>
                 </Paper>
               );

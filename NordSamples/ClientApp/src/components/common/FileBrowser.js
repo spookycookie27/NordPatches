@@ -18,7 +18,8 @@ const containsSearchTerms = (term, data) => {
   return searchArr.every(x => lowerData.includes(x));
 };
 
-function getFileMetaData(file) {
+const getFileMetaData = file => {
+  console.log(file);
   return (
     <>
       <Box>
@@ -38,9 +39,9 @@ function getFileMetaData(file) {
       </Box>
     </>
   );
-}
+};
 
-function getFileData(file) {
+const getFileData = file => {
   return (
     <>
       <Box>
@@ -54,7 +55,7 @@ function getFileData(file) {
       </Box>
     </>
   );
-}
+};
 
 const FileBrowser = () => {
   const { state, dispatch } = React.useContext(Store);
@@ -101,7 +102,7 @@ const FileBrowser = () => {
         }}
         components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
         columns={[
-          { title: 'File ID', field: 'id', cellStyle: { width: '120px' } },
+          { title: 'File ID', field: 'id', cellStyle: { width: '100px' }, type: 'numeric' },
           {
             title: 'Name',
             field: 'name',
@@ -121,7 +122,18 @@ const FileBrowser = () => {
             cellStyle: { width: '240px' },
             customFilterAndSearch: (term, rowData) => {
               return containsSearchTerms(term, rowData.name);
-            }
+            },
+            hidden: false
+          },
+          {
+            title: 'IsNUF',
+            field: 'attachId',
+            filtering: true,
+            searchable: false,
+            cellStyle: {
+              width: '60px'
+            },
+            type: 'boolean'
           },
           {
             title: 'Assigned to Patch ID',
@@ -144,7 +156,6 @@ const FileBrowser = () => {
               }
             }
           },
-          { title: 'Size', field: 'size', cellStyle: { width: '80px' } },
           {
             title: 'Extension',
             field: 'extension',
@@ -154,6 +165,18 @@ const FileBrowser = () => {
             customFilterAndSearch: (items, rowData) => {
               return items.length === 0 || items.includes(rowData.extension);
             }
+          },
+          {
+            title: 'Link',
+            field: 'link',
+            cellStyle: { width: '140px' },
+            render: rowData =>
+              rowData.link && (
+                <a href={rowData.link} target='_blank' rel='noopener noreferrer'>
+                  Link
+                </a>
+              ),
+            filtering: false
           }
         ]}
         data={data}

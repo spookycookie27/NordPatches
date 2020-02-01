@@ -25,8 +25,8 @@ const useStyles = makeStyles(theme => ({
 
 const File = props => {
   const classes = useStyles();
-  const { file, toggleRemoveFile } = props;
-  if ((file.removed || file.isNord) && !toggleRemoveFile) return null;
+  const { file, deleteFile } = props;
+  if ((file.removed || file.isNord) && !deleteFile) return null;
   const link = file.isBlob ? `${blobUrl}/mp3s/${file.name}` : `${nufFileLink}${file.attachId}`;
   return (
     <Paper className={classes.fileContainer} key={file.id}>
@@ -49,11 +49,11 @@ const File = props => {
           </Box>
         </Box>
       </a>
-      {props.toggleRemoveFile && (
+      {props.deleteFile && (
         <Box display='flex' justifyContent='flex-end'>
           <FormControlLabel
             value='end'
-            control={<Switch color='primary' checked={file.removed} onChange={() => toggleRemoveFile(file)} size='small' />}
+            control={<Switch color='primary' checked={file.removed} onChange={() => deleteFile(file)} size='small' />}
             label='Hide this file'
             labelPlacement='end'
             size='small'

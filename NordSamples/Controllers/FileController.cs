@@ -103,6 +103,8 @@ namespace NordSamples.Controllers
                     await context.Files
                         .Include(x => x.NufUser)
                         .Include(pf => pf.PatchFiles)
+                        .Include(u => u.AppUser)
+                        .Include(n => n.NufUser)
                      .AsNoTracking()
                      .ToListAsync();
 
