@@ -142,7 +142,7 @@ function AppMenu(props) {
           open={open}
           onClose={handleClose}
         >
-          <MenuItem onClick={() => handleNavigate('/sounds')}>All Patches</MenuItem>
+          <MenuItem onClick={() => handleNavigate('/sounds')}>All Sounds</MenuItem>
           <MenuItem onClick={() => handleNavigate('/addsound')}>Add New</MenuItem>
           {user && user.role === 'administrator' && <MenuItem onClick={() => handleNavigate('/files')}>Files</MenuItem>}
           {isSignedIn() ? <MenuItem onClick={onSignoutClick}>Logout</MenuItem> : <MenuItem onClick={onLoginClick}>Login</MenuItem>}

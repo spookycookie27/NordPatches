@@ -94,6 +94,18 @@ const containsSearchTerms = (term, data) => {
 
 const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
   {
+    title: 'Id',
+    field: 'id',
+    type: 'numeric',
+    filtering: true,
+    customFilterAndSearch: (term, rowData) => {
+      return rowData.id.toString() === term;
+    },
+    hidden: user.role !== 'administrator',
+    searchable: false,
+    cellStyle: { width: '120px' }
+  },
+  {
     title: 'Name',
     field: 'name',
     customFilterAndSearch: (term, rowData) => {
@@ -223,18 +235,6 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       return 0;
     },
     cellStyle: { width: '100px' }
-  },
-  {
-    title: 'Id',
-    field: 'id',
-    type: 'numeric',
-    filtering: true,
-    customFilterAndSearch: (term, rowData) => {
-      return rowData.id.toString() === term;
-    },
-    hidden: user.role !== 'administrator',
-    searchable: false,
-    cellStyle: { width: '120px' }
   },
   {
     title: 'Rating',

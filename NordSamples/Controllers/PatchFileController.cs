@@ -29,6 +29,25 @@ namespace NordSamples.Controllers
             this.cache = cache;
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult<Patch>> Post([FromBody] PatchFile patchFile)
+        {
+            Data.Models.Patch existingPatch = await context.Patches
+                .Include(x => x.Tags)
+                .Include(x => x.Ratings)
+                .Include(x => x.AppUser)
+                .Include(x => x.NufUser)
+                .Include(x => x.PatchFiles)
+                .ThenInclude(pf => pf.File)
+                .FirstOrDefaultAsync(x => x.Id == patchFile.PatchId);
+
+            existingPatch.PatchFiles.Add(new Data.Models.PatchFile { FileId = patchFile.FileId, PatchId = patchFile.PatchId });
+            await context.SaveChangesAsync();
+            var model = mapper.Map<Patch>(existingPatch);
+            return CreatedAtAction("PostPatchFile", model);
+        }
+
         [HttpDelete("{fileId}/{patchId}")]
         [Authorize(Policy = "HasPatchEditAuthorization")]
         public async Task<ActionResult<Patch>> Delete([FromRoute] int fileId, [FromRoute] int patchId)
