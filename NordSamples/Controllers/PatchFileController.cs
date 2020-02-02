@@ -34,12 +34,22 @@ namespace NordSamples.Controllers
         public async Task<ActionResult<Patch>> Post([FromBody] PatchFile patchFile)
         {
             Data.Models.Patch existingPatch = await context.Patches
+                .Include(x => x.NufUser)
                 .Include(x => x.Tags)
                 .Include(x => x.Ratings)
-                .Include(x => x.AppUser)
-                .Include(x => x.NufUser)
+                .Include(x => x.Comments)
+                .Include(x => x.Children)
+                    .ThenInclude(x => x.PatchFiles)
+                        .ThenInclude(pf => pf.File)
+                .Include(x => x.Children)
+                    .ThenInclude(x => x.NufUser)
+                .Include(x => x.Parent)
+                    .ThenInclude(x => x.PatchFiles)
+                        .ThenInclude(pf => pf.File)
+                .Include(x => x.Parent)
+                    .ThenInclude(x => x.NufUser)
                 .Include(x => x.PatchFiles)
-                .ThenInclude(pf => pf.File)
+                    .ThenInclude(pf => pf.File)
                 .FirstOrDefaultAsync(x => x.Id == patchFile.PatchId);
 
             existingPatch.PatchFiles.Add(new Data.Models.PatchFile { FileId = patchFile.FileId, PatchId = patchFile.PatchId });

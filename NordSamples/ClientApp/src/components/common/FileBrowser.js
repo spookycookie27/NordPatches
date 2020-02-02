@@ -47,12 +47,13 @@ const tableTheme = createMuiTheme({
 });
 
 const containsSearchTerms = (term, data) => {
-  var searchArr = term
+  const searchArr = term
     .toLowerCase()
     .trim()
     .split(' ');
-  var lowerData = data.toLowerCase();
-  return searchArr.every(x => lowerData.includes(x));
+  const lowerData = data.toLowerCase();
+  const match = searchArr.every(x => lowerData.includes(x));
+  return match;
 };
 
 const FileBrowser = () => {
@@ -102,12 +103,13 @@ const FileBrowser = () => {
             pageSize: pageSize,
             pageSizeOptions: [5, 10, 20, 50, 100],
             filtering: true,
-            searchFieldAlignment: 'left',
-            padding: 'dense'
+            searchFieldAlignment: 'right',
+            padding: 'dense',
+            filterCellStyle: { padding: '8px', paddingTop: '4px' }
           }}
           components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
           columns={[
-            { title: 'File ID', field: 'id', cellStyle: { width: '100px' }, type: 'numeric' },
+            { title: 'File ID', field: 'id', cellStyle: { width: '120px' }, type: 'numeric', searchable: false },
             {
               title: 'Name',
               field: 'name',
@@ -116,7 +118,6 @@ const FileBrowser = () => {
                 if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
                 return 0;
               },
-              cellStyle: { width: '240px' },
               customFilterAndSearch: (term, rowData) => {
                 return containsSearchTerms(term, rowData.name);
               }
@@ -124,31 +125,29 @@ const FileBrowser = () => {
             {
               title: 'Comment',
               field: 'comment',
-              cellStyle: { width: '240px' },
+              cellStyle: { maxWidth: '300px' },
               customFilterAndSearch: (term, rowData) => {
-                return containsSearchTerms(term, rowData.name);
-              },
-              hidden: false
+                return containsSearchTerms(term, rowData.comment);
+              }
             },
             {
               title: 'AttachID',
               field: 'attachId',
               filtering: true,
               searchable: false,
-              cellStyle: {
-                width: '80px'
-              }
+              cellStyle: { width: '80px' }
             },
             {
               title: 'SoundID',
               field: 'patchFiles',
+              searchable: false,
               render: rowData => {
                 if (rowData.patchFiles && rowData.patchFiles.length > 0) {
                   return <span>{rowData.patchFiles[0].patchId}</span>;
                 }
                 return null;
               },
-              cellStyle: { width: '120px' },
+              cellStyle: { width: '100px' },
               lookup: { 0: 'Unassigned', 1: 'Assigned' },
               customFilterAndSearch: (items, rowData) => {
                 if (items.length !== 1) return true;
@@ -164,6 +163,7 @@ const FileBrowser = () => {
               title: 'Extension',
               field: 'extension',
               cellStyle: { width: '80px' },
+              searchable: false,
               lookup: { mp3: 'mp3', nsmp: 'nsmp', nspg: 'nspg', ns2p: 'ns2p', ns2pb: 'ns2pb', jpg: 'jpg', nss: 'nss', gif: 'gif', png: 'png' },
               render: rowData => <span>{rowData.extension}</span>,
               customFilterAndSearch: (items, rowData) => {
@@ -173,6 +173,7 @@ const FileBrowser = () => {
             {
               title: 'Link',
               field: 'link',
+              searchable: false,
               cellStyle: { width: '140px' },
               render: rowData =>
                 rowData.link && (

@@ -66,7 +66,6 @@ const FileViewer = props => {
     const response = await RestUtilities.post(url, patchFile);
     if (response.ok) {
       response.json().then(updatedPatch => {
-        console.log(updatedPatch);
         dispatch({
           type: 'updatePatch',
           patch: updatedPatch
@@ -81,13 +80,13 @@ const FileViewer = props => {
 
   return (
     <Grid container spacing={3} justify='center'>
-      <Grid item xs={4}>
+      <Grid item xs={5}>
         <Typography className={classes.title} color='textSecondary' gutterBottom>
           {file.name}
         </Typography>
         {getFileMetaData(file)}
       </Grid>
-      <Grid item xs={8}>
+      <Grid item xs={7}>
         <Typography className={classes.title} color='textSecondary' gutterBottom>
           Assign File to Sound
         </Typography>

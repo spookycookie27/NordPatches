@@ -42,6 +42,9 @@ const File = props => {
             <strong>File ID:</strong> {file.id}
           </Box>
           <Box>
+            <strong>AttachID:</strong> {file.attachId}
+          </Box>
+          <Box>
             <strong>Size (bytes):</strong> {file.size}
           </Box>
           <Box>
