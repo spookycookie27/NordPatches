@@ -1,8 +1,8 @@
 import React from 'react';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import InsertDriveFileRoundedIcon from '@material-ui/icons/InsertDriveFileRounded';
 import { blobUrl, nufFileLink } from '../../Constants';
@@ -51,13 +51,9 @@ const File = props => {
       </a>
       {props.deleteFile && (
         <Box display='flex' justifyContent='flex-end'>
-          <FormControlLabel
-            value='end'
-            control={<Switch color='primary' checked={file.removed} onChange={() => deleteFile(file)} size='small' />}
-            label='Hide this file'
-            labelPlacement='end'
-            size='small'
-          />
+          <Button variant='contained' color='secondary' startIcon={<DeleteIcon />} onClick={() => deleteFile(file)} size='small'>
+            Delete
+          </Button>
         </Box>
       )}
     </Paper>

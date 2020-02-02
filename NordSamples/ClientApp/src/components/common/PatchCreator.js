@@ -14,6 +14,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import InlineError from '../common/InlineError';
 import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { categoriesLu, instrumentsLu, renderOptions } from '../../Constants';
 import UploadDropZone from './UploadDropZone';
@@ -301,7 +302,7 @@ const PatchCreator = props => {
         </Grid>
       </CardContent>
       <CardActions>
-        <Button size='small' color='primary' variant='contained' onClick={handleInsert} disabled={disable}>
+        <Button color='secondary' variant='contained' onClick={handleInsert} disabled={disable} startIcon={<AddIcon />}>
           Create
         </Button>
       </CardActions>
