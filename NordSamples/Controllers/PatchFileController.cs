@@ -18,14 +18,12 @@ namespace NordSamples.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<PatchController> logger;
         private readonly IAppCache cache;
 
-        public PatchFileController(ApplicationDbContext context, IMapper mapper, ILogger<PatchController> logger, IAppCache cache)
+        public PatchFileController(ApplicationDbContext context, IMapper mapper, IAppCache cache)
         {
             this.context = context;
             this.mapper = mapper;
-            this.logger = logger;
             this.cache = cache;
         }
 
@@ -34,28 +32,25 @@ namespace NordSamples.Controllers
         public async Task<ActionResult<Patch>> Post([FromBody] PatchFile patchFile)
         {
             Data.Models.Patch existingPatch = await context.Patches
-                .Include(x => x.NufUser)
                 .Include(x => x.Tags)
                 .Include(x => x.Ratings)
-                .Include(x => x.Comments)
-                .Include(x => x.Children)
-                    .ThenInclude(x => x.PatchFiles)
-                        .ThenInclude(pf => pf.File)
-                .Include(x => x.Children)
-                    .ThenInclude(x => x.NufUser)
-                .Include(x => x.Parent)
-                    .ThenInclude(x => x.PatchFiles)
-                        .ThenInclude(pf => pf.File)
-                .Include(x => x.Parent)
-                    .ThenInclude(x => x.NufUser)
+                .Include(x => x.AppUser)
+                .Include(x => x.NufUser)
                 .Include(x => x.PatchFiles)
-                    .ThenInclude(pf => pf.File)
+                .ThenInclude(pf => pf.File)
+                .OrderByDescending(x => x.DateCreated)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == patchFile.PatchId);
 
             existingPatch.PatchFiles.Add(new Data.Models.PatchFile { FileId = patchFile.FileId, PatchId = patchFile.PatchId });
             await context.SaveChangesAsync();
+
+            cache.Remove(Constants.PatchCacheKey);
+            cache.Remove(Constants.FileCacheKey);
+
             var model = mapper.Map<Patch>(existingPatch);
-            return CreatedAtAction("PostPatchFile", model);
+
+            return CreatedAtAction("Post", model);
         }
 
         [HttpDelete("{fileId}/{patchId}")]
@@ -84,13 +79,12 @@ namespace NordSamples.Controllers
             var patchFile = existingPatch.PatchFiles.SingleOrDefault(x => x.FileId == fileId);
             existingPatch.PatchFiles.Remove(patchFile);
             await context.SaveChangesAsync();
+
+            cache.Remove(Constants.PatchCacheKey);
+            cache.Remove(Constants.FileCacheKey);
+
             var model = mapper.Map<Patch>(existingPatch);
             return model;
-        }
-
-        private bool PatchExists(int id)
-        {
-            return context.Patches.Any(e => e.Id == id);
         }
     }
 }
