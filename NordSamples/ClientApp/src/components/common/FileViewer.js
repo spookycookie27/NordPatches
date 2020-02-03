@@ -61,11 +61,12 @@ const FileViewer = props => {
   const [patchId, setPatchId] = useState('');
 
   const addFile = async () => {
-    const patchFile = { fileId: file.id, patchId: patchId };
+    const patchFile = { fileId: file.id, patchId: patchId, file: file };
     const url = '/api/patchfile/';
     const response = await RestUtilities.post(url, patchFile);
     if (response.ok) {
       response.json().then(updatedPatch => {
+        // make sure file is mapped
         dispatch({
           type: 'updatePatch',
           patch: updatedPatch

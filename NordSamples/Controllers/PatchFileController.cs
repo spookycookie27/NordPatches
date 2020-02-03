@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using LazyCache;
@@ -19,38 +20,57 @@ namespace NordSamples.Controllers
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
         private readonly IAppCache cache;
+        private readonly ILogger<PatchFileController> logger;
 
-        public PatchFileController(ApplicationDbContext context, IMapper mapper, IAppCache cache)
+        public PatchFileController(ApplicationDbContext context, IMapper mapper, IAppCache cache, ILogger<PatchFileController> logger)
         {
             this.context = context;
             this.mapper = mapper;
             this.cache = cache;
+            this.logger = logger;
         }
 
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult<Patch>> Post([FromBody] PatchFile patchFile)
         {
-            Data.Models.Patch existingPatch = await context.Patches
-                .Include(x => x.Tags)
-                .Include(x => x.Ratings)
-                .Include(x => x.AppUser)
-                .Include(x => x.NufUser)
-                .Include(x => x.PatchFiles)
-                .ThenInclude(pf => pf.File)
-                .OrderByDescending(x => x.DateCreated)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == patchFile.PatchId);
+            try
+            {
+                Data.Models.Patch existingPatch = await context.Patches
+                    .Include(x => x.Tags)
+                    .Include(x => x.Ratings)
+                    .Include(x => x.AppUser)
+                    .Include(x => x.NufUser)
+                    .Include(x => x.PatchFiles)
+                        .ThenInclude(pf => pf.File)
+                    .OrderByDescending(x => x.DateCreated)
+                    .SingleOrDefaultAsync(x => x.Id == patchFile.PatchId);
 
-            existingPatch.PatchFiles.Add(new Data.Models.PatchFile { FileId = patchFile.FileId, PatchId = patchFile.PatchId });
-            await context.SaveChangesAsync();
 
-            cache.Remove(Constants.PatchCacheKey);
-            cache.Remove(Constants.FileCacheKey);
+                existingPatch.PatchFiles.Add(new Data.Models.PatchFile {FileId = patchFile.FileId, PatchId = patchFile.PatchId});
+                await context.SaveChangesAsync();
 
-            var model = mapper.Map<Patch>(existingPatch);
+                cache.Remove(Constants.PatchCacheKey);
+                cache.Remove(Constants.FileCacheKey);
 
-            return CreatedAtAction("Post", model);
+                Data.Models.Patch updatedPatch = await context.Patches
+                    .Include(x => x.Tags)
+                    .Include(x => x.Ratings)
+                    .Include(x => x.AppUser)
+                    .Include(x => x.NufUser)
+                    .Include(x => x.PatchFiles)
+                    .ThenInclude(pf => pf.File)
+                    .OrderByDescending(x => x.DateCreated)
+                    .SingleOrDefaultAsync(x => x.Id == patchFile.PatchId);
+
+                var model = mapper.Map<Patch>(updatedPatch);
+                return CreatedAtAction("Post", model);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An error occurred creating the DB connection.");
+                return BadRequest();
+            }
         }
 
         [HttpDelete("{fileId}/{patchId}")]

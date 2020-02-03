@@ -16,6 +16,7 @@ namespace NordSamples.Models
                 .ForMember(dest => dest.NufUserId, opt => opt.MapFrom(src => src.User.NufUserId));
             CreateMap<Data.Models.File, File>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => GetFileUser(src)));
+            CreateMap<File, Data.Models.File>();
             CreateMap<NufUser, User>()
                 .ForMember(dest => dest.NufUserId, opt => opt.MapFrom(src => src.Id));
             CreateMap<AppUser, User>();
