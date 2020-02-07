@@ -17,7 +17,7 @@ namespace NordSamples
         {
             var request = context.HttpContext.Request;
             var host = request.Host;
-            if (host.Host.StartsWith("norduser", StringComparison.OrdinalIgnoreCase))
+            if (host.Host.StartsWith("nordusersounds", StringComparison.OrdinalIgnoreCase))
             {
                 context.Result = RuleResult.ContinueRules;
                 return;
@@ -29,7 +29,7 @@ namespace NordSamples
                 return;
             }
 
-            string newPath = request.Scheme + "://nordusersamples.azurewebsites.net" + request.PathBase + request.Path + request.QueryString;
+            string newPath = request.Scheme + "://nordusersounds.com" + request.PathBase + request.Path + request.QueryString;
 
             var response = context.HttpContext.Response;
             response.StatusCode = StatusCode;
