@@ -40,6 +40,24 @@ const Home = () => {
           what you’re looking with far less effort.
         </Typography>
         <Typography variant='h5' gutterBottom>
+          How To Use This Search Tool
+        </Typography>
+        <Typography variant='body1' gutterBottom>
+          If you are not already a member of Nord User Forum (<a href='https://norduserforum.com'>norduserforum.com</a>) you can simply{' '}
+          <a href='https://nordusersounds.com/register'>register</a> a new account and dive right in to explore the sounds. We strongly encourage you to also
+          sign up for a free account at the Nord User Forum and join our growing community. You should receive a confirmation email which you should check to
+          complete your sign up.
+        </Typography>
+        <Typography variant='body1' gutterBottom>
+          However if you are already a member of Nord User Forum the best place to start is by checking your user account where you’ll see an activation code on
+          your user control panel under the 'profile' tab. After taking a note of the confirmation code, just sign up (as above) and enter the activation code
+          during the sign up process. We use this code to establish a linkage between users on this website and owners of original source files on the Nord User
+          Forum.
+        </Typography>
+        <Box my={2}>
+          <img src='/Images/forum.png' width='100%' alt='notd user form user control panel' />
+        </Box>
+        <Typography variant='h5' gutterBottom>
           A Few Terms And Concepts
         </Typography>
         <Typography variant='body1' gutterBottom>
@@ -67,21 +85,6 @@ const Home = () => {
         <Box my={2}>
           <img src='/Images/sample-editor.png' width='100%' alt='nord sample editor' />
         </Box>
-        <Typography variant='h5' gutterBottom>
-          How To Use This Search Tool
-        </Typography>
-        <Typography variant='body1' gutterBottom>
-          The best place to start is by creating a free user account at the Nord User Forum (<a href='https://norduserforum.com'>norduserforum.com</a>
-          ). Once you do so, you’ll see an activation code on your user control panel under the 'profile' tab. Please note Users that registered on Nord User
-          Forum after December 2019 do not require an Activation code.
-        </Typography>
-        <Box my={2}>
-          <img src='/Images/forum.png' width='100%' alt='notd user form user control panel' />
-        </Box>
-        <Typography variant='body1' gutterBottom>
-          When you register here, please enter your activation code (if you have one). We use this code to establish a linkage between users on this website and
-          owners of source files on the Nord User Forum.
-        </Typography>
         <Typography variant='h5' gutterBottom>
           Work In Progress – Volunteers Needed!
         </Typography>
