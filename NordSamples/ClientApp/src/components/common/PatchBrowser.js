@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RestUtilities from '../../services/RestUtilities';
+import { withRouter } from 'react-router-dom';
 import MaterialTable from 'material-table';
 import Box from '@material-ui/core/Box';
 import PatchViewer from './PatchViewer';
@@ -103,7 +104,8 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
     },
     hidden: user.role !== 'administrator',
     searchable: false,
-    cellStyle: { width: '120px' }
+    cellStyle: { width: '120px' },
+    hidden: false
   },
   {
     title: 'Name',
@@ -324,6 +326,10 @@ const PatchBrowser = props => {
     });
   };
 
+  const openInPage = rowData => {
+    props.history.push(`/sound/${rowData.id}`);
+  };
+
   const mySoundsToggle = (
     <FormControlLabel
       control={
@@ -392,7 +398,13 @@ const PatchBrowser = props => {
       },
       isFreeAction: true,
       tooltip: 'Clear Filters'
-    }
+    },
+    rowData => ({
+      icon: 'launch',
+      onClick: () => openInPage(rowData),
+      isFreeAction: false,
+      tooltip: 'Open in page'
+    })
   ];
 
   const handleRowClick = (event, rowData, togglePanel) => {
@@ -418,7 +430,8 @@ const PatchBrowser = props => {
             filtering: state.columnFilters,
             searchFieldAlignment: 'left',
             padding: 'dense',
-            filterCellStyle: { padding: '8px', paddingTop: '4px' }
+            filterCellStyle: { padding: '8px', paddingTop: '4px' },
+            actionsColumnIndex: -1
           }}
           components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
           data={state.mySounds ? state.myPatches : state.patches}
@@ -432,4 +445,4 @@ const PatchBrowser = props => {
     </div>
   );
 };
-export default PatchBrowser;
+export default withRouter(PatchBrowser);

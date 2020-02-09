@@ -8,6 +8,7 @@ import ResetPassword from './components/views/ResetPassword';
 import Home from './components/views/Home';
 import About from './components/views/About';
 import AddPatch from './components/views/AddPatch';
+import ViewSound from './components/views/ViewSound';
 import AllPatches from './components/views/AllPatches';
 import Files from './components/views/Files';
 import { isSignedIn } from './services/Auth';
@@ -16,19 +17,9 @@ import WithTracker from './components/common/WithTracker';
 import 'typeface-roboto';
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
+  const isLoggedIn = isSignedIn();
   return (
-    <Route
-      {...rest}
-      render={props =>
-        isSignedIn() ? (
-          <Component {...props} />
-        ) : (
-          <Redirect
-            to={{ pathname: '/login', state: { from: props.location } }}
-          />
-        )
-      }
-    />
+    <Route {...rest} render={props => (isLoggedIn ? <Component {...props} /> : <Redirect to={{ pathname: '/login', state: { from: props.location } }} />)} />
   );
 };
 
@@ -40,25 +31,15 @@ const App = () => {
         <Switch>
           <Route path='/login' component={WithTracker(Login)} />
           <Route path='/register' component={WithTracker(Register)} />
-          <Route
-            path='/forgotPassword'
-            component={WithTracker(ForgotPassword)}
-          />
+          <Route path='/forgotPassword' component={WithTracker(ForgotPassword)} />
           <Route path='/resetPassword' component={WithTracker(ResetPassword)} />
           <Layout>
             <Route exact path='/' component={WithTracker(Home)} />
-            <PrivateRoute
-              exact
-              path='/addsound'
-              component={WithTracker(AddPatch)}
-            />
-            <PrivateRoute
-              exact
-              path='/sounds'
-              component={WithTracker(AllPatches)}
-            />
+            <PrivateRoute exact path='/addsound' component={WithTracker(AddPatch)} />
+            <PrivateRoute exact path='/sounds' component={WithTracker(AllPatches)} />
             <PrivateRoute exact path='/files' component={WithTracker(Files)} />
             <PrivateRoute exact path='/about' component={WithTracker(About)} />
+            <PrivateRoute exact path='/sound/:id' component={WithTracker(ViewSound)} />
           </Layout>
         </Switch>
       </BrowserRouter>

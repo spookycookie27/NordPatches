@@ -25,7 +25,7 @@ namespace NordSamples.Services
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress("no-reply@nordsamples.com"),
+                From = new EmailAddress("no-reply@nordusersounds.com"),
                 Subject = subject,
                 PlainTextContent = message,
                 HtmlContent = message

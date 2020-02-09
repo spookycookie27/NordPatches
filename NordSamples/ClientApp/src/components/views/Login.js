@@ -21,7 +21,7 @@ function SignInSide(props) {
   const [disabled, setDisabled] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [errors, setErrors] = useState(null);
-
+  const redirectTo = props.location.state ? props.location.state.from.pathname : null;
   const isPasswordInvalid = !!(password.length < 5 || password.length > 30);
   const isUsernameInvalid = !!(username.length < 5 || username.length > 16);
   const hasErrors = isUsernameInvalid || isPasswordInvalid;
@@ -39,7 +39,7 @@ function SignInSide(props) {
             type: 'setUser',
             user: res.user
           });
-          props.history.push('/sounds');
+          redirectTo ? props.history.push(redirectTo) : props.history.push('/sounds');
         } else if (response.status === 400) {
           setErrors(res.errors ? res.errors : res);
           setFeedback('There were errors:');

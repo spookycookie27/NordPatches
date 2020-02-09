@@ -171,7 +171,7 @@ const PatchCreator = props => {
   }, [tagOptions]);
 
   return (
-    <Card className={classes.mainCard}>
+    <Card>
       <CardContent>
         <form className={classes.root} noValidate autoComplete='off'>
           <Grid container spacing={2}>

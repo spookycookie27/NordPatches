@@ -117,12 +117,14 @@ const PatchViewer = props => {
           <Box>
             <strong>Parent ID:</strong> {thisPatch.parentPatchId}
           </Box>
-          <Box>
-            <strong>Link:</strong>{' '}
-            <a href={thisPatch.link} target='_blank' rel='noopener noreferrer'>
-              Click
-            </a>
-          </Box>
+          {thisPatch.link && (
+            <Box>
+              <strong>Link:</strong>{' '}
+              <a href={thisPatch.link} target='_blank' rel='noopener noreferrer'>
+                Click
+              </a>
+            </Box>
+          )}
         </Grid>
         <Grid item md={6} sm={12}>
           <Typography className={classes.title} color='textSecondary' gutterBottom>
