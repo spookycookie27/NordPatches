@@ -104,8 +104,7 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
     },
     hidden: user.role !== 'administrator',
     searchable: false,
-    cellStyle: { width: '120px' },
-    hidden: false
+    cellStyle: { width: '120px' }
   },
   {
     title: 'Name',

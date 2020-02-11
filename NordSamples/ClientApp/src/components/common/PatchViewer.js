@@ -56,11 +56,14 @@ const PatchViewer = props => {
     const url = `/api/patch/${props.patchId}`;
     const res = await RestUtilities.get(url);
     res.json().then(patch => {
-      const userRating = patch.ratings.find(r => r.appUserId === state.user.id);
-      const userRatingValue = userRating ? userRating.value : null;
+      if (state.user) {
+        const userRating = patch.ratings.find(r => r.appUserId === state.user.id);
+        const userRatingValue = userRating ? userRating.value : null;
+        setUserRating(userRatingValue);
+      }
       const globalRating = patch.ratings.reduce((p, c) => p + c.value, 0) / patch.ratings.length;
       setPatch(patch);
-      setUserRating(userRatingValue);
+
       setGlobalRating(globalRating);
     });
   };
@@ -147,7 +150,7 @@ const PatchViewer = props => {
             ))}
           </Box>
 
-          {renderRating && (
+          {renderRating && state.user && (
             <Box className={classes.ratingBox}>
               <strong>How would you rate this sound? (click a star rating)</strong>
               <Rating

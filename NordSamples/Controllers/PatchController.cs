@@ -68,7 +68,6 @@ namespace NordSamples.Controllers
 
         // GET: api/Patches/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Administrator,User")]
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
             Data.Models.Patch patch = await context.Patches

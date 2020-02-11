@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,6 +9,7 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import Fab from '@material-ui/core/Fab';
 import AppMenu from '../common/Menu';
 import { siteName } from '../../Constants';
+import { Store } from '../../state/Store';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -18,7 +19,6 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.main
   },
   main: {
-    marginTop: '80px',
     paddingTop: theme.spacing(3),
     paddingBottom: theme.spacing(3)
   },
@@ -70,24 +70,36 @@ function ScrollTop(props) {
   );
 }
 
-function Layout(props) {
+const Layout = props => {
   const classes = useStyles();
+  const { state, dispatch } = React.useContext(Store);
+  const isNuf = state.queryString.includes('nuf=1');
+  useEffect(() => {
+    if (props.location.search) {
+      dispatch({
+        type: 'setQueryString',
+        queryString: props.location.search
+      });
+    }
+  }, [props.location.search, dispatch]);
 
   return (
     <div className={classes.root}>
       <div id='back-to-top-anchor' />
 
-      <AppMenu />
+      {isNuf || <AppMenu />}
 
-      <Container component='main' className={classes.main} maxWidth='xl'>
+      <Container component='main' className={classes.main} style={{ marginTop: isNuf ? 0 : '80px' }} maxWidth='xl'>
         {props.children}
       </Container>
 
-      <footer className={classes.footer}>
-        <Container maxWidth='sm'>
-          <Copyright />
-        </Container>
-      </footer>
+      {isNuf || (
+        <footer className={classes.footer}>
+          <Container maxWidth='sm'>
+            <Copyright />
+          </Container>
+        </footer>
+      )}
 
       <ScrollTop {...props}>
         <Fab color='secondary' size='small' aria-label='scroll back to top'>
@@ -96,6 +108,6 @@ function Layout(props) {
       </ScrollTop>
     </div>
   );
-}
+};
 
 export default withRouter(Layout);

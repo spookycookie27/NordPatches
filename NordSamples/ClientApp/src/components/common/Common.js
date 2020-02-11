@@ -7,13 +7,6 @@ export const loginStyles = makeStyles(theme => ({
   root: {
     height: '100vh'
   },
-  image: {
-    backgroundImage: 'url(Images/clavianordstage.jpg)',
-    backgroundRepeat: 'no-repeat',
-    backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50],
-    backgroundSize: 'cover',
-    backgroundPosition: 'center'
-  },
   paper: {
     margin: theme.spacing(8, 4),
     display: 'flex',

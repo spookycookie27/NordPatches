@@ -18,14 +18,22 @@ const defaultState = {
   columnFilters: false,
   activeMp3Context: null,
   showTagsColumn: true,
-  showDescriptionColumn: true
+  showDescriptionColumn: true,
+  queryString: ''
 };
 
 const localState = parseState(localStorage.getItem(LOCAL_STORAGE_KEY));
 const initialState = { ...defaultState, ...localState };
 
+initialState.queryString = ''; // so that its never persisted to local storage
+
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case 'setQueryString':
+      return {
+        ...state,
+        queryString: action.queryString
+      };
     case 'setUser':
       return {
         ...state,

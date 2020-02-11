@@ -29,17 +29,18 @@ const App = () => {
     <div className='App'>
       <BrowserRouter>
         <Switch>
-          <Route path='/login' component={WithTracker(Login)} />
-          <Route path='/register' component={WithTracker(Register)} />
-          <Route path='/forgotPassword' component={WithTracker(ForgotPassword)} />
-          <Route path='/resetPassword' component={WithTracker(ResetPassword)} />
+          <Route exact path='/login' component={WithTracker(Login)} />
+          <Route exact path='/register' component={WithTracker(Register)} />
+          <Route exact path='/forgotPassword' component={WithTracker(ForgotPassword)} />
+          <Route exact path='/resetPassword' component={WithTracker(ResetPassword)} />
+
           <Layout>
             <Route exact path='/' component={WithTracker(Home)} />
+            <Route exact path='/sound/:id' component={WithTracker(ViewSound)} />
             <PrivateRoute exact path='/addsound' component={WithTracker(AddPatch)} />
             <PrivateRoute exact path='/sounds' component={WithTracker(AllPatches)} />
             <PrivateRoute exact path='/files' component={WithTracker(Files)} />
             <PrivateRoute exact path='/about' component={WithTracker(About)} />
-            <PrivateRoute exact path='/sound/:id' component={WithTracker(ViewSound)} />
           </Layout>
         </Switch>
       </BrowserRouter>

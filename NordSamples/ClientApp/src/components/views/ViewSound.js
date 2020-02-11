@@ -11,6 +11,7 @@ const useStyles = makeStyles(theme => ({}));
 const ViewSound = () => {
   const classes = useStyles();
   const { id } = useParams();
+
   return (
     <div>
       <Container maxWidth='lg'>
