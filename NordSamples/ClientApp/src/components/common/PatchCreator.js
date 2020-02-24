@@ -70,14 +70,21 @@ const PatchCreator = props => {
   const isLinkInvalid = link.length > 1000;
   const isCategoryInvalid = categoryId < 1;
   const isInstrumentInvalid = instrumentId < 1;
-  const isFormInvalid = isNameInvalid || isDescriptionInvalid || isLinkInvalid || isCategoryInvalid || isInstrumentInvalid;
+  const isFormInvalid =
+    isNameInvalid ||
+    isDescriptionInvalid ||
+    isLinkInvalid ||
+    isCategoryInvalid ||
+    isInstrumentInvalid;
 
   const forceUpdate = useForceUpdate();
 
   const handleInsert = async () => {
     if (isFormInvalid) {
       setShowSpinner(false);
-      setFeedback('Fields marked with * are mandatory. There may be some errors in red.');
+      setFeedback(
+        'Fields marked with * are mandatory. There may be some errors in red.'
+      );
       return;
     }
     setErrors(null);
@@ -127,7 +134,7 @@ const PatchCreator = props => {
                 setShowSpinner(false);
                 setFeedback('Your sound was added successfully');
                 setErrors(null);
-                props.history.push('/sounds');
+                props.history.push(`/sound/${insertedPatch.id}`);
               }
             });
           }
@@ -136,7 +143,7 @@ const PatchCreator = props => {
         setShowSpinner(false);
         setFeedback('Your sound was added successfully');
         setErrors(null);
-        props.history.push('/sounds');
+        props.history.push(`/sound/${insertedPatch.id}`);
       }
     } else if (response.status === 400) {
       response.json().then(res => {
@@ -176,7 +183,11 @@ const PatchCreator = props => {
         <form className={classes.root} noValidate autoComplete='off'>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography className={classes.title} color='textSecondary' gutterBottom>
+              <Typography
+                className={classes.title}
+                color='textSecondary'
+                gutterBottom
+              >
                 Create Sound
               </Typography>
             </Grid>
@@ -192,7 +203,11 @@ const PatchCreator = props => {
                 name='name'
                 onChange={event => setName(event.target.value)}
                 error={isNameInvalid && !!name}
-                helperText={isNameInvalid && !!name && 'Must be more than 5 and less than 255 characters'}
+                helperText={
+                  isNameInvalid &&
+                  !!name &&
+                  'Must be more than 5 and less than 255 characters'
+                }
               />
             </Grid>
             <Grid item sm={6} xs={12}>
@@ -207,25 +222,55 @@ const PatchCreator = props => {
                 placeholder='https://www.'
                 onChange={event => setLink(event.target.value)}
                 error={isLinkInvalid && !!link}
-                helperText={isLinkInvalid && !!link && 'Must be less than 1000 characters'}
+                helperText={
+                  isLinkInvalid && !!link && 'Must be less than 1000 characters'
+                }
               />
             </Grid>
             <Grid item sm={6} xs={12}>
-              <FormControl fullWidth error={instrumentId !== '' && isInstrumentInvalid} required>
+              <FormControl
+                fullWidth
+                error={instrumentId !== '' && isInstrumentInvalid}
+                required
+              >
                 <InputLabel id='typeLabel'>Type</InputLabel>
-                <Select fullWidth id='instrumentId' value={instrumentId} onChange={event => setInstrumentId(event.target.value)} required>
+                <Select
+                  fullWidth
+                  id='instrumentId'
+                  value={instrumentId}
+                  onChange={event => setInstrumentId(event.target.value)}
+                  required
+                >
                   {renderOptions(instrumentsLu, false)}
                 </Select>
-                <FormHelperText>{instrumentId !== '' && isInstrumentInvalid ? 'Please choose the type of sound' : ''}</FormHelperText>
+                <FormHelperText>
+                  {instrumentId !== '' && isInstrumentInvalid
+                    ? 'Please choose the type of sound'
+                    : ''}
+                </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item sm={6} xs={12}>
-              <FormControl error={categoryId !== '' && isCategoryInvalid} fullWidth required>
+              <FormControl
+                error={categoryId !== '' && isCategoryInvalid}
+                fullWidth
+                required
+              >
                 <InputLabel id='categoryLabel'>Category</InputLabel>
-                <Select fullWidth id='categoryId' value={categoryId} onChange={event => setCategoryId(event.target.value)} required>
+                <Select
+                  fullWidth
+                  id='categoryId'
+                  value={categoryId}
+                  onChange={event => setCategoryId(event.target.value)}
+                  required
+                >
                   {renderOptions(categoriesLu, false)}
                 </Select>
-                <FormHelperText>{categoryId !== '' && isCategoryInvalid ? 'Please choose a primary category' : ''}</FormHelperText>
+                <FormHelperText>
+                  {categoryId !== '' && isCategoryInvalid
+                    ? 'Please choose a primary category'
+                    : ''}
+                </FormHelperText>
               </FormControl>
             </Grid>
 
@@ -242,7 +287,11 @@ const PatchCreator = props => {
                 name='description'
                 onChange={event => setDescription(event.target.value)}
                 error={isDescriptionInvalid && !!description}
-                helperText={isDescriptionInvalid && !!description && 'Must be less than 1000 characters'}
+                helperText={
+                  isDescriptionInvalid &&
+                  !!description &&
+                  'Must be less than 1000 characters'
+                }
               />
             </Grid>
 
@@ -260,9 +309,23 @@ const PatchCreator = props => {
                 freeSolo
                 options={tagOptions.map(option => option.name)}
                 renderTags={(value, getTagProps) =>
-                  value.map((option, index) => <Chip variant='default' size='small' label={option} color='secondary' {...getTagProps({ index })} />)
+                  value.map((option, index) => (
+                    <Chip
+                      variant='default'
+                      size='small'
+                      label={option}
+                      color='secondary'
+                      {...getTagProps({ index })}
+                    />
+                  ))
                 }
-                renderInput={params => <TextField {...params} placeholder='Start typing tag select from list or press enter' fullWidth />}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    placeholder='Start typing tag select from list or press enter'
+                    fullWidth
+                  />
+                )}
                 onChange={(_event, value) => {
                   setTags(value);
                 }}
@@ -288,10 +351,19 @@ const PatchCreator = props => {
       <CardContent>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography className={classes.title} color='textSecondary' gutterBottom>
+            <Typography
+              className={classes.title}
+              color='textSecondary'
+              gutterBottom
+            >
               Add Nord Files and Mp3s
             </Typography>
-            <UploadDropZone onAccept={onUploadFiles} auto showSpinner={showSpinner} filesAdded={files} />
+            <UploadDropZone
+              onAccept={onUploadFiles}
+              auto
+              showSpinner={showSpinner}
+              filesAdded={files}
+            />
           </Grid>
           <Grid item xs={12}>
             <Typography component='p'>{feedback}</Typography>
@@ -302,7 +374,13 @@ const PatchCreator = props => {
         </Grid>
       </CardContent>
       <CardActions>
-        <Button color='secondary' variant='contained' onClick={handleInsert} disabled={disable} startIcon={<AddIcon />}>
+        <Button
+          color='secondary'
+          variant='contained'
+          onClick={handleInsert}
+          disabled={disable}
+          startIcon={<AddIcon />}
+        >
           Create
         </Button>
       </CardActions>
