@@ -59,6 +59,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         columnFilters: action.columnFilters
       };
+    case 'setFiles':
+      return {
+        ...state,
+        files: action.files
+      };
     case 'setPatches':
       return {
         ...state,
@@ -114,7 +119,11 @@ export function StoreProvider(props) {
   const value = { state, dispatch };
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+    const clone = JSON.parse(JSON.stringify(state));
+    delete clone.patches;
+    delete clone.myPatches;
+    delete clone.files;
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(clone));
   }, [state]);
 
   return <Store.Provider value={value}>{props.children}</Store.Provider>;

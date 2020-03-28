@@ -59,7 +59,6 @@ const containsSearchTerms = (term, data) => {
 const FileBrowser = () => {
   const classes = useStyles();
   const { state, dispatch } = React.useContext(Store);
-  const [data, setData] = useState([]);
 
   const pageSize = state.pageSize;
 
@@ -72,9 +71,8 @@ const FileBrowser = () => {
         .then(res => {
           dispatch({
             type: 'setFiles',
-            files: []
+            files: res
           });
-          setData(res);
         })
         .catch(err => {
           console.log(err);
@@ -184,7 +182,7 @@ const FileBrowser = () => {
               filtering: false
             }
           ]}
-          data={data}
+          data={state.files}
           title='Admins only File list'
           onChangeRowsPerPage={handlePageSizeChange}
           onRowClick={handleRowClick}
