@@ -32,12 +32,12 @@ function SignInSide(props) {
     var response = await RestUtilities.post(url, data);
     response
       .json()
-      .then(res => {
+      .then((res) => {
         if (response.ok) {
           setToken(res.token, res.tokenExpiry);
           dispatch({
             type: 'setUser',
-            user: res.user
+            user: res.user,
           });
           redirectTo ? props.history.push(redirectTo) : props.history.push('/sounds');
         } else if (response.status === 400) {
@@ -74,7 +74,7 @@ function SignInSide(props) {
               name='username'
               autoComplete='username'
               autoFocus
-              onChange={event => {
+              onChange={(event) => {
                 setUsername(event.target.value);
                 setFeedback(null);
               }}
@@ -98,7 +98,7 @@ function SignInSide(props) {
               type='password'
               id='password'
               autoComplete='current-password'
-              onChange={event => {
+              onChange={(event) => {
                 setPassword(event.target.value);
                 setFeedback(null);
               }}
@@ -108,7 +108,15 @@ function SignInSide(props) {
             />
           </Grid>
         </Grid>
-        <Button fullWidth variant='contained' color='secondary' className={classes.submit} onClick={() => handleLoginClick()} disabled={disabled || hasErrors}>
+        <Button
+          type='submit'
+          fullWidth
+          variant='contained'
+          color='secondary'
+          className={classes.submit}
+          onClick={() => handleLoginClick()}
+          disabled={disabled || hasErrors}
+        >
           Sign In
         </Button>
         {disabled && (
