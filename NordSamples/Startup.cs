@@ -119,6 +119,7 @@ namespace NordSamples
                 {
                     configuration.RootPath = "ClientApp/build";
                 });
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
