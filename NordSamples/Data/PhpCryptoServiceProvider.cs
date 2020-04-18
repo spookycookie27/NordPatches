@@ -202,7 +202,9 @@ namespace NordSamples.Data
         private static string Smd5(string password, bool raw = false)
         {
             using var md5 = new MD5CryptoServiceProvider();
+#pragma warning disable CA1307 // Specify StringComparison
             string returnValue = raw ? Encoding.ASCII.GetString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))) : BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(password))).Replace("-", "");
+#pragma warning restore CA1307 // Specify StringComparison
             return returnValue;
         }
     }

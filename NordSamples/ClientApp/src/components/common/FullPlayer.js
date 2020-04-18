@@ -8,38 +8,38 @@ import PauseCircleFilledIcon from '@material-ui/icons/PauseCircleFilled';
 import { makeStyles } from '@material-ui/core/styles';
 import { Store } from '../../state/Store';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   mp3Player: {
     borderRadius: '10px',
     backgroundColor: theme.palette.primary.main,
     color: 'white',
     display: 'flex',
     alignItems: 'center',
-    boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);'
+    boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);',
   },
   mp3PlayerInverse: {
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   controls: {
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   title: {
     margin: 0,
     padding: '0 !important',
-    fontSize: '12px'
-  }
+    fontSize: '12px',
+  },
 }));
 
-const getFilename = filename => {
+const getFilename = (filename) => {
   if (filename.startsWith('patch_')) {
     return filename.substring(filename.indexOf('_', 6) + 1);
   }
   return filename;
 };
 
-const FullPlayer = props => {
+const FullPlayer = (props) => {
   const { state, dispatch } = React.useContext(Store);
   const [playing, setPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
@@ -60,14 +60,14 @@ const FullPlayer = props => {
   const handlePause = () => {
     dispatch({
       type: 'setPlayMp3Id',
-      id: null
+      id: null,
     });
   };
 
   const handlePlay = () => {
     dispatch({
       type: 'setPlayMp3Id',
-      activeMp3Context: { fileId: props.id, context: props.context }
+      activeMp3Context: { fileId: props.id, context: props.context },
     });
   };
 
@@ -87,8 +87,8 @@ const FullPlayer = props => {
             loop={false}
             playbackRate={1.0}
             volume={0.8}
-            onProgress={state => setPlayed(state.played)}
-            onDuration={duration => setDuration(duration)}
+            onProgress={(state) => setPlayed(state.played)}
+            onDuration={(duration) => setDuration(duration)}
           />
           {playing ? (
             <PauseCircleFilledIcon color={props.inverse ? 'primary' : 'inherit'} fontSize='large' onClick={handlePause} className='react-player' />

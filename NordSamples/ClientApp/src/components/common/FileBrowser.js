@@ -6,59 +6,68 @@ import theme from '../../theme';
 import { Store } from '../../state/Store';
 import MTableFilterRow from './MTableFilterRow';
 import { makeStyles } from '@material-ui/core/styles';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Container from '@material-ui/core/Container';
 import FileViewer from './FileViewer';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
+  main: {
+    backgroundColor: '#FFF',
+    width: '100%',
+    minHeight: '400px',
+  },
   detailsContainer: {
     backgroundColor: '#f9f9f9',
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
   },
   details: {
     width: '89vw',
     padding: theme.spacing(2),
-    backgroundColor: '#FFF'
-  }
+    backgroundColor: '#FFF',
+  },
+  spinner: {
+    margin: '0 auto',
+    paddingTop: '160px',
+    width: '50px',
+  },
 }));
 
 const tableTheme = createMuiTheme({
   link: {
-    color: '#990000'
+    color: '#990000',
   },
   palette: {
     primary: {
-      main: '#990000'
+      main: '#990000',
     },
     secondary: {
-      main: '#26725d'
-    }
+      main: '#26725d',
+    },
   },
   overrides: {
     MuiTableCell: {
       root: {
-        height: 54
+        height: 54,
       },
       body: {
-        fontSize: '.875rem'
-      }
-    }
-  }
+        fontSize: '.875rem',
+      },
+    },
+  },
 });
 
 const containsSearchTerms = (term, data) => {
-  const searchArr = term
-    .toLowerCase()
-    .trim()
-    .split(' ');
+  const searchArr = term.toLowerCase().trim().split(' ');
   const lowerData = data.toLowerCase();
-  const match = searchArr.every(x => lowerData.includes(x));
+  const match = searchArr.every((x) => lowerData.includes(x));
   return match;
 };
 
 const FileBrowser = () => {
   const classes = useStyles();
   const { state, dispatch } = React.useContext(Store);
+  const [isLoading, setIsLoading] = useState(true);
 
   const pageSize = state.pageSize;
 
@@ -68,23 +77,24 @@ const FileBrowser = () => {
       const res = await RestUtilities.get(url);
       res
         .json()
-        .then(res => {
+        .then((res) => {
           dispatch({
             type: 'setFiles',
-            files: res
+            files: res,
           });
+          setIsLoading(false);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     };
     getData();
   }, [dispatch]);
 
-  const handlePageSizeChange = size => {
+  const handlePageSizeChange = (size) => {
     dispatch({
       type: 'setPageSize',
-      pageSize: size
+      pageSize: size,
     });
   };
 
@@ -93,110 +103,119 @@ const FileBrowser = () => {
   };
 
   return (
-    <div className='FilesList'>
-      <MuiThemeProvider theme={tableTheme}>
-        <MaterialTable
-          theme={theme}
-          options={{
-            pageSize: pageSize,
-            pageSizeOptions: [5, 10, 20, 50, 100],
-            filtering: true,
-            searchFieldAlignment: 'right',
-            padding: 'dense',
-            filterCellStyle: { padding: '8px', paddingTop: '4px' }
-          }}
-          components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
-          columns={[
-            { title: 'File ID', field: 'id', cellStyle: { width: '120px' }, type: 'numeric', searchable: false },
-            {
-              title: 'Name',
-              field: 'name',
-              customSort: (a, b) => {
-                if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-                if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-                return 0;
-              },
-              customFilterAndSearch: (term, rowData) => {
-                return containsSearchTerms(term, rowData.name);
-              }
-            },
-            {
-              title: 'Comment',
-              field: 'comment',
-              cellStyle: { maxWidth: '300px' },
-              customFilterAndSearch: (term, rowData) => {
-                return containsSearchTerms(term, rowData.comment);
-              }
-            },
-            {
-              title: 'AttachID',
-              field: 'attachId',
+    <div className={classes.main}>
+      {isLoading && (
+        <Container fixed style={{ position: 'relative' }}>
+          <Box className={classes.spinner}>
+            <CircularProgress />
+          </Box>
+        </Container>
+      )}
+      {isLoading || (
+        <MuiThemeProvider theme={tableTheme}>
+          <MaterialTable
+            theme={theme}
+            options={{
+              pageSize: pageSize,
+              pageSizeOptions: [5, 10, 20, 50, 100],
               filtering: true,
-              searchable: false,
-              cellStyle: { width: '80px' }
-            },
-            {
-              title: 'SoundID',
-              field: 'patchFiles',
-              searchable: false,
-              render: rowData => {
-                if (rowData.patchFiles && rowData.patchFiles.length > 0) {
-                  return <span>{rowData.patchFiles[0].patchId}</span>;
-                }
-                return null;
+              searchFieldAlignment: 'right',
+              padding: 'dense',
+              filterCellStyle: { padding: '8px', paddingTop: '4px' },
+            }}
+            components={{ FilterRow: (props) => <MTableFilterRow {...props} /> }}
+            columns={[
+              { title: 'File ID', field: 'id', cellStyle: { width: '120px' }, type: 'numeric', searchable: false },
+              {
+                title: 'Name',
+                field: 'name',
+                customSort: (a, b) => {
+                  if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+                  if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+                  return 0;
+                },
+                customFilterAndSearch: (term, rowData) => {
+                  return containsSearchTerms(term, rowData.name);
+                },
               },
-              cellStyle: { width: '100px' },
-              lookup: { 0: 'Unassigned', 1: 'Assigned' },
-              customFilterAndSearch: (items, rowData) => {
-                if (items.length !== 1) return true;
-                const hasPatch = rowData.patchFiles.length > 0;
-                if (items[0] === '1') {
-                  return hasPatch;
-                } else {
-                  return !hasPatch;
-                }
-              }
-            },
-            {
-              title: 'Extension',
-              field: 'extension',
-              cellStyle: { width: '80px' },
-              searchable: false,
-              lookup: { mp3: 'mp3', nsmp: 'nsmp', nspg: 'nspg', ns2p: 'ns2p', ns2pb: 'ns2pb', jpg: 'jpg', nss: 'nss', gif: 'gif', png: 'png' },
-              render: rowData => <span>{rowData.extension}</span>,
-              customFilterAndSearch: (items, rowData) => {
-                return items.length === 0 || items.includes(rowData.extension);
-              }
-            },
-            {
-              title: 'Link',
-              field: 'link',
-              searchable: false,
-              cellStyle: { width: '140px' },
-              render: rowData =>
-                rowData.link && (
-                  <a href={rowData.link} target='_blank' rel='noopener noreferrer'>
-                    Link
-                  </a>
-                ),
-              filtering: false
-            }
-          ]}
-          data={state.files}
-          title='Admins only File list'
-          onChangeRowsPerPage={handlePageSizeChange}
-          onRowClick={handleRowClick}
-          detailPanel={file => {
-            return (
-              <Box className={classes.detailsContainer}>
-                <Box className={classes.details}>
-                  <FileViewer file={file} />
+              {
+                title: 'Comment',
+                field: 'comment',
+                cellStyle: { maxWidth: '300px' },
+                customFilterAndSearch: (term, rowData) => {
+                  return containsSearchTerms(term, rowData.comment);
+                },
+              },
+              {
+                title: 'AttachID',
+                field: 'attachId',
+                filtering: true,
+                searchable: false,
+                cellStyle: { width: '80px' },
+              },
+              {
+                title: 'SoundID',
+                field: 'patchFiles',
+                searchable: false,
+                render: (rowData) => {
+                  if (rowData.patchFiles && rowData.patchFiles.length > 0) {
+                    return <span>{rowData.patchFiles[0].patchId}</span>;
+                  }
+                  return null;
+                },
+                cellStyle: { width: '100px' },
+                lookup: { 0: 'Unassigned', 1: 'Assigned' },
+                customFilterAndSearch: (items, rowData) => {
+                  if (items.length !== 1) return true;
+                  const hasPatch = rowData.patchFiles.length > 0;
+                  if (items[0] === '1') {
+                    return hasPatch;
+                  } else {
+                    return !hasPatch;
+                  }
+                },
+              },
+              {
+                title: 'Extension',
+                field: 'extension',
+                cellStyle: { width: '80px' },
+                searchable: false,
+                lookup: { mp3: 'mp3', nsmp: 'nsmp', nspg: 'nspg', ns2p: 'ns2p', ns2pb: 'ns2pb', jpg: 'jpg', nss: 'nss', gif: 'gif', png: 'png' },
+                render: (rowData) => <span>{rowData.extension}</span>,
+                customFilterAndSearch: (items, rowData) => {
+                  return items.length === 0 || items.includes(rowData.extension);
+                },
+              },
+              {
+                title: 'Link',
+                field: 'link',
+                searchable: false,
+                cellStyle: { width: '140px' },
+                render: (rowData) =>
+                  rowData.link && (
+                    <a href={rowData.link} target='_blank' rel='noopener noreferrer'>
+                      Link
+                    </a>
+                  ),
+                filtering: false,
+              },
+            ]}
+            data={state.files}
+            title='Admins only File list'
+            onChangeRowsPerPage={handlePageSizeChange}
+            onRowClick={handleRowClick}
+            detailPanel={(file) => {
+              return (
+                <Box className={classes.detailsContainer}>
+                  <Box className={classes.details}>
+                    <FileViewer file={file} />
+                  </Box>
                 </Box>
-              </Box>
-            );
-          }}
-        />
-      </MuiThemeProvider>
+              );
+            }}
+          />
+        </MuiThemeProvider>
+      )}
     </div>
   );
 };

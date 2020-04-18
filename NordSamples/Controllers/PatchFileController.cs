@@ -47,7 +47,7 @@ namespace NordSamples.Controllers
                     .SingleOrDefaultAsync(x => x.Id == patchFile.PatchId);
 
 
-                existingPatch.PatchFiles.Add(new Data.Models.PatchFile {FileId = patchFile.FileId, PatchId = patchFile.PatchId});
+                existingPatch.PatchFiles.Add(new Data.Models.PatchFile { FileId = patchFile.FileId, PatchId = patchFile.PatchId });
                 await context.SaveChangesAsync();
 
                 cache.Remove(Constants.PatchCacheKey);
@@ -73,9 +73,9 @@ namespace NordSamples.Controllers
             }
         }
 
-        [HttpDelete("{fileId}/{patchId}")]
+        [HttpDelete("{fileId}/{id}")]
         [Authorize(Policy = "HasPatchEditAuthorization")]
-        public async Task<ActionResult<Patch>> Delete([FromRoute] int fileId, [FromRoute] int patchId)
+        public async Task<ActionResult<Patch>> Delete([FromRoute] int fileId, [FromRoute] int id)
         {
             Data.Models.Patch existingPatch = await context.Patches
                 .Include(x => x.NufUser)
@@ -94,7 +94,7 @@ namespace NordSamples.Controllers
                     .ThenInclude(x => x.NufUser)
                 .Include(x => x.PatchFiles)
                     .ThenInclude(pf => pf.File)
-                .FirstOrDefaultAsync(x => x.Id == patchId);
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             var patchFile = existingPatch.PatchFiles.SingleOrDefault(x => x.FileId == fileId);
             existingPatch.PatchFiles.Remove(patchFile);

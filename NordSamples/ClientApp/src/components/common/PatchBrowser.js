@@ -14,45 +14,58 @@ import { Typography } from '@material-ui/core';
 import { Store } from '../../state/Store';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import MTableFilterRow from './MTableFilterRow';
+import LibraryMusicIcon from '@material-ui/icons/LibraryMusic';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
+  main: {
+    backgroundColor: '#FFF',
+    width: '100%',
+    minHeight: '400px',
+  },
+  spinner: {
+    margin: '0 auto',
+    paddingTop: '160px',
+    width: '50px',
+  },
   detailsContainer: {
     backgroundColor: '#f9f9f9',
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
   },
   details: {
     width: '89vw',
     padding: theme.spacing(2),
-    backgroundColor: '#FFF'
-  }
+    backgroundColor: '#FFF',
+  },
 }));
 
 const tableTheme = createMuiTheme({
   link: {
-    color: '#990000'
+    color: '#990000',
   },
   palette: {
     primary: {
-      main: '#990000'
+      main: '#990000',
     },
     secondary: {
-      main: '#26725d'
-    }
+      main: '#26725d',
+    },
   },
   overrides: {
     MuiTableCell: {
       root: {
-        height: 54
+        height: 54,
       },
       body: {
-        fontSize: '.875rem'
-      }
-    }
-  }
+        fontSize: '.875rem',
+      },
+    },
+  },
 });
 
-const renderRating = patch => {
+const renderRating = (patch) => {
   if (!patch.ratings) return null;
   const count = patch.ratings.length;
   const average = patch.ratings.reduce((p, c) => p + c.value, 0) / count;
@@ -63,17 +76,27 @@ const renderRating = patch => {
   );
 };
 
-const renderMp3 = patch => {
-  const mp3s = patch && patch.patchFiles.filter(x => x.file.extension === 'mp3').map(x => x.file);
+const renderMp3 = (patch) => {
+  const mp3s = patch && patch.patchFiles.filter((x) => x.file.extension === 'mp3').map((x) => x.file);
   if (mp3s.length === 0) return null;
-  return mp3s.map(mp3 => {
+  var count = 0;
+  for (var i = 0; i < mp3s.length; ++i) {
+    if (!mp3s[i].removed) count++;
+  }
+  if (count > 1)
+    return (
+      <Box id='multipleMpsContainer'>
+        <LibraryMusicIcon color={'inherit'} fontSize='large' className='react-player' id='multipleMps' />
+      </Box>
+    );
+  return mp3s.map((mp3, i) => {
     if (mp3.removed) return null;
     const link = mp3.isBlob ? `${blobUrl}/mp3s/${mp3.name}` : `${nufFileLink}${mp3.attachId}`;
-    return <FullPlayer src={link} key={mp3.id} inverse id={mp3.id} context='patchBrowser' />;
+    return <FullPlayer src={link} key={mp3.id} inverse id={mp3.id} context='patchBrowser' index={i} />;
   });
 };
 
-const getTags = tags => {
+const getTags = (tags) => {
   return tags.length > 0
     ? tags.map((t, i) => (
         <span key={t.name}>
@@ -85,12 +108,9 @@ const getTags = tags => {
 };
 
 const containsSearchTerms = (term, data) => {
-  var searchArr = term
-    .toLowerCase()
-    .trim()
-    .split(' ');
+  var searchArr = term.toLowerCase().trim().split(' ');
   var lowerData = data.toLowerCase();
-  return searchArr.every(x => lowerData.includes(x));
+  return searchArr.every((x) => lowerData.includes(x));
 };
 
 const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
@@ -102,9 +122,9 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
     customFilterAndSearch: (term, rowData) => {
       return rowData.id.toString() === term;
     },
-    hidden: user.role !== 'administrator',
+    //hidden: user.role !== 'administrator',
     searchable: false,
-    cellStyle: { width: '120px' }
+    cellStyle: { width: '120px' },
   },
   {
     title: 'Name',
@@ -118,13 +138,13 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
       return 0;
     },
-    cellStyle: { minWidth: '100px' }
+    cellStyle: { minWidth: '100px' },
   },
   {
     title: 'Description',
     field: 'description',
     cellStyle: { maxWidth: '400px', minWidth: '100px' },
-    render: rowData => (
+    render: (rowData) => (
       <Typography noWrap variant='body2'>
         {rowData.description}
       </Typography>
@@ -138,29 +158,26 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       if (a.description.toLowerCase() > b.description.toLowerCase()) return 1;
       return 0;
     },
-    hidden: !showDescriptionColumn
+    hidden: !showDescriptionColumn,
   },
   {
     title: 'Tags',
     field: 'tags',
     cellStyle: { maxWidth: '200px' },
-    render: rowData => getTags(rowData.tags),
+    render: (rowData) => getTags(rowData.tags),
     customFilterAndSearch: (term, rowData) => {
-      const lowerTags = rowData.tags.map(t => t.name.toLowerCase());
-      const searchArr = term
-        .toLowerCase()
-        .trim()
-        .split(' ');
-      return searchArr.every(x => lowerTags.some(y => y.includes(x)));
+      const lowerTags = rowData.tags.map((t) => t.name.toLowerCase());
+      const searchArr = term.toLowerCase().trim().split(' ');
+      return searchArr.every((x) => lowerTags.some((y) => y.includes(x)));
     },
     filtering: false,
     hidden: !showTagsColumn,
-    sorting: false
+    sorting: false,
   },
   {
     title: 'Category',
     field: 'categoryId',
-    render: rowData => <span>{categories[rowData.categoryId]}</span>,
+    render: (rowData) => <span>{categories[rowData.categoryId]}</span>,
     lookupArr: categoriesLu,
     customFilterAndSearch: (items, rowData) => items.length === 0 || (rowData.categoryId ? items.includes(rowData.categoryId) : false),
     filtering: true,
@@ -176,12 +193,12 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       }
     },
     searchable: false,
-    cellStyle: { width: '140px', minWidth: '80px' }
+    cellStyle: { width: '140px', minWidth: '80px' },
   },
   {
     title: 'Type',
     field: 'instrumentId',
-    render: rowData => <span>{instruments[rowData.instrumentId]}</span>,
+    render: (rowData) => <span>{instruments[rowData.instrumentId]}</span>,
     customFilterAndSearch: (items, rowData) => items.length === 0 || items.includes(rowData.instrumentId),
     lookupArr: instrumentsLu,
     filtering: true,
@@ -198,15 +215,17 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
     },
     searchable: false,
     cellStyle: {
-      width: '80px'
-    }
+      width: '80px',
+    },
   },
   {
     title: 'Mp3',
     field: 'patchFiles',
-    render: rowData => renderMp3(rowData),
+    render: (rowData) => {
+      return <div style={{ display: 'flex', maxWidth: '60px', overflow: 'hidden' }}>{renderMp3(rowData)}</div>;
+    },
     customFilterAndSearch: (items, rowData) => {
-      const hasmp3 = rowData.patchFiles.some(x => x.file.extension === 'mp3');
+      const hasmp3 = rowData.patchFiles.some((x) => x.file.extension === 'mp3');
       if (items === 'checked') {
         return hasmp3;
       } else {
@@ -216,14 +235,14 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
     filtering: true,
     searchable: false,
     cellStyle: {
-      width: '60px'
+      width: '60px',
     },
-    type: 'boolean'
+    type: 'boolean',
   },
   {
     title: 'User',
     field: 'user',
-    render: rowData => rowData.user && rowData.user.username,
+    render: (rowData) => rowData.user && rowData.user.username,
     filtering: true,
     searchable: false,
     customFilterAndSearch: (term, rowData) => {
@@ -235,23 +254,23 @@ const getInitialColumns = (user, showTagsColumn, showDescriptionColumn) => [
       if (a.user.username.toLowerCase() > b.user.username.toLowerCase()) return 1;
       return 0;
     },
-    cellStyle: { width: '100px' }
+    cellStyle: { width: '100px' },
   },
   {
     title: 'Rating',
     field: 'rating',
-    render: rowData => renderRating(rowData),
+    render: (rowData) => renderRating(rowData),
     filtering: false,
     cellStyle: { maxWidth: '115px', padding: 0, paddingRight: 5 },
-    sorting: false
-  }
+    sorting: false,
+  },
 ];
 
-const editDetailPanel = classes => ({
+const editDetailPanel = (classes) => ({
   icon: 'edit',
   openIcon: 'cancel',
   tooltip: 'Edit Sound',
-  render: rowData => {
+  render: (rowData) => {
     return (
       <Box className={classes.detailsContainer}>
         <Box className={classes.details}>
@@ -259,12 +278,12 @@ const editDetailPanel = classes => ({
         </Box>
       </Box>
     );
-  }
+  },
 });
 
-const viewDetailPanel = classes => ({
+const viewDetailPanel = (classes) => ({
   tooltip: 'View Sound',
-  render: rowData => {
+  render: (rowData) => {
     return (
       <Box className={classes.detailsContainer}>
         <Box className={classes.details}>
@@ -272,7 +291,7 @@ const viewDetailPanel = classes => ({
         </Box>
       </Box>
     );
-  }
+  },
 });
 
 const getDetailPanels = (state, classes) => {
@@ -282,12 +301,13 @@ const getDetailPanels = (state, classes) => {
   return [viewDetailPanel(classes)];
 };
 
-const PatchBrowser = props => {
+const PatchBrowser = (props) => {
   const classes = useStyles();
   const { state, dispatch } = React.useContext(Store);
   const { showTagsColumn, showDescriptionColumn } = state;
   const [columns, setColumns] = useState(getInitialColumns(state.user, showTagsColumn, showDescriptionColumn));
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getAllData = async () => {
@@ -295,19 +315,20 @@ const PatchBrowser = props => {
       const res = await RestUtilities.get(url);
       res
         .json()
-        .then(res => {
-          const userPatches = res ? res.filter(x => (x.user && x.user.id === state.user.id) || (x.user && x.user.nufUserId === state.user.nufUserId)) : [];
-          const publicPatches = res ? res.filter(x => !x.removed) : [];
+        .then((res) => {
+          const userPatches = res ? res.filter((x) => (x.user && x.user.id === state.user.id) || (x.user && x.user.nufUserId === state.user.nufUserId)) : [];
+          const publicPatches = res ? res.filter((x) => !x.removed) : [];
           dispatch({
             type: 'setPatches',
-            patches: publicPatches
+            patches: publicPatches,
           });
           dispatch({
             type: 'setMyPatches',
-            patches: userPatches
+            patches: userPatches,
           });
+          setIsLoading(false);
         })
-        .catch(err => {
+        .catch((err) => {
           setError(true);
         });
     };
@@ -318,14 +339,14 @@ const PatchBrowser = props => {
     setColumns(getInitialColumns(state.user, state.showTagsColumn, state.showDescriptionColumn));
   }, [state.showTagsColumn, state.showDescriptionColumn, state.user]);
 
-  const handlePageSizeChange = size => {
+  const handlePageSizeChange = (size) => {
     dispatch({
       type: 'setPageSize',
-      pageSize: size
+      pageSize: size,
     });
   };
 
-  const openInPage = rowData => {
+  const openInPage = (rowData) => {
     props.history.push(`/sound/${rowData.id}`);
   };
 
@@ -338,7 +359,7 @@ const PatchBrowser = props => {
           onChange={() => {
             dispatch({
               type: 'setMySounds',
-              mySounds: !state.mySounds
+              mySounds: !state.mySounds,
             });
           }}
         />
@@ -352,43 +373,43 @@ const PatchBrowser = props => {
       icon: () => {
         return mySoundsToggle;
       },
-      onClick: event => {},
+      onClick: (event) => {},
       isFreeAction: true,
       tooltip: 'Show My Sounds',
-      hidden: state.myPatches.length === 0
+      hidden: state.myPatches.length === 0,
     },
     {
       icon: showDescriptionColumn ? 'speaker_notes_off' : 'speaker_notes',
       onClick: () => {
         dispatch({
           type: 'setShowDescriptionColumn',
-          showDescriptionColumn: !state.showDescriptionColumn
+          showDescriptionColumn: !state.showDescriptionColumn,
         });
       },
       isFreeAction: true,
-      tooltip: `${showDescriptionColumn ? 'Hide' : 'Show'} Description (affects search results)`
+      tooltip: `${showDescriptionColumn ? 'Hide' : 'Show'} Description (affects search results)`,
     },
     {
       icon: showTagsColumn ? 'label_off' : 'label',
       onClick: () => {
         dispatch({
           type: 'setShowTagsColumn',
-          showTagsColumn: !state.showTagsColumn
+          showTagsColumn: !state.showTagsColumn,
         });
       },
       isFreeAction: true,
-      tooltip: `${showTagsColumn ? 'Hide' : 'Show'} Tags (affects search results)`
+      tooltip: `${showTagsColumn ? 'Hide' : 'Show'} Tags (affects search results)`,
     },
     {
       icon: 'filter_list',
       onClick: () => {
         dispatch({
           type: 'setColumnFilters',
-          columnFilters: !state.columnFilters
+          columnFilters: !state.columnFilters,
         });
       },
       isFreeAction: true,
-      tooltip: 'Toggle Column Filters'
+      tooltip: 'Toggle Column Filters',
     },
     {
       icon: 'clear_all',
@@ -396,51 +417,62 @@ const PatchBrowser = props => {
         setColumns(getInitialColumns(state.user));
       },
       isFreeAction: true,
-      tooltip: 'Clear Filters'
+      tooltip: 'Clear Filters',
     },
-    rowData => ({
+    (rowData) => ({
       icon: 'launch',
       onClick: () => openInPage(rowData),
       isFreeAction: false,
-      tooltip: 'Open in page'
-    })
+      tooltip: 'Open in page',
+    }),
   ];
 
   const handleRowClick = (event, rowData, togglePanel) => {
-    if (!['svg', 'path'].includes(event.target.nodeName)) {
+    const target = event.target;
+    console.log(target);
+    if (!['svg', 'path'].includes(target.nodeName) || target.parentElement.id === 'multipleMpsContainer' || target.parentElement.id === 'multipleMps') {
       dispatch({ type: 'setPlayMp3Id', id: null });
       togglePanel();
     }
   };
 
   return (
-    <div className='Patchlist'>
+    <div className={classes.main}>
       {error && <p>There was an error getting data</p>}
-      <MuiThemeProvider theme={tableTheme}>
-        <MaterialTable
-          localization={{
-            header: { actions: '' }
-          }}
-          onRowClick={handleRowClick}
-          actions={actions}
-          options={{
-            pageSize: state.pageSize,
-            pageSizeOptions: [5, 10, 20, 50, 100],
-            filtering: state.columnFilters,
-            searchFieldAlignment: 'left',
-            padding: 'dense',
-            filterCellStyle: { padding: '8px', paddingTop: '4px' },
-            actionsColumnIndex: -1
-          }}
-          components={{ FilterRow: props => <MTableFilterRow {...props} /> }}
-          data={state.mySounds ? state.myPatches : state.patches}
-          title={state.mySounds ? 'My Sounds' : 'All Sounds'}
-          onChangeRowsPerPage={handlePageSizeChange}
-          //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
-          columns={columns}
-          detailPanel={getDetailPanels(state, classes)}
-        />
-      </MuiThemeProvider>
+      {isLoading && (
+        <Container fixed style={{ position: 'relative' }}>
+          <Box className={classes.spinner}>
+            <CircularProgress />
+          </Box>
+        </Container>
+      )}
+      {isLoading || (
+        <MuiThemeProvider theme={tableTheme}>
+          <MaterialTable
+            localization={{
+              header: { actions: '' },
+            }}
+            onRowClick={handleRowClick}
+            actions={actions}
+            options={{
+              pageSize: state.pageSize,
+              pageSizeOptions: [5, 10, 20, 50, 100],
+              filtering: state.columnFilters,
+              searchFieldAlignment: 'left',
+              padding: 'dense',
+              filterCellStyle: { padding: '8px', paddingTop: '4px' },
+              actionsColumnIndex: -1,
+            }}
+            components={{ FilterRow: (props) => <MTableFilterRow {...props} /> }}
+            data={state.mySounds ? state.myPatches : state.patches}
+            title={state.mySounds ? 'My Sounds' : 'All Sounds'}
+            onChangeRowsPerPage={handlePageSizeChange}
+            //parentChildData={(row, rows) => rows.find(a => a.id === row.parentPatchId)}
+            columns={columns}
+            detailPanel={getDetailPanels(state, classes)}
+          />
+        </MuiThemeProvider>
+      )}
     </div>
   );
 };
