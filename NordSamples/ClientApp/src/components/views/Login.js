@@ -25,7 +25,9 @@ function SignInSide(props) {
   const isPasswordInvalid = !!(password.length < 5 || password.length > 30);
   const isUsernameInvalid = !!(username.length < 5 || username.length > 16);
   const hasErrors = isUsernameInvalid || isPasswordInvalid;
-  async function handleLoginClick() {
+
+  async function handleLoginClick(e) {
+    e.preventDefault();
     setDisabled(true);
     const url = '/api/auth/login';
     const data = { password, username };
@@ -114,7 +116,7 @@ function SignInSide(props) {
           variant='contained'
           color='secondary'
           className={classes.submit}
-          onClick={() => handleLoginClick()}
+          onClick={(e) => handleLoginClick(e)}
           disabled={disabled || hasErrors}
         >
           Sign In
