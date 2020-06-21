@@ -71,6 +71,7 @@ namespace NordSamples.Controllers
         public async Task<ActionResult<Patch>> GetPatch(int id)
         {
             Data.Models.Patch patch = await context.Patches
+                .Include(x => x.AppUser)
                 .Include(x => x.NufUser)
                 .Include(x => x.Tags)
                 .Include(x => x.Ratings)
