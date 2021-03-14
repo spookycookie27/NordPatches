@@ -128,7 +128,7 @@ namespace NordSamples.Controllers
                 return null;
             }
 
-            string name = $"s{patchId}_{file.FileName}";
+            string name = $"s{patchId} {file.FileName}";
             try
             {
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
