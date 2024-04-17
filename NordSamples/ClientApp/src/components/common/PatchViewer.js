@@ -73,7 +73,6 @@ const PatchViewer = (props) => {
       refreshData();
     };
     getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addRating = async (newValue) => {
