@@ -8,6 +8,8 @@
         Electro = 3,
         Stage1 = 4, // .nspg
         Stage2 = 5, // .ns2p
-        Stage3 = 6 // .ns3p
+        Stage3 = 6, // .ns3p
+        SampleV3 = 7,
+        Stage4 = 8 // .ns4p
     }
 }

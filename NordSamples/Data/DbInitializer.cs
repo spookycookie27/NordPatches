@@ -33,6 +33,7 @@ namespace NordSamples.Data
                     new Instrument {Name = "Stage1", Id = 4},
                     new Instrument {Name = "Stage2", Id = 5},
                     new Instrument {Name = "Stage3", Id = 6},
+                    new Instrument {Name = "Stage4", Id = 8},
                 };
                 foreach (Instrument i in instruments)
                 {

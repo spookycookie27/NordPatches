@@ -53,7 +53,7 @@ const About = () => {
               </TableRow>
               <TableRow>
                 <TableCell>Instrument Type</TableCell>
-                <TableCell>The type of patch. [StageClassic | Stage2 | Stage3 | Sample | Lead | Electro]</TableCell>
+                <TableCell>The type of patch. [StageClassic | Stage2 | Stage3 | Stage4 | Sample | Lead | Electro]</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Category</TableCell>
