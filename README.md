@@ -6,3 +6,6 @@ This project aims to build a searchable database of user samples and patches, an
 
 # Hosting
 Azure Web App and Azure Blob storage
+
+# Deployment
+GitHub Action set up in Azure WebApp
